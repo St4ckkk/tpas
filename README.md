@@ -6,12 +6,11 @@ This repository contains the necessary instructions to set up the ScheduCare dat
 
 Make sure you have the following installed on your system:
 
-- [Your Database Management System (e.g., MySQL, PostgreSQL)](link_to_download)
-- [Git](https://git-scm.com/downloads)
+
 
 ## Instructions
 
-1. **Clone the Repository:**
+1. **Clone the Repository or Download it:**
    ```bash
    git clone https://github.com/your-username/nena-system.git
    cd nena-system
