@@ -45,9 +45,6 @@ alert('Added fail. Please try again.');
 }
 ?>
 
-
-
-?>
 <!DOCTYPE html>
 <html lang="en">
     <head>
@@ -287,7 +284,7 @@ alert('Added fail. Please try again.');
 
                         <!-- panel heading starat -->
                         <div class="panel-heading">
-                            <h3 class="panel-title">List of Patients</h3>
+                            <h3 class="panel-title">List of Schedule</h3>
                             <div class="pull-right">
                             <button class="btn btn-default btn-xs btn-filter"><span class="fa fa-filter"></span> Filter</button>
                         </div>
@@ -300,7 +297,6 @@ alert('Added fail. Please try again.');
                         <table class="table table-hover table-bordered">
                             <thead>
                                 <tr class="filters">
-                                    <th><input type="text" class="form-control" placeholder="scheduleId" disabled></th>
                                     <th><input type="text" class="form-control" placeholder="scheduleDate" disabled></th>
                                     <th><input type="text" class="form-control" placeholder="scheduleDay" disabled></th>
                                     <th><input type="text" class="form-control" placeholder="startTime." disabled></th>
@@ -319,7 +315,6 @@ alert('Added fail. Please try again.');
                               
                                 echo "<tbody>";
                                 echo "<tr>";
-                                    echo "<td>" . $doctorschedule['scheduleId'] . "</td>";
                                     echo "<td>" . $doctorschedule['scheduleDate'] . "</td>";
                                     echo "<td>" . $doctorschedule['scheduleDay'] . "</td>";
                                     echo "<td>" . $doctorschedule['startTime'] . "</td>";
