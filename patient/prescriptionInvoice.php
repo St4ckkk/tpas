@@ -22,7 +22,8 @@ if (isset($_GET['prescriptionId'])) {
     }
 } else {
     die("Prescription ID not set");
-}if (isset($_GET['prescriptionId'])) {
+}
+if (isset($_GET['prescriptionId'])) {
     $prescriptionId = $_GET['prescriptionId'];
 }
 $session = $_SESSION['patientSession'];
@@ -35,8 +36,17 @@ if (!isset($_SESSION['patientSession'])) {
 // Fetch user information
 $res1 = mysqli_query($con, "SELECT * FROM patient WHERE philhealthId=" . $session);
 $userRow = mysqli_fetch_array($res1, MYSQLI_ASSOC);
-$res = mysqli_query($con, "SELECT * FROM prenatalprescription WHERE prescriptionId=" . $prescriptionId);
+$res = mysqli_query($con, "
+    SELECT pp.*, d.doctorFirstname AS doctorFirstName, d.doctorLastname AS doctorLastName
+    FROM prenatalprescription pp
+    JOIN doctor d ON pp.icDoctor = d.icDoctor
+    WHERE pp.prescriptionId = $prescriptionId
+");
+
+
+
 $prescriptionRow = mysqli_fetch_array($res, MYSQLI_ASSOC);
+
 ?>
 
 <!doctype html>
@@ -137,7 +147,16 @@ $prescriptionRow = mysqli_fetch_array($res, MYSQLI_ASSOC);
                     <?php echo $prescriptionRow['instructions']; ?>
                 </td>
             </tr>
-
+            <tr class="signature">
+                <td colspan="2">
+                    <br>
+                    <div>
+                        <img src="assets/img/signature.png" alt="" srcset="" width="50px"><br>
+                       <?php echo $prescriptionRow['doctorFirstName'] . ' ' . $prescriptionRow['doctorLastName']; ?><br>
+                        <strong>Date of Signature:</strong> <?php echo date("d-m-Y"); ?>
+                    </div>
+                </td>
+            </tr>
         </table>
     </div>
     <br>
