@@ -6,58 +6,12 @@ if(!isset($_SESSION['doctorSession']))
 header("Location: ../index.php");
 }
 $usersession = $_SESSION['doctorSession'];
-$res=mysqli_query($con,"SELECT * FROM doctor WHERE doctorId=".$usersession);
+$res=mysqli_query($con,"SELECT * FROM patient WHERE philHealthId=".$_GET['philhealthId']);
 $userRow=mysqli_fetch_array($res,MYSQLI_ASSOC);
+$res1=mysqli_query($con,"SELECT * FROM appointment WHERE philHealthId=".$_GET['philhealthId']);
+$userRow1=mysqli_fetch_array($res1,MYSQLI_ASSOC);
 
 
-
-// INSERT
-if (isset($_POST['appointment'])) {
-    $philhealthId = mysqli_real_escape_string($con, $userRow['philhealthId']);
-    $scheduleid = mysqli_real_escape_string($con, $appid);
-    $symptom = mysqli_real_escape_string($con, $_POST['symptom']);
-    $comment = mysqli_real_escape_string($con, $_POST['comment']);
-
-    if (!empty($symptom) && !empty($comment)) {
-        $avail = "notavail";
-        $query = "INSERT INTO appointment (philhealthId, scheduleId, appSymptom, appComment)
-                  VALUES ('$philhealthId', '$scheduleid', '$symptom', '$comment')";
-
-        // Update table appointment schedule
-        $sql = "UPDATE doctorschedule SET bookAvail = '$avail' WHERE scheduleId = $scheduleid";
-        $scheduleres = mysqli_query($con, $sql);
-
-        if ($scheduleres) {
-            $btn = "disable";
-        }
-
-        $result = mysqli_query($con, $query);
-
-        if ($result) {
-            ?>
-            <script type="text/javascript">
-                alert('Appointment made successfully.');
-            </script>
-            <?php
-            header("Location: patientapplist.php");
-        } else {
-            echo mysqli_error($con);
-            ?>
-            <script type="text/javascript">
-                alert('Appointment booking failed. Please try again.');
-            </script>
-            <?php
-            header("Location: appointment.php");
-        }
-    } else {
-        ?>
-        
-<script type="text/javascript">
-    alert('Please fill in all the appointment details.');
-</script>
-<?php
-}
-}
 ?>
 <!DOCTYPE html>
 <html>
@@ -102,7 +56,7 @@ if (isset($_POST['appointment'])) {
 						<div class="col-md-3 col-sm-3">
 							
 							<div class="user-wrapper">
-								<img src="assets/img/patient.png" class="img-responsive" />
+								<img src="../patient/assets/img/patient.png" class="img-responsive" />
 								<div class="description">
 									<h4><?php echo $userRow['patientFirstName']; ?> <?php echo $userRow['patientLastName']; ?></h4>
 									<button type="button" class="btn btn-primary" data-toggle="modal" data-target="#myModal">Update Profile</button>
@@ -116,31 +70,20 @@ if (isset($_POST['appointment'])) {
 								
 								<div class="panel panel-default">
 									<div class="panel-body">
-										
-										
 										<form class="form" role="form" method="POST" accept-charset="UTF-8">
 											<div class="panel panel-default">
 												<div class="panel-heading">Patient Information</div>
 												<div class="panel-body">
-													Patient Name: <?php echo $userRow['patientFirstName'] ?> <?php echo $userRow['patientLastName'] ?><br>
-													Philhealth ID: <?php echo $userRow['philhealthId'] ?><br>
-													Contact Number: <?php echo $userRow['patientPhone'] ?><br>
-													Address: <?php echo $userRow['patientAddress'] ?>
-												</div>
-											</div>
-											<div class="panel panel-default">
-												<div class="panel-heading">Appointment Information</div>
-												<div class="panel-body">
-													Day: <?php echo $userRow['scheduleDay'] ?><br>
-													Date: <?php echo $userRow['scheduleDate'] ?><br>
-													Time: <?php echo $userRow['startTime'] ?> - <?php echo $userRow['endTime'] ?><br>
+												Patient Name: <?php echo $userRow['patientFirstName'] ?> <?php echo $userRow['patientLastName'] ?><br>
+                                                Philhealth ID: <?php echo $userRow['philhealthId'] ?><br>
+                                                Contact Number: <?php echo $userRow['patientPhone'] ?><br>
+                                                Address: <?php echo $userRow['patientAddress'] ?><br>
+                                                Symptoms: <?php echo $userRow1['appSymptom'] ?><br>
+                                                Comments: <?php echo $userRow1['appComment'] ?>
 												</div>
 											</div>
 											
-											<div class="form-group">
-												<label for="recipient-name" class="control-label">Symptom:</label>
-												<input type="text" class="form-control" name="symptom" required>
-											</div>
+											
                                             <div class="panel panel-default">
                                             <div class="panel-heading">Prescription Information</div>
                                             <div class="panel-body">

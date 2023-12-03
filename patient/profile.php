@@ -208,11 +208,11 @@ $widowed = "checked";
 											<table class="table table-user-information">
 												<tbody>
 													<tr>
-														<td>IC Number:</td>
-														<td><?php echo $userRow['icPatient']; ?></td>
+														<td>Philhealth Id:</td>
+														<td><?php echo $userRow['philhealthId']; ?></td>
 													</tr>
 													<tr>
-														<td>First Name:</td>
+														<td>First Name:</td>	
 														<td><input type="text" class="form-control" name="patientFirstName" value="<?php echo $userRow['patientFirstName']; ?>"  /></td>
 													</tr>
 													<tr>
