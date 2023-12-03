@@ -85,54 +85,62 @@ VALUES ( '$philhealthId', '$password', '$patientFirstName', '$patientLastName', 
     <link href="assets/css/blocks.css" rel="stylesheet">
     <link href="assets/css/date/bootstrap-datepicker.css" rel="stylesheet">
     <link href="assets/css/date/bootstrap-datepicker3.css" rel="stylesheet">
-    <!-- Special version of Bootstrap that only affects content wrapped in .bootstrap-iso -->
-    <!-- <link rel="stylesheet" href="https://formden.com/static/cdn/bootstrap-iso.css" />  -->
-
-    <!--Font Awesome (added because you use icons in your prepend/append)-->
     <link rel="stylesheet" href="https://formden.com/static/cdn/font-awesome/4.4.0/css/font-awesome.min.css" />
     <link href="assets/css/material.css" rel="stylesheet">
 </head>
 <style>
     .promo-1 {
-	background: url("assets/img/cd-index-cover.jpg") center top no-repeat;
-	-webkit-background-size: cover;
-	-moz-background-size: cover;
-	-o-background-size: cover;
-	background-size: cover;
-	padding: 200px 0;
-}
+        background: url("assets/img/Female-Doctor.png") center no-repeat;
+        -webkit-background-size: cover;
+        -moz-background-size: cover;
+        -o-background-size: cover;
+        background-size: cover;
+        height: 100%;
+        overflow: hidden;
+    }
 
-.promo-1 .video-wrapper {
-     position: relative;
-      display: inline-block;
-	max-width: 600px;
-	margin: 20px auto 0 auto;
-     vertical-align: top;
-      background-color: #fff;
-      padding: 16px;
-    box-shadow: 0 12px 15px 0 rgba(0, 0, 0, 0.24);
-}
-.navbar-nav .dropdown-menu li p.navbar-text {
-    text-align: center;
-    margin-top: 10px;
-}
+    .promo-1 .video-wrapper {
+        position: relative;
+        display: inline-block;
+        max-width: 600px;
+        margin: 20px auto 0 auto;
+        vertical-align: top;
+        background-color: #fff;
+        padding: 16px;
+        box-shadow: 0 12px 15px 0 rgba(0, 0, 0, 0.24);
+    }
 
-.navbar-nav .dropdown-menu li p.navbar-text a {
-    font-size: 20px;
-    color: #3b5998;
-    text-decoration: none;
-}
+    .navbar-nav .dropdown-menu li p.navbar-text {
+        text-align: center;
+    }
 
-.navbar-nav .dropdown-menu li p.navbar-text a:hover {
-    text-decoration: underline;
-}
+    .navbar-nav .dropdown-menu li p.navbar-text a {
+        font-size: 20px;
+        color: #3b5998;
+        text-decoration: none;
+    }
+
+    .navbar-nav .dropdown-menu li p.navbar-text a:hover {
+        text-decoration: underline;
+    }
+
+    .schedule-container {
+        float: right;
+        width: 100%;
+        margin-top: 50px;
+        background: rgba(0, 0, 0, .5);
+        padding: 20px;
+        border-radius: 10px;
+    }
+    .schedule-container h2, p {
+        color: #fff;
+    }
 </style>
 
 <body>
     <!-- navigation -->
     <nav class="navbar navbar-default navbar-fixed-top" role="navigation">
         <div class="container-fluid">
-            <!-- Brand and toggle get grouped for better mobile display -->
             <div class="navbar-header">
                 <button type="button" class="navbar-toggle collapsed" data-toggle="collapse"
                     data-target="#bs-example-navbar-collapse-1">
@@ -141,47 +149,42 @@ VALUES ( '$philhealthId', '$password', '$patientFirstName', '$patientLastName', 
                     <span class="icon-bar"></span>
                     <span class="icon-bar"></span>
                 </button>
-                <img alt="Brand" src="./assets/img/cd-logo.png" height="50px"><a href=""
-                    class="navbar-brand">ScheduCare</a>
-
-
+                <img src="assets/img/cd-logo.png" alt="" height="50">
+                <a href="" class="navbar-brand">ScheduCare</a>
             </div>
-            <!-- Collect the nav links, forms, and other content for toggling -->
+           
             <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
-
-
                 <ul class="nav navbar-nav navbar-right">
-
-
-                    <!-- <li><a href="adminlogin.php">Admin</a></li> -->
-                  
-
-                   
-                  <li class="dropdown">
-            <a href="#" class="dropdown-toggle" data-toggle="dropdown"><b>Login</b> <span class="caret"></span></a>
-            <ul id="login-dp" class="dropdown-menu">
-                <li>
-                <div class="row">
-                    <div class="col-md-12">
-                        <form class="form" role="form" method="POST" accept-charset="UTF-8">
-                            <div class="form-group">    
-                                <label class="sr-only" for="philhealthId">Email</label>
-                                <input type="text" class="form-control" name="philhealthId" placeholder="Philhealth ID Number" required>
-                            </div>
-                            <div class="form-group">
-                                <label class="sr-only" for="password">Password</label>
-                                <input type="password" class="form-control" name="password" placeholder="Password" required>
-                            </div>
-                            <div class="form-group">
-                                <button type="submit" name="login" id="login" class="btn btn-primary btn-block">Sign in</button>
-                                <p class="navbar-text">Already have an account? <a href="#" data-toggle="modal" data-target="#myModal">Sign Up</a></p>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-        </li>
-    </ul>
-</li>
+                    <li class="dropdown">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown"><b>Login</b> <span
+                                class="caret"></span></a>
+                        <ul id="login-dp" class="dropdown-menu">
+                            <li>
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <form class="form" role="form" method="POST" accept-charset="UTF-8">
+                                            <div class="form-group">
+                                                <label class="sr-only" for="philhealthId">Email</label>
+                                                <input type="text" class="form-control" name="philhealthId"
+                                                    placeholder="Philhealth ID Number" required>
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="sr-only" for="password">Password</label>
+                                                <input type="password" class="form-control" name="password"
+                                                    placeholder="Password" required>
+                                            </div>
+                                            <div class="form-group">
+                                                <button type="submit" name="login" id="login"
+                                                    class="btn btn-primary btn-block">Sign in</button>
+                                                <p class="navbar-text">Already have an account? <a href="#"
+                                                        data-toggle="modal" data-target="#myModal">Sign Up</a></p>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </li>
+                        </ul>
+                    </li>
                 </ul>
             </div>
         </div>
@@ -354,7 +357,7 @@ VALUES ( '$philhealthId', '$password', '$patientFirstName', '$patientLastName', 
     <section id="promo-1" class="content-block promo-1  min-height-600px bg-offwhite">
         <div class="container">
             <div class="row">
-                <div class="col-md-5">
+                <div class="col-md-6  col-md-offset-1 schedule-container">
                     <h2>Make appointment today!</h2>
                     <p>This is Doctor's Schedule. Please <span class="label label-danger">login</span> to make an
                         appointment. </p>
@@ -400,26 +403,12 @@ VALUES ( '$philhealthId', '$password', '$patientFirstName', '$patientLastName', 
 
                     <!-- table appointment end -->
                 </div>
-                <!-- /.col -->
-                <!--  <div class="col-md-6 col-md-offset-1">
-                        <div class="video-wrapper">
-                            <iframe width="560" height="315" src="http://www.youtube.com/embed/FEoQFbzLYhc?rel=0&amp;controls=0&amp;showinfo=0" frameborder="0" allowfullscreen></iframe>
-                        </div>
-                    </div> -->
-                <!-- /.col -->
+
             </div>
             <!-- /.row -->
         </div>
     </section>
-    <!-- first section end -->
 
-
-    <!-- second section start -->
-
-    <!-- second section end -->
-    <!-- third section start -->
-
-    <!-- third section end -->
 
     </div>
     <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
