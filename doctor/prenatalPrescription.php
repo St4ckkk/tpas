@@ -21,7 +21,7 @@ $userRow1=mysqli_fetch_array($res1,MYSQLI_ASSOC);
 		<meta name="viewport" content="width=device-width, initial-scale=1">
 		<!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
 		
-		<title>Make Appoinment</title>
+		<title>Prenatal Prescription</title>
 		<link href="../assets/css/bootstrap.min.css" rel="stylesheet">
 		<link href="../assets/css/default/style.css" rel="stylesheet">
 		<link href="../assets/css/default/blocks.css" rcel="stylesheet">
@@ -32,20 +32,6 @@ $userRow1=mysqli_fetch_array($res1,MYSQLI_ASSOC);
 	</head>
 	<body>
 		<!-- navigation -->
-		<nav class="navbar navbar-default " role="navigation">
-			<div class="container-fluid">
-				<!-- Brand and toggle get grouped for better mobile display -->
-				<div class="navbar-header">
-					<button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
-					<span class="sr-only">Toggle navigation</span>
-					<span class="icon-bar"></span>
-					<span class="icon-bar"></span>
-					<span class="icon-bar"></span>
-					</button>
-					<a class="navbar-brand" href="patient.php"><img alt="Brand" src="assets/img/cd-logo.png" height="20px"></a>
-				</div>
-			</div>
-		</nav>
 		<!-- navigation -->
 		<div class="container">
 			<section style="padding-bottom: 50px; padding-top: 50px;">

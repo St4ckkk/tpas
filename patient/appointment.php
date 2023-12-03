@@ -180,7 +180,7 @@ if (isset($_POST['appointment'])) {
 											</div>
 											
 											<div class="form-group">
-												<label for="recipient-name" class="control-label">Symptom:</label>
+												<label for="recipient-name" class="control-label">Symptoms/Concerns:</label>
 												<input type="text" class="form-control" name="symptom" required>
 											</div>
 											<div class="form-group">
