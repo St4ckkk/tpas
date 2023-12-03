@@ -42,16 +42,16 @@ $userRow=mysqli_fetch_array($res,MYSQLI_ASSOC);
 		
 	</head>
 	<style>
-		.promo-1 {
-	background: url("assets/img/cd-cover2.jpg") center top no-repeat;
-	height: 93vh;
+	.promo-1 {
+	background: url("assets/img/cd-cover2.jpg") center no-repeat;
+	height: 94vh;
 	-webkit-background-size: cover;
 	-moz-background-size: cover;
 	-o-background-size: cover;
 	background-size: cover;
-	padding: 200px 0;
+	overflow: hidden;
+	
 }
-
 .promo-1 .video-wrapper {
      position: relative;
       display: inline-block;

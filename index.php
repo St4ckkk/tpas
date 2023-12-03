@@ -48,9 +48,11 @@ if (isset($_POST['signup'])) {
     $year = mysqli_real_escape_string($con, $_POST['year']);
     $patientDOB = $year . "-" . $month . "-" . $day;
     $patientGender = mysqli_real_escape_string($con, $_POST['patientGender']);
+    $appointmentType = mysqli_real_escape_string($con, $_POST['appointmentType']);
+
     //INSERT
-    $query = " INSERT INTO patient (philhealthId, password, patientFirstName, patientLastName,  patientDOB, patientGender,   patientEmail )
-VALUES ( '$philhealthId', '$password', '$patientFirstName', '$patientLastName', '$patientDOB', '$patientGender', '$patientEmail' ) ";
+    $query = "INSERT INTO patient (philhealthId, password, patientFirstName, patientLastName, patientDOB, patientGender, patientEmail, appointmentType)
+              VALUES ('$philhealthId', '$password', '$patientFirstName', '$patientLastName', '$patientDOB', '$patientGender', '$patientEmail', '$appointmentType')";
     $result = mysqli_query($con, $query);
     // echo $result;
     if ($result) {
@@ -335,10 +337,15 @@ VALUES ( '$philhealthId', '$password', '$patientFirstName', '$patientLastName', 
                                     <label class="radio-inline">
                                         <input type="radio" name="patientGender" value="female" required />Female
                                     </label>
+                                    <br>
+                                    <label for="appointmentType">Appointment Type:</label>
+                                    <select name="appointmentType" class="form-control input-lg" required>
+                                        <option value="tb">TB</option>
+                                        <option value="prenatal">Prenatal</option>
+                                    </select>
                                     <br />
                                     <span class="help-block">By clicking Create my account, you agree to our Terms and
                                         that you have read our Data Use Policy, including our Cookie Use.</span>
-
                                     <button class="btn btn-lg btn-primary btn-block signup-btn" type="submit"
                                         name="signup" id="signup">Create my account</button>
                                 </form>

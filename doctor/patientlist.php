@@ -142,20 +142,22 @@ $userRow = mysqli_fetch_array($res, MYSQLI_ASSOC);
                                     <th><input type="text" class="form-control" placeholder="Name" disabled></th>
                                     <th><input type="text" class="form-control" placeholder="Password" disabled></th>
                                     <th><input type="text" class="form-control" placeholder="ContactNo." disabled></th>
-                                    <th><input type="text" class="form-control" placeholder="Symptoms" disabled></th>
                                     <th><input type="text" class="form-control" placeholder="Gender" disabled></th>
                                     <th><input type="text" class="form-control" placeholder="Status" disabled></th>
                                     <th><input type="text" class="form-control" placeholder="Birthdate" disabled></th>
                                     <th><input type="text" class="form-control" placeholder="Address" disabled></th>
+                                    <th><input type="text" class="form-control" placeholder="Symptoms" disabled></th>
+                                    <th><input type="text" class="form-control" placeholder="Appointment Type" disabled></th>
                                 </tr>
                             </thead>
 
                             <?php
-                            $result = mysqli_query($con, "SELECT a.*, c.*, d.appSymptom
-                            FROM patient a
-                            JOIN appointment d ON a.philhealthId = d.philhealthId
-                            LEFT JOIN doctorschedule c ON d.scheduleId = c.scheduleId
-                            ORDER BY d.appId DESC");
+                           $result = mysqli_query($con, "SELECT a.*, c.*, d.appSymptom, a.appointmentType
+                               FROM patient a
+                               JOIN appointment d ON a.philhealthId = d.philhealthId
+                               LEFT JOIN doctorschedule c ON d.scheduleId = c.scheduleId
+                               ORDER BY d.appId DESC");
+
 
                             if (!$result) {
                                 
@@ -171,13 +173,19 @@ $userRow = mysqli_fetch_array($res, MYSQLI_ASSOC);
                                 echo "<td>" . $patientRow['patientLastName'] . "</td>";
                                 echo "<td>" . $patientRow['password'] . "</td>";
                                 echo "<td>" . $patientRow['patientPhone'] . "</td>";
-                                echo "<td>" . $patientRow['appSymptom'] . "</td>";
                                 echo "<td>" . $patientRow['patientGender'] . "</td>";
                                 echo "<td>" . $patientRow['patientMaritialStatus'] . "</td>";
                                 echo "<td>" . $patientRow['patientDOB'] . "</td>";
                                 echo "<td>" . $patientRow['patientAddress'] . "</td>";
+                                echo "<td>" . $patientRow['appSymptom'] . "</td>";
+                                echo "<td>" . $patientRow['appointmentType'] . "</td>";
+                                 if ($patientRow['appointmentType'] == 'prenatal') {
+                                    echo "<td class=''><a href='prenatalPrescription.php?philhealthId=" . $patientRow['philhealthId'] . "' class='prescription-btn'>Give Prescription</a></td>";
+                                } else if($patientRow['appointmentType'] == 'tb'){
+                                    echo "<td class='text-center'>Not Applicable</td>";
+                                }
                                 echo "<form method='POST'>";
-                                echo "<td class='text-center'><a href='#' id='" . $patientRow['philhealthId'] . "' class='delete'><span class='glyphicon glyphicon-trash' aria-hidden='true'></span></a>
+                                echo "<td class='text-center'><a href='#' id='" . $patientRow['philhealthId'] . "' class='delete'>Delete</a>
                             </td>";
 
                             }
