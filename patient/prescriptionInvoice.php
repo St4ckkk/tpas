@@ -89,7 +89,7 @@ $prescriptionRow = mysqli_fetch_array($res, MYSQLI_ASSOC);
 
                             <td>
                                 <!-- Patient's Information -->
-                                Philhealt ID: <?php echo $userRow['philhealthId']; ?><br>
+                                Philhealth ID: <?php echo $userRow['philhealthId']; ?><br>
                                 Patient Name: <?php echo $userRow['patientFirstName']; ?> <?php echo $userRow['patientLastName']; ?><br>
                                 Patient Email: <?php echo $userRow['patientEmail']; ?>
                             </td>
