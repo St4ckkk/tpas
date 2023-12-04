@@ -354,6 +354,7 @@ if (isset($_POST['submit'])) {
                         <table class="table table-hover table-bordered">
                             <thead>
                                 <tr class="filters">
+                                    <th><input type="text" class="form-control" placeholder="Doctor's Name" disabled></th>
                                     <th><input type="text" class="form-control" placeholder="scheduleDate" disabled></th>
                                     <th><input type="text" class="form-control" placeholder="scheduleDay" disabled></th>
                                     <th><input type="text" class="form-control" placeholder="startTime." disabled></th>
@@ -364,9 +365,12 @@ if (isset($_POST['submit'])) {
 
                             <?php
                             if ($userRow['doctorRole'] == 'superAdmin') {
-                                $scheduleQuery = "SELECT * FROM doctorschedule";
+                                $scheduleQuery = "SELECT ds.*, d.doctorFirstName, d.doctorLastName FROM doctorschedule ds
+                      LEFT JOIN doctor d ON ds.doctorId = d.doctorId";
                             } else {
-                                $scheduleQuery = "SELECT * FROM doctorschedule WHERE doctorId = $usersession";
+                                $scheduleQuery = "SELECT ds.*, d.doctorFirstName, d.doctorLastName FROM doctorschedule ds
+                      LEFT JOIN doctor d ON ds.doctorId = d.doctorId
+                      WHERE ds.doctorId = $usersession";
                             }
                             $result = mysqli_query($con, $scheduleQuery);
 
@@ -377,6 +381,7 @@ if (isset($_POST['submit'])) {
                             while ($row = mysqli_fetch_assoc($result)) {
                                 echo "<tbody>";
                                 echo "<tr>";
+                                echo "<td>" . $row['doctorFirstName'] . " " . $row['doctorLastName'] . "</td>";
                                 echo "<td>" . $row['scheduleDate'] . "</td>";
                                 echo "<td>" . $row['scheduleDay'] . "</td>";
                                 echo "<td>" . $row['startTime'] . "</td>";
