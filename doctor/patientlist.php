@@ -92,8 +92,11 @@ $userRow = mysqli_fetch_array($res, MYSQLI_ASSOC);
                     <li>
                         <a href="addschedule.php"><i class="fa fa-fw fa-table"></i> Doctor Schedule</a>
                     </li>
+                    <li>
+                        <a href="adddoctor.php"><i class="fa fa-fw fa-user"></i> Doctor</a>
+                    </li>
                     <li class="active">
-                        <a href="patientlist.php"><i class="fa fa-fw fa-edit"></i> Patient List</a>
+                        <a href="patientlist.php"><i class="fa fa-fw fa-user"></i> Patient List</a>
                     </li>
                 </ul>
             </div>
@@ -152,7 +155,7 @@ $userRow = mysqli_fetch_array($res, MYSQLI_ASSOC);
                             </thead>
 
                             <?php
-                           $result = mysqli_query($con, "SELECT a.*, c.*, d.appSymptom, a.appointmentType
+                            $result = mysqli_query($con, "SELECT a.*, c.*, d.appSymptom, a.appointmentType
                                FROM patient a
                                JOIN appointment d ON a.philhealthId = d.philhealthId
                                LEFT JOIN doctorschedule c ON d.scheduleId = c.scheduleId
@@ -160,7 +163,7 @@ $userRow = mysqli_fetch_array($res, MYSQLI_ASSOC);
 
 
                             if (!$result) {
-                                
+
                                 die('Error: ' . mysqli_error($con));
                             }
 
@@ -179,15 +182,14 @@ $userRow = mysqli_fetch_array($res, MYSQLI_ASSOC);
                                 echo "<td>" . $patientRow['patientAddress'] . "</td>";
                                 echo "<td>" . $patientRow['appSymptom'] . "</td>";
                                 echo "<td>" . $patientRow['appointmentType'] . "</td>";
-                                 if ($patientRow['appointmentType'] == 'prenatal') {
+                                if ($patientRow['appointmentType'] == 'prenatal') {
                                     echo "<td class=''><a href='prenatalPrescription.php?philhealthId=" . $patientRow['philhealthId'] . "' class='prescription-btn'>Give Prescription</a></td>";
-                                } else if($patientRow['appointmentType'] == 'tb'){
-                                    echo "<td class='text-center'>Not Applicable</td>";
+                                } else if ($patientRow['appointmentType'] == 'tb') {
+                                    echo "<td class=''><a href='tbPrescription.php?philhealthId=" . $patientRow['philhealthId'] . "' class='prescription-btn'>Give Prescription</a></td>";
                                 }
                                 echo "<form method='POST'>";
                                 echo "<td class='text-center'><a href='#' id='" . $patientRow['philhealthId'] . "' class='delete'>Delete</a>
                             </td>";
-
                             }
                             echo "</tr>";
                             echo "</tbody>";
@@ -213,8 +215,8 @@ $userRow = mysqli_fetch_array($res, MYSQLI_ASSOC);
         <!-- jQuery -->
         <script src="../patient/assets/js/jquery.js"></script>
         <script type="text/javascript">
-            $(function () {
-                $(".delete").click(function () {
+            $(function() {
+                $(".delete").click(function() {
                     var element = $(this);
                     var ic = element.attr("id");
                     var info = 'ic=' + ic;
@@ -223,10 +225,11 @@ $userRow = mysqli_fetch_array($res, MYSQLI_ASSOC);
                             type: "POST",
                             url: "deletepatient.php",
                             data: info,
-                            success: function () {
-                            }
+                            success: function() {}
                         });
-                        $(this).parent().parent().fadeOut(300, function () { $(this).remove(); });
+                        $(this).parent().parent().fadeOut(300, function() {
+                            $(this).remove();
+                        });
                     }
                     return false;
                 });
@@ -236,8 +239,8 @@ $userRow = mysqli_fetch_array($res, MYSQLI_ASSOC);
             /*
             Please consider that the JS part isn't production ready at all, I just code it to show the concept of merging filters and titles together !
             */
-            $(document).ready(function () {
-                $('.filterable .btn-filter').click(function () {
+            $(document).ready(function() {
+                $('.filterable .btn-filter').click(function() {
                     var $panel = $(this).parents('.filterable'),
                         $filters = $panel.find('.filters input'),
                         $tbody = $panel.find('.table tbody');
@@ -251,7 +254,7 @@ $userRow = mysqli_fetch_array($res, MYSQLI_ASSOC);
                     }
                 });
 
-                $('.filterable .filters input').keyup(function (e) {
+                $('.filterable .filters input').keyup(function(e) {
                     /* Ignore tab key */
                     var code = e.keyCode || e.which;
                     if (code == '9') return;
@@ -263,7 +266,7 @@ $userRow = mysqli_fetch_array($res, MYSQLI_ASSOC);
                         $table = $panel.find('.table'),
                         $rows = $table.find('tbody tr');
                     /* Dirtiest filter function ever ;) */
-                    var $filteredRows = $rows.filter(function () {
+                    var $filteredRows = $rows.filter(function() {
                         var value = $(this).find('td').eq(column).text().toLowerCase();
                         return value.indexOf(inputContent) === -1;
                     });

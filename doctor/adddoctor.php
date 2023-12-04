@@ -133,14 +133,14 @@ if (isset($_POST['addDoctor'])) {
                     <li>
                         <a href="doctordashboard.php"><i class="fa fa-fw fa-dashboard"></i> Dashboard</a>
                     </li>
-                    <li class="active">
+                    <li >
                         <a href="addschedule.php"><i class="fa fa-fw fa-table"></i> Doctor Schedule</a>
+                    </li>
+                    <li class="active">
+                        <a href="adddoctor.php"><i class="fa fa-fw fa-user"></i> Doctor</a>
                     </li>
                     <li>
                         <a href="patientlist.php"><i class="fa fa-fw fa-user"></i> Patient List</a>
-                    </li>
-                    <li>
-                        <a href="adddoctor.php"><i class="fa fa-fw fa-user"></i>Doctor</a>
                     </li>
                 </ul>
             </div>

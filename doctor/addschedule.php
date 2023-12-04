@@ -129,8 +129,12 @@ VALUES ( '$date', '$scheduleday', '$starttime', '$endtime', '$bookavail' ) ";
                         <a href="addschedule.php"><i class="fa fa-fw fa-table"></i> Doctor Schedule</a>
                     </li>
                     <li>
-                        <a href="patientlist.php"><i class="fa fa-fw fa-edit"></i> Patient List</a>
+                        <a href="adddoctor.php"><i class="fa fa-fw fa-user"></i> Doctor</a>
                     </li>
+                    <li>
+                        <a href="patientlist.php"><i class="fa fa-fw fa-user"></i> Patient List</a>
+                    </li>
+
                 </ul>
             </div>
             <!-- /.navbar-collapse -->

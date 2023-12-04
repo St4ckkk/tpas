@@ -84,11 +84,12 @@ $userRow = mysqli_fetch_array($res, MYSQLI_ASSOC);
                         <a href="addschedule.php"><i class="fa fa-fw fa-table"></i> Doctor Schedule</a>
                     </li>
                     <li>
+                        <a href="adddoctor.php"><i class="fa fa-fw fa-user"></i> Doctor</a>
+                    </li>
+                    <li>
                         <a href="patientlist.php"><i class="fa fa-fw fa-user"></i> Patient List</a>
                     </li>
-                     <li>
-                        <a href="adddoctor.php"><i class="fa fa-fw fa-user"></i>Doctor</a>
-                    </li>
+
                 </ul>
             </div>
             <!-- /.navbar-collapse -->
@@ -161,7 +162,6 @@ $userRow = mysqli_fetch_array($res, MYSQLI_ASSOC);
                                     $status = "danger";
                                     $icon = 'remove';
                                     $checked = '';
-
                                 } else {
                                     $status = "success";
                                     $icon = 'ok';
@@ -192,7 +192,6 @@ $userRow = mysqli_fetch_array($res, MYSQLI_ASSOC);
                                 echo "<td class='text-center'><input type='checkbox' name='enable' id='enable' value='" . $appointment['appId'] . "' onclick='chkit(" . $appointment['appId'] . ",this.checked);' " . $checked . "></td>";
                                 echo "<td class='text-center'><a href='#' id='" . $appointment['appId'] . "' class='delete'><span class='glyphicon glyphicon-trash' aria-hidden='true'></span></a>
                                 </td>";
-
                             }
                             echo "</tr>";
                             echo "</tbody>";
@@ -235,8 +234,8 @@ $userRow = mysqli_fetch_array($res, MYSQLI_ASSOC);
     <!-- jQuery -->
     <script src="../patient/assets/js/jquery.js"></script>
     <script type="text/javascript">
-        $(function () {
-            $(".delete").click(function () {
+        $(function() {
+            $(".delete").click(function() {
                 var element = $(this);
                 var appid = element.attr("id");
                 var info = 'id=' + appid;
@@ -245,10 +244,11 @@ $userRow = mysqli_fetch_array($res, MYSQLI_ASSOC);
                         type: "POST",
                         url: "deleteappointment.php",
                         data: info,
-                        success: function () {
-                        }
+                        success: function() {}
                     });
-                    $(this).parent().parent().fadeOut(300, function () { $(this).remove(); });
+                    $(this).parent().parent().fadeOut(300, function() {
+                        $(this).remove();
+                    });
                 }
                 return false;
             });
@@ -262,8 +262,8 @@ $userRow = mysqli_fetch_array($res, MYSQLI_ASSOC);
         /*
         Please consider that the JS part isn't production ready at all, I just code it to show the concept of merging filters and titles together !
         */
-        $(document).ready(function () {
-            $('.filterable .btn-filter').click(function () {
+        $(document).ready(function() {
+            $('.filterable .btn-filter').click(function() {
                 var $panel = $(this).parents('.filterable'),
                     $filters = $panel.find('.filters input'),
                     $tbody = $panel.find('.table tbody');
@@ -277,7 +277,7 @@ $userRow = mysqli_fetch_array($res, MYSQLI_ASSOC);
                 }
             });
 
-            $('.filterable .filters input').keyup(function (e) {
+            $('.filterable .filters input').keyup(function(e) {
                 /* Ignore tab key */
                 var code = e.keyCode || e.which;
                 if (code == '9') return;
@@ -289,7 +289,7 @@ $userRow = mysqli_fetch_array($res, MYSQLI_ASSOC);
                     $table = $panel.find('.table'),
                     $rows = $table.find('tbody tr');
                 /* Dirtiest filter function ever ;) */
-                var $filteredRows = $rows.filter(function () {
+                var $filteredRows = $rows.filter(function() {
                     var value = $(this).find('td').eq(column).text().toLowerCase();
                     return value.indexOf(inputContent) === -1;
                 });

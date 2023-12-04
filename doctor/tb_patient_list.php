@@ -92,6 +92,9 @@ $userRow = mysqli_fetch_array($res, MYSQLI_ASSOC);
                     <li>
                         <a href="addschedule.php"><i class="fa fa-fw fa-table"></i> Doctor Schedule</a>
                     </li>
+                    <li>
+                        <a href="adddoctor.php"><i class="fa fa-fw fa-user"></i> Doctor</a>
+                    </li>
                     <li class="active">
                         <a href="patientlist.php"><i class="fa fa-fw fa-edit"></i> Patient List</a>
                     </li>
@@ -108,7 +111,7 @@ $userRow = mysqli_fetch_array($res, MYSQLI_ASSOC);
                 <div class="row">
                     <div class="col-lg-12">
                         <h2 class="page-header">
-                           TB Patient List
+                            TB Patient List
                         </h2>
                         <ol class="breadcrumb">
                             <li class="active">
@@ -182,7 +185,7 @@ $userRow = mysqli_fetch_array($res, MYSQLI_ASSOC);
                                 if ($patientRow['appointmentType'] == 'prenatal') {
                                     echo "<td class=''><a href='prenatalPrescription.php?philhealthId=" . $patientRow['philhealthId'] . "' class='prescription-btn'>Give Prescription</a></td>";
                                 } else if ($patientRow['appointmentType'] == 'tb') {
-                                     echo "<td class=''><a href='tbPrescription.php?philhealthId=" . $patientRow['philhealthId'] . "' class='prescription-btn'>Give Prescription</a></td>";
+                                    echo "<td class=''><a href='tbPrescription.php?philhealthId=" . $patientRow['philhealthId'] . "' class='prescription-btn'>Give Prescription</a></td>";
                                 }
                                 echo "<form method='POST'>";;
                             }
