@@ -24,4 +24,4 @@ Import the SQL File:
 Use your preferred method to import the "nena.sql" file into the newly created "nena" database. This can typically be done using command-line tools or through a database management tool.
 For example, using MySQL command-line:
 
-# made by keyan
+# made by kad-f
