@@ -182,8 +182,6 @@ if (isset($_POST['addDoctor'])) {
                         <h3 class="panel-title">Add Doctor</h3>
                     </div>
                     <div class="panel-body">
-                        <!-- Add Doctor Form -->
-                        <!-- Add Doctor Form -->
                         <div class="form-container">
                             <form class="form-vertical" method="post">
                                 <div class="form-row">
@@ -274,7 +272,15 @@ if (isset($_POST['addDoctor'])) {
                         <!-- Add filter button here if needed -->
                     </div>
                     <div class="panel-body">
-                        <!-- List of Doctors Table -->
+                        <?php
+                        // Check if the user is a superAdmin
+                        if ($userRow['doctorRole'] == 'superAdmin') {
+                            $doctorList = mysqli_query($con, "SELECT * FROM doctor WHERE doctorRole IN ('Pulmonologist', 'Obstetrician')");
+                        } else {
+                            // For Pulmonologist or Obstetrician, only show doctors with the specified roles
+                            $doctorList = mysqli_query($con, "SELECT * FROM doctor WHERE doctorRole IN ('Pulmonologist', 'Obstetrician')");
+                        }
+                        ?>
                         <table class="table table-hover table-bordered">
                             <thead>
                                 <tr class="filters">
@@ -288,7 +294,6 @@ if (isset($_POST['addDoctor'])) {
                             </thead>
                             <tbody>
                                 <?php
-                                $doctorList = mysqli_query($con, "SELECT * FROM doctor");
                                 while ($doctor = mysqli_fetch_array($doctorList)) {
                                     echo "<tr>";
                                     echo "<td>" . $doctor['doctorId'] . "</td>";
@@ -296,18 +301,15 @@ if (isset($_POST['addDoctor'])) {
                                     echo "<td>" . $doctor['doctorFirstName'] . "</td>";
                                     echo "<td>" . $doctor['doctorLastName'] . "</td>";
                                     echo "<td>" . $doctor['doctorRole'] . "</td>";
-                                    echo '<td><a href="#" class=" assignBtn" data-doctor-id="' . $doctor['doctorId'] . '">Assign</a></td>';
+                                    echo '<td><a href="#" class="assignBtn" data-doctor-id="' . $doctor['doctorId'] . '">Assign</a></td>';
                                     echo "</tr>";
                                 }
-
                                 ?>
-
                             </tbody>
-
                         </table>
-
                         <!-- End List of Doctors Table -->
                     </div>
+
                 </div>
                 <!-- End panel for List of Doctors -->
 
