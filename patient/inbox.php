@@ -140,6 +140,10 @@ if ($prescriptionResult === false) {
         resize: vertical;
         /* Allow vertical resizing */
     }
+    .custom-btn {
+        height: 30px; /* Set your desired height */
+        line-height: 1.5; /* Adjust line-height if needed for vertical alignment */
+    }
 </style>
 
 <body>
@@ -200,7 +204,14 @@ if ($prescriptionResult === false) {
                                 <p><strong>Dosage:</strong> <?php echo $prescriptionRow['dosage']; ?></p>
                                 <p><strong>Comment:</strong> <?php echo $prescriptionRow['comment']; ?></p>
                                 <p><strong>Instructions:</strong> <?php echo $prescriptionRow['instructions']; ?></p>
-                                <button class="btn btn-primary btn-print" onclick="printPrescription(<?php echo $prescriptionRow['prescriptionId']; ?>)">Print Prescription</button>
+                                <!-- Print Prescription button with custom class -->
+                                <button class="btn btn-primary btn-print custom-btn" onclick="printPrescription(<?php echo $prescriptionRow['prescriptionId']; ?>)">Print</button>
+
+                                <!-- Delete Prescription button with custom class -->
+                                <form action="deletePrescription.php" method="post" style="display: inline;">
+                                    <input type="hidden" name="prescriptionId" value="<?php echo $prescriptionRow['prescriptionId']; ?>">
+                                    <button type="submit" class="btn btn-danger custom-btn">Delete</button>
+                                </form>
                             </div>
                         </div>
                         <div class="message-container">
@@ -215,37 +226,32 @@ if ($prescriptionResult === false) {
                         </div>
 
                         <?php
-                        $messageQuery = "SELECT * FROM messages WHERE receiverId=" . $userRow['philhealthId'] . " AND senderId=" . $prescriptionRow['icDoctor'];
+                        $messageQuery = "SELECT * FROM doctormessages WHERE receiverId=" . $userRow['philhealthId'] . " AND senderId=" . $prescriptionRow['icDoctor'];
                         $messageResult = mysqli_query($con, $messageQuery);
 
-                        while ($messageRow = mysqli_fetch_array($messageResult, MYSQLI_ASSOC)) {
-                            $messageSender = ($messageRow['senderId'] == $userRow['philhealthId']) ? 'You' : 'Dr. ' . $prescriptionRow['doctorLastName'];
+                        if ($messageResult) {
+                            if (mysqli_num_rows($messageResult) > 0) {
+                                while ($messageRow = mysqli_fetch_array($messageResult, MYSQLI_ASSOC)) {
+                                    $messageSender = ($messageRow['senderId'] == $userRow['philhealthId']) ? 'You' : 'Dr. ' . $prescriptionRow['doctorLastName'];
                         ?>
-                            <div class="message-container user-message">
-                                <div class="message">
-                                    <p><strong>Sender:</strong> <?php echo $messageSender; ?></p>
-                                    <p><strong>Message:</strong> <?php echo $messageRow['messageContent']; ?></p>
-                                    <p><strong>Timestamp:</strong> <?php echo $messageRow['timestamp']; ?></p>
-                                </div>
-                            </div>
-                             <?php
-                    $messageQuery = "SELECT * FROM messages WHERE receiverId=" . $userRow['philhealthId'] . " AND senderId=" . $prescriptionRow['icDoctor'];
-                    $messageResult = mysqli_query($con, $messageQuery);
-
-                    while ($messageRow = mysqli_fetch_array($messageResult, MYSQLI_ASSOC)) {
-                        $messageSender = ($messageRow['senderId'] == $userRow['philhealthId']) ? 'You' : 'Dr. ' . $prescriptionRow['doctorLastName'];
-                    ?>
-                        <div class="message-container user-message">
-                            <div class="message">
-                                <p><strong>Sender:</strong> <?php echo $messageSender; ?></p>
-                                <p><strong>Message:</strong> <?php echo $messageRow['messageContent']; ?></p>
-                                <p><strong>Timestamp:</strong> <?php echo $messageRow['timestamp']; ?></p>
-                            </div>
-                        </div>
-                    <?php
-                    }
-                    ?>
+                                    <div class="message-container user-message">
+                                        <div class="message">
+                                            <p><strong>Sender:</strong> <?php echo $messageSender; ?></p>
+                                            <p><strong>Message:</strong> <?php echo $messageRow['messageContent']; ?></p>
+                                            <p><strong>Timestamp:</strong> <?php echo $messageRow['timestamp']; ?></p>
+                                            <form action="deleteMessage.php" method="post">
+                                                <input type="hidden" name="messageId" value="<?php echo $messageRow['messageId']; ?>">
+                                                <button type="submit" class="btn btn-danger">Delete</button>
+                                            </form>
+                                        </div>
+                                    </div>
                         <?php
+                                }
+                            } else {
+                                echo '<div class="message-container user-message"><p>No messages.</p></div>';
+                            }
+                        } else {
+                            echo "Error in SQL query: " . mysqli_error($con);
                         }
                         ?>
                     <?php

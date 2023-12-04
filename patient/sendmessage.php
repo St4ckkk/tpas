@@ -18,7 +18,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $message = $_POST['message'];
 
     // Insert the message into the database
-    $insertMessageQuery = "INSERT INTO messages (senderId, receiverId, messageContent) 
+    $insertMessageQuery = "INSERT INTO usermessages (senderId, receiverId, messageContent) 
                            VALUES ('{$userRow['philhealthId']}', '$doctorId', '$message')";
     $result = mysqli_query($con, $insertMessageQuery);
 
