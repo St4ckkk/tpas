@@ -17,10 +17,10 @@ if (isset($_POST['submit'])) {
     $starttime = isset($_POST['starttime']) ? mysqli_real_escape_string($con, $_POST['starttime']) : '';
     $endtime = isset($_POST['endtime']) ? mysqli_real_escape_string($con, $_POST['endtime']) : '';
     $bookavail = isset($_POST['bookavail']) ? mysqli_real_escape_string($con, $_POST['bookavail']) : '';
-
+    $doctorId = $usersession;
     //INSERT
-    $query = " INSERT INTO doctorschedule (  scheduleDate, scheduleDay, startTime, endTime,  bookAvail)
-VALUES ( '$date', '$scheduleday', '$starttime', '$endtime', '$bookavail' ) ";
+    $query = "INSERT INTO doctorschedule (scheduleDate, scheduleDay, startTime, endTime, bookAvail, doctorId)
+          VALUES ('$date', '$scheduleday', '$starttime', '$endtime', '$bookavail', '$doctorId')";
 
     $result = mysqli_query($con, $query);
     // echo $result;
@@ -151,7 +151,7 @@ VALUES ( '$date', '$scheduleday', '$starttime', '$endtime', '$bookavail' ) ";
                             <a href="addschedule.php"><i class="fa fa-fw fa-table"></i> Doctor Schedule</a>
                         </li>
                         <li>
-                            <a href="adddoctor.php"><i class="fa fa-fw fa-user"></i> Doctor</a>
+                            <a href="doctor.php"><i class="fa fa-fw fa-user"></i> Doctor</a>
                         </li>
                         <li>
                             <a href="patientlist.php"><i class="fa fa-fw fa-user"></i> Patient List</a>
@@ -363,26 +363,29 @@ VALUES ( '$date', '$scheduleday', '$starttime', '$endtime', '$bookavail' ) ";
                             </thead>
 
                             <?php
-                            $result = mysqli_query($con, "SELECT * FROM doctorschedule");
+                            if ($userRow['doctorRole'] == 'superAdmin') {
+                                $scheduleQuery = "SELECT * FROM doctorschedule";
+                            } else {
+                                $scheduleQuery = "SELECT * FROM doctorschedule WHERE doctorId = $usersession";
+                            }
+                            $result = mysqli_query($con, $scheduleQuery);
 
+                            if (!$result) {
+                                die("Error in SQL query: " . mysqli_error($con));
+                            }
 
-
-                            while ($doctorschedule = mysqli_fetch_array($result)) {
-
-
+                            while ($row = mysqli_fetch_assoc($result)) {
                                 echo "<tbody>";
                                 echo "<tr>";
-                                echo "<td>" . $doctorschedule['scheduleDate'] . "</td>";
-                                echo "<td>" . $doctorschedule['scheduleDay'] . "</td>";
-                                echo "<td>" . $doctorschedule['startTime'] . "</td>";
-                                echo "<td>" . $doctorschedule['endTime'] . "</td>";
-                                echo "<td>" . $doctorschedule['bookAvail'] . "</td>";
-                                echo "<form method='POST'>";
-                                echo "<td class='text-center'><a href='#' id='" . $doctorschedule['scheduleId'] . "' class='delete'><span class='glyphicon glyphicon-trash' aria-hidden='true'></span></a>
-                            </td>";
+                                echo "<td>" . $row['scheduleDate'] . "</td>";
+                                echo "<td>" . $row['scheduleDay'] . "</td>";
+                                echo "<td>" . $row['startTime'] . "</td>";
+                                echo "<td>" . $row['endTime'] . "</td>";
+                                echo "<td>" . $row['bookAvail'] . "</td>";
+                                echo "<td class='text-center'><a href='#' id='" . $row['scheduleId'] . "' class='delete'><span class='glyphicon glyphicon-trash' aria-hidden='true'></span></a></td>";
+                                echo "</tr>";
+                                echo "</tbody>";
                             }
-                            echo "</tr>";
-                            echo "</tbody>";
                             echo "</table>";
                             echo "<div class='panel panel-default'>";
                             echo "<div class='col-md-offset-3 pull-right'>";
@@ -390,6 +393,7 @@ VALUES ( '$date', '$scheduleday', '$starttime', '$endtime', '$bookavail' ) ";
                             echo "</div>";
                             echo "</div>";
                             ?>
+
                             <!-- panel content end -->
                             <!-- panel end -->
                     </div>
