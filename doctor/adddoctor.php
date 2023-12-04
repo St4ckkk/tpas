@@ -24,7 +24,7 @@ if (isset($_POST['addDoctor'])) {
     $doctorRole = mysqli_real_escape_string($con, $_POST['doctorRole']);
     // INSERT
     $query = "INSERT INTO doctor (icDoctor, password,doctorId, doctorFirstName, doctorLastName, doctorAddress, doctorPhone, doctorEmail, doctorDOB, doctorRole)
-              VALUES ('$icDoctor', '$password', ,'$doctorId', '$doctorFirstName', '$doctorLastName', '$doctorAddress', '$doctorPhone', '$doctorEmail', '$doctorDOB', '$doctorRole')";
+              VALUES ('$icDoctor', '$password','$doctorId', '$doctorFirstName', '$doctorLastName', '$doctorAddress', '$doctorPhone', '$doctorEmail', '$doctorDOB', '$doctorRole')";
 
     $result = mysqli_query($con, $query);
 
@@ -301,7 +301,7 @@ if (isset($_POST['addDoctor'])) {
                                     echo "<td>" . $doctor['doctorFirstName'] . "</td>";
                                     echo "<td>" . $doctor['doctorLastName'] . "</td>";
                                     echo "<td>" . $doctor['doctorRole'] . "</td>";
-                                    echo '<td><a href="#" class="assignBtn" data-doctor-id="' . $doctor['doctorId'] . '">Assign</a></td>';
+                                    echo '<td><a href="#" class="delete" data-doctor-id="' . $doctor['doctorId'] . '">Delete</a></td>';
                                     echo "</tr>";
                                 }
                                 ?>
@@ -330,38 +330,27 @@ if (isset($_POST['addDoctor'])) {
     <!-- Include Date Range Picker -->
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.4.1/js/bootstrap-datepicker.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.4.1/css/bootstrap-datepicker3.css" />
-    <script>
-        $(document).ready(function() {
-            $('.assignBtn').click(function() {
-                var doctorId = $(this).data('doctor-id');
-
-                $.ajax({
-                    url: 'get_doctor_role.php',
-                    method: 'POST',
-                    data: {
-                        doctorId: doctorId
-                    },
-                    dataType: 'json',
-                    success: function(response) {
-                        var doctorRole = response.doctorRole;
-
-                        if (doctorRole === 'Pulmonologist') {
-                            window.location.href = 'tb_patient_list.php'; // Replace with your actual TB patient list page URL
-                        } else if (doctorRole === 'Obstetrician') {
-                            window.location.href = 'prenatal_patient_list.php'; // Replace with your actual prenatal patient list page URL
-                        } else {
-                            // Handle other roles or show an error message
-                            alert('Invalid doctor role');
-                        }
-                    },
-                    error: function() {
-                        // Handle AJAX error
-                        alert('Failed to retrieve doctor role');
+    <script type="text/javascript">
+            $(function() {
+                $(".delete").click(function() {
+                    var element = $(this);
+                    var id = element.attr("id");
+                    var info = 'id=' + id;
+                    if (confirm("Are you sure you want to delete this?")) {
+                        $.ajax({
+                            type: "POST",
+                            url: "deletedoctor.php",
+                            data: info,
+                            success: function() {}
+                        });
+                        $(this).parent().parent().fadeOut(300, function() {
+                            $(this).remove();
+                        });
                     }
+                    return false;
                 });
             });
-        });
-    </script>
+        </script>
 
 
     <script>
