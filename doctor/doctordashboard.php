@@ -78,17 +78,41 @@ $userRow = mysqli_fetch_array($res, MYSQLI_ASSOC);
             <div class="collapse navbar-collapse navbar-ex1-collapse">
                 <ul class="nav navbar-nav side-nav">
                     <li class="active">
-                        <a href="doctordashboard.php"><i class="fa fa-fw fa-dashboard"></i> Dashboard</a>
+                        <a href=" doctordashboard.php"><i class="fa fa-fw fa-dashboard"></i> Dashboard</a>
                     </li>
-                    <li>
-                        <a href="addschedule.php"><i class="fa fa-fw fa-table"></i> Doctor Schedule</a>
-                    </li>
-                    <li>
-                        <a href="adddoctor.php"><i class="fa fa-fw fa-user"></i> Doctor</a>
-                    </li>
-                    <li>
-                        <a href="patientlist.php"><i class="fa fa-fw fa-user"></i> Patient List</a>
-                    </li>
+                    <?php
+                    // Check if the user's role is "superAdmin"
+                    if ($userRow['doctorRole'] == 'superAdmin') {
+                        // Display the following options for the superAdmin role
+                    ?>
+                        <li>
+                            <a href="addschedule.php"><i class="fa fa-fw fa-table"></i> Doctor Schedule</a>
+                        </li>
+                        <li>
+                            <a href="adddoctor.php"><i class="fa fa-fw fa-user"></i> Doctor</a>
+                        </li>
+                        <li class="active">
+                            <a href="patientlist.php"><i class="fa fa-fw fa-user"></i> Patient List</a>
+                        </li>
+                    <?php
+                    }
+                    ?>
+                    <?php
+                    $allowedRoles = ['Pulmonologist', 'Obstetrician'];
+
+                    // Check if the user's role is in the allowedRoles array
+                    if (in_array($userRow['doctorRole'], $allowedRoles)) {
+                        // Display the following options for specific roles
+                    ?>
+                        <li>
+                            <a href="addschedule.php"><i class="fa fa-fw fa-table"></i> Doctor Schedule</a>
+                        </li>
+                        <li>
+                            <a href="patientlist.php"><i class="fa fa-fw fa-user"></i> Patient List</a>
+                        </li>
+                    <?php
+                    }
+                    ?>
 
                 </ul>
             </div>
@@ -145,13 +169,36 @@ $userRow = mysqli_fetch_array($res, MYSQLI_ASSOC);
                             </thead>
 
                             <?php
-                            $res = mysqli_query($con, "SELECT a.*, b.*,c.*
-                                                        FROM patient a
-                                                        JOIN appointment b
-                                                        On a.philhealthId = b.philhealthId
-                                                        JOIN doctorschedule c
-                                                        On b.scheduleId=c.scheduleId
-                                                        Order By appId desc");
+                            $res = null; // Initialize $res variable
+
+                            // Check the user's role
+                            $doctorRole = $userRow['doctorRole'];
+
+                            // Modify the SQL query based on the doctor's role
+                            if ($doctorRole == 'superAdmin') {
+                                $sqlQuery = "SELECT a.*, b.*, c.*
+                 FROM patient a
+                 JOIN appointment b ON a.philhealthId = b.philhealthId
+                 JOIN doctorschedule c ON b.scheduleId = c.scheduleId
+                 ORDER BY appId DESC";
+                            } elseif ($doctorRole == 'Pulmonologist') {
+                                $sqlQuery = "SELECT a.*, b.*, c.*
+                 FROM patient a
+                 JOIN appointment b ON a.philhealthId = b.philhealthId
+                 JOIN doctorschedule c ON b.scheduleId = c.scheduleId
+                 WHERE a.appointmentType = 'tb'
+                 ORDER BY appId DESC";
+                            } elseif ($doctorRole == 'Obstetrician') {
+                                $sqlQuery = "SELECT a.*, b.*, c.*
+                 FROM patient a
+                 JOIN appointment b ON a.philhealthId = b.philhealthId
+                 JOIN doctorschedule c ON b.scheduleId = c.scheduleId
+                 WHERE a.appointmentType = 'prenatal'
+                 ORDER BY appId DESC";
+                            }
+
+                            $res = mysqli_query($con, $sqlQuery);
+
                             if (!$res) {
                                 printf("Error: %s\n", mysqli_error($con));
                                 exit();

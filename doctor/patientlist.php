@@ -86,18 +86,42 @@ $userRow = mysqli_fetch_array($res, MYSQLI_ASSOC);
             <!-- Sidebar Menu Items - These collapse to the responsive navigation menu on small screens -->
             <div class="collapse navbar-collapse navbar-ex1-collapse">
                 <ul class="nav navbar-nav side-nav">
-                    <li>
+                    <li ">
                         <a href="doctordashboard.php"><i class="fa fa-fw fa-dashboard"></i> Dashboard</a>
                     </li>
-                    <li>
-                        <a href="addschedule.php"><i class="fa fa-fw fa-table"></i> Doctor Schedule</a>
-                    </li>
-                    <li>
-                        <a href="adddoctor.php"><i class="fa fa-fw fa-user"></i> Doctor</a>
-                    </li>
-                    <li class="active">
-                        <a href="patientlist.php"><i class="fa fa-fw fa-user"></i> Patient List</a>
-                    </li>
+                    <?php
+                    // Check if the user's role is "superAdmin"
+                    if ($userRow['doctorRole'] == 'superAdmin') {
+                        // Display the following options for the superAdmin role
+                    ?>
+                        <li>
+                            <a href="addschedule.php"><i class="fa fa-fw fa-table"></i> Doctor Schedule</a>
+                        </li>
+                        <li>
+                            <a href="adddoctor.php"><i class="fa fa-fw fa-user"></i> Doctor</a>
+                        </li>
+                        <li class="active">
+                            <a href="patientlist.php"><i class="fa fa-fw fa-user"></i> Patient List</a>
+                        </li>
+                    <?php
+                    }
+                    ?>
+                    <?php
+                    $allowedRoles = ['Pulmonologist', 'Obstetrician'];
+
+                    // Check if the user's role is in the allowedRoles array
+                    if (in_array($userRow['doctorRole'], $allowedRoles)) {
+                        // Display the following options for specific roles
+                    ?>
+                        <li>
+                            <a href="addschedule.php"><i class="fa fa-fw fa-table"></i> Doctor Schedule</a>
+                        </li>
+                        <li class="active">
+                            <a href="patientlist.php"><i class="fa fa-fw fa-user"></i> Patient List</a>
+                        </li>
+                    <?php
+                    }
+                    ?>
                 </ul>
             </div>
             <!-- /.navbar-collapse -->
@@ -154,20 +178,29 @@ $userRow = mysqli_fetch_array($res, MYSQLI_ASSOC);
                                 </tr>
                             </thead>
 
-                            <?php
+                             <?php
+                            $appointmentTypeFilter = '';
+
+                            // Check if the doctor is not a superAdmin
+                            if ($userRow['doctorRole'] != 'superAdmin') {
+                                $allowedAppointmentTypes = ($userRow['doctorRole'] == 'Obstetrician') ? ['prenatal'] : ['tb'];
+
+                                // Create a condition to filter by allowed appointment types
+                                $appointmentTypeFilter = "AND a.appointmentType IN ('" . implode("', '", $allowedAppointmentTypes) . "')";
+                            }
+
                             $result = mysqli_query($con, "SELECT a.*, c.*, d.appSymptom, a.appointmentType
                                FROM patient a
                                JOIN appointment d ON a.philhealthId = d.philhealthId
                                LEFT JOIN doctorschedule c ON d.scheduleId = c.scheduleId
+                               WHERE 1 $appointmentTypeFilter
                                ORDER BY d.appId DESC");
 
-
                             if (!$result) {
-
                                 die('Error: ' . mysqli_error($con));
                             }
 
-                            while ($patientRow = mysqli_fetch_array($result)) {
+                           while ($patientRow = mysqli_fetch_array($result)) {
 
 
                                 echo "<tbody>";

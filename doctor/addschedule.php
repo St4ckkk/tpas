@@ -122,19 +122,42 @@ VALUES ( '$date', '$scheduleday', '$starttime', '$endtime', '$bookavail' ) ";
             <!-- Sidebar Menu Items - These collapse to the responsive navigation menu on small screens -->
             <div class="collapse navbar-collapse navbar-ex1-collapse">
                 <ul class="nav navbar-nav side-nav">
-                    <li>
+                    <li >
                         <a href="doctordashboard.php"><i class="fa fa-fw fa-dashboard"></i> Dashboard</a>
                     </li>
-                    <li class="active">
-                        <a href="addschedule.php"><i class="fa fa-fw fa-table"></i> Doctor Schedule</a>
-                    </li>
-                    <li>
-                        <a href="adddoctor.php"><i class="fa fa-fw fa-user"></i> Doctor</a>
-                    </li>
-                    <li>
-                        <a href="patientlist.php"><i class="fa fa-fw fa-user"></i> Patient List</a>
-                    </li>
+                    <?php
+                    // Check if the user's role is "superAdmin"
+                    if ($userRow['doctorRole'] == 'superAdmin') {
+                        // Display the following options for the superAdmin role
+                    ?>
+                        <li>
+                            <a href="addschedule.php"><i class="fa fa-fw fa-table"></i> Doctor Schedule</a>
+                        </li>
+                        <li>
+                            <a href="adddoctor.php"><i class="fa fa-fw fa-user"></i> Doctor</a>
+                        </li>
+                        <li>
+                            <a href="patientlist.php"><i class="fa fa-fw fa-user"></i> Patient List</a>
+                        </li>
+                    <?php
+                    }
+                    ?>
+                    <?php
+                    $allowedRoles = ['Pulmonologist', 'Obstetrician'];
 
+                    // Check if the user's role is in the allowedRoles array
+                    if (in_array($userRow['doctorRole'], $allowedRoles)) {
+                        // Display the following options for specific roles
+                    ?>
+                        <li class="active">
+                            <a href="addschedule.php"><i class="fa fa-fw fa-table"></i> Doctor Schedule</a>
+                        </li>
+                        <li >
+                            <a href="patientlist.php"><i class="fa fa-fw fa-user"></i> Patient List</a>
+                        </li>
+                    <?php
+                    }
+                    ?>
                 </ul>
             </div>
             <!-- /.navbar-collapse -->
