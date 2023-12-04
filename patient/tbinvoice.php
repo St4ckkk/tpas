@@ -5,51 +5,27 @@ include_once '../assets/conn/dbconnect.php';
 if (isset($_GET['prescriptionId'])) {
     $prescriptionId = $_GET['prescriptionId'];
 
-    // Initialize variables
-    $resTB = null;
-    $resPrenatal = null;
-
-    // Perform the query for TB prescription
-    $resTB = mysqli_query($con, "
-        SELECT tp.*, d.doctorFirstname AS doctorFirstName, d.doctorLastname AS doctorLastName
-        FROM tbprescription tp
-        JOIN doctor d ON tp.icDoctor = d.icDoctor
-        WHERE tp.prescriptionId = $prescriptionId
-    ");
+    // Perform the query
+    $res = mysqli_query($con, "SELECT * FROM tbprescription WHERE prescriptionId=" . $prescriptionId);
 
     // Check for errors in the query
-    if (!$resTB) {
-        die("Error in TB Prescription SQL query: " . mysqli_error($con));
+    if (!$res) {
+        die("Error in SQL query: " . mysqli_error($con));
     }
 
-    // Perform the query for Prenatal prescription
-    $resPrenatal = mysqli_query($con, "
-        SELECT pp.*, d.doctorFirstname AS doctorFirstName, d.doctorLastname AS doctorLastName
-        FROM prenatalprescription pp
-        JOIN doctor d ON pp.icDoctor = d.icDoctor
-        WHERE pp.prescriptionId = $prescriptionId
-    ");
-
-    // Check for errors in the query
-    if (!$resPrenatal) {
-        die("Error in Prenatal Prescription SQL query: " . mysqli_error($con));
-    }
-
-    // Check if any rows were returned for TB prescription
-    if (mysqli_num_rows($resTB) > 0) {
-        // Fetch the prescription details for TB
-        $prescriptionRow = mysqli_fetch_array($resTB, MYSQLI_ASSOC);
-    } elseif (mysqli_num_rows($resPrenatal) > 0) {
-        // Fetch the prescription details for Prenatal
-        $prescriptionRow = mysqli_fetch_array($resPrenatal, MYSQLI_ASSOC);
+    // Check if any rows were returned
+    if (mysqli_num_rows($res) > 0) {
+        // Fetch the prescription details
+        $prescriptionRow = mysqli_fetch_array($res, MYSQLI_ASSOC);
     } else {
-        // Prescription not found for both types
         die("Prescription not found");
     }
 } else {
     die("Prescription ID not set");
 }
-
+if (isset($_GET['prescriptionId'])) {
+    $prescriptionId = $_GET['prescriptionId'];
+}
 $session = $_SESSION['patientSession'];
 
 // Check if the user is logged in
@@ -57,21 +33,28 @@ if (!isset($_SESSION['patientSession'])) {
     header("Location: ../index.php");
     exit;
 }
-
 // Fetch user information
 $res1 = mysqli_query($con, "SELECT * FROM patient WHERE philhealthId=" . $session);
 $userRow = mysqli_fetch_array($res1, MYSQLI_ASSOC);
+$res = mysqli_query($con, "
+    SELECT pp.*, d.doctorFirstname AS doctorFirstName, d.doctorLastname AS doctorLastName
+    FROM tbprescription pp
+    JOIN doctor d ON pp.icDoctor = d.icDoctor
+    WHERE pp.prescriptionId = $prescriptionId
+");
+
+
+
+$prescriptionRow = mysqli_fetch_array($res, MYSQLI_ASSOC);
 
 ?>
-
-
 
 <!doctype html>
 <html lang="en">
 
 <head>
     <meta charset="utf-8">
-    <title>Prescription Invoice - ScheduCare</title>
+    <title>Prescription Invoice - Your Clinic Name</title>
     <link rel="stylesheet" type="text/css" href="assets/css/invoice.css">
 </head>
 
@@ -169,7 +152,7 @@ $userRow = mysqli_fetch_array($res1, MYSQLI_ASSOC);
                     <br>
                     <div>
                         <img src="assets/img/signature.png" alt="" srcset="" width="50px"><br>
-                        <?php echo $prescriptionRow['doctorFirstName'] . ' ' . $prescriptionRow['doctorLastName']; ?><br>
+                       <?php echo $prescriptionRow['doctorFirstName'] . ' ' . $prescriptionRow['doctorLastName']; ?><br>
                         <strong>Date of Signature:</strong> <?php echo date("d-m-Y"); ?>
                     </div>
                 </td>

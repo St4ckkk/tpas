@@ -227,37 +227,36 @@ if ($res) {
 
                                 <div class="message-container">
                                     <div class="message">
-                                        <!-- Add a form for sending messages -->
+                                        <!-- Add a form for sending messages outside of the loop -->
                                         <form action="sendmessage.php" method="post">
                                             <?php
                                             // Execute the messageQuery
-                                            // Execute the messageQuery
                                             $messageQuery = "SELECT m.*, p.philhealthId AS senderPhilhealthId, p.patientLastName 
-                FROM usermessages m
-                JOIN patient p ON m.senderId = p.philhealthId
-                WHERE m.receiverId = " . $userRow['icDoctor'];
+    FROM usermessages m
+    JOIN patient p ON m.senderId = p.philhealthId
+    WHERE m.receiverId = " . $userRow['icDoctor'];
 
                                             $messageResult = mysqli_query($con, $messageQuery);
 
                                             // Check if the query was successful and if there are rows
                                             if ($messageResult && mysqli_num_rows($messageResult) > 0) {
-                                                // Fetch the first row from the result
+                                                // Fetch the first messageRow to get sender's information
                                                 $messageRow = mysqli_fetch_array($messageResult, MYSQLI_ASSOC);
-                                                // Check if "philhealthId" key exists in the fetched row
-                                                $philhealthId = isset($messageRow['senderPhilhealthId']) ? $messageRow['senderPhilhealthId'] : '';
+                                                // Use the $messageRow to display or process the sender's information
+                                                $philhealthId = $messageRow['senderPhilhealthId'];
                                             } else {
                                                 // Handle the case where the query fails or there are no rows
                                                 echo "Error in SQL query: " . mysqli_error($con);
-                                                // Set a default value for $philhealthId
-                                                $philhealthId = ''; // You can set a default value as needed
                                             }
                                             ?>
-
                                             <!-- Use the $philhealthId variable in the form -->
                                             <input type="hidden" name="philhealthId" value="<?php echo $philhealthId; ?>">
+                                            <!-- Include the textarea outside the loop -->
                                             <textarea name="message" placeholder="Type your message here"></textarea>
+                                            <!-- Include the button outside the loop -->
                                             <button type="submit" class="btn btn-primary">Send Message</button>
                                         </form>
+
                                     </div>
                                 </div>
                                 <?php

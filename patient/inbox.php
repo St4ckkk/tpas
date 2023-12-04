@@ -13,20 +13,49 @@ if (!isset($_SESSION['patientSession'])) {
 $res = mysqli_query($con, "SELECT * FROM patient WHERE philhealthId=" . $session);
 $userRow = mysqli_fetch_array($res, MYSQLI_ASSOC);
 
-// Fetch prescriptions with doctor information
-$prescriptionQuery = "SELECT p.*, d.doctorFirstName, d.doctorLastName 
-                      FROM prenatalprescription p 
-                      JOIN doctor d ON p.icDoctor = d.icDoctor 
-                      WHERE p.philhealthId=" . $userRow['philhealthId'];
-
-$prescriptionResult = mysqli_query($con, $prescriptionQuery);
-
-// Check for errors
-if ($prescriptionResult === false) {
-    echo mysqli_error($con);
+// Check if the userRow is not empty and has the 'philhealthId' key
+if (empty($userRow) || !isset($userRow['philhealthId'])) {
+    echo "Error: User information not found.";
+    exit;
 }
 
+// Fetch appointment information directly from the 'patient' table
+$appointmentType = $userRow['appointmentType'];
+
+
+
+// Fetch prescriptions with doctor information based on the appointment type
+$prescriptionQuery = "";
+if ($appointmentType === 'tb') {
+    $prescriptionQuery = "SELECT t.*, d.doctorFirstName, d.doctorLastName 
+                          FROM tbprescription t 
+                          JOIN doctor d ON t.icDoctor = d.icDoctor 
+                          WHERE t.philhealthId=" . $userRow['philhealthId'];
+} elseif ($appointmentType === 'prenatal') {
+    $prescriptionQuery = "SELECT p.*, d.doctorFirstName, d.doctorLastName 
+                          FROM prenatalprescription p 
+                          JOIN doctor d ON p.icDoctor = d.icDoctor 
+                          WHERE p.philhealthId=" . $userRow['philhealthId'];
+}
+
+// Check if the $prescriptionQuery is not empty
+if (!empty($prescriptionQuery)) {
+    $prescriptionResult = mysqli_query($con, $prescriptionQuery);
+
+    // Check for errors
+    if ($prescriptionResult === false) {
+        echo mysqli_error($con);
+    }
+} else {
+    echo "Error: Appointment type not found.";
+    exit;
+}
+
+// Rest of your code...
 ?>
+
+
+<!-- The rest of your HTML and PHP code -->
 
 
 <!DOCTYPE html>
@@ -49,8 +78,6 @@ if ($prescriptionResult === false) {
     <!-- <link rel="stylesheet" href="https://formden.com/static/cdn/bootstrap-iso.css" /> -->
     <!--Font Awesome (added because you use icons in your prepend/append)-->
     <link rel="stylesheet" href="assets/font-awesome/css/font-awesome.min.css" />
-
-
 </head>
 <style>
     body {
@@ -132,6 +159,13 @@ if ($prescriptionResult === false) {
         border-color: #204d74;
     }
 
+    .custom-btn {
+        height: 30px;
+        /* Set your desired height */
+        line-height: 1.5;
+        /* Adjust line-height if needed for vertical alignment */
+    }
+
     /* Increase the height of the message textarea */
     form textarea {
         height: 165px;
@@ -139,10 +173,6 @@ if ($prescriptionResult === false) {
         /* Adjust the height as needed */
         resize: vertical;
         /* Allow vertical resizing */
-    }
-    .custom-btn {
-        height: 30px; /* Set your desired height */
-        line-height: 1.5; /* Adjust line-height if needed for vertical alignment */
     }
 </style>
 
@@ -199,6 +229,7 @@ if ($prescriptionResult === false) {
                     ?>
                         <div class="message-container <?php echo $messageClass; ?>">
                             <div class="message">
+                                <!-- Display prescription information -->
                                 <p><strong>Sender:</strong> Dr. <?php echo $prescriptionRow['doctorFirstName'] . ' ' . $prescriptionRow['doctorLastName']; ?></p>
                                 <p><strong>Medication:</strong> <?php echo $prescriptionRow['medication']; ?></p>
                                 <p><strong>Dosage:</strong> <?php echo $prescriptionRow['dosage']; ?></p>
@@ -224,7 +255,6 @@ if ($prescriptionResult === false) {
                                 </form>
                             </div>
                         </div>
-
                         <?php
                         $messageQuery = "SELECT * FROM doctormessages WHERE receiverId=" . $userRow['philhealthId'] . " AND senderId=" . $prescriptionRow['icDoctor'];
                         $messageResult = mysqli_query($con, $messageQuery);
@@ -257,11 +287,11 @@ if ($prescriptionResult === false) {
                     <?php
                     }
                     ?>
+
                 </div>
             </div>
         </section>
     </div>
-
 
     <!-- Add your JavaScript and jQuery scripts here -->
     <script>
@@ -274,7 +304,6 @@ if ($prescriptionResult === false) {
     <script src="assets/js/jquery.js"></script>
     <script src="assets/js/bootstrap.min.js"></script>
     <!-- Add any additional scripts needed for the inbox page -->
-
 </body>
 
 </html>

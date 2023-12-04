@@ -13,15 +13,17 @@
     $userRow1 = mysqli_fetch_array($res1, MYSQLI_ASSOC);
 
     if (isset($_POST['prescription'])) {
+        
         $philhealthId = mysqli_real_escape_string($con, $userRow['philhealthId']);
+        $icDoctor = mysqli_real_escape_string($con, $userRow3['icDoctor']);
         $medication = mysqli_real_escape_string($con, $_POST['medication']);
         $dosage = mysqli_real_escape_string($con, $_POST['dosage']);
         $comment = mysqli_real_escape_string($con, $_POST['comment']);
         $instructions = mysqli_real_escape_string($con, $_POST['instructions']);
 
         // Insert data into prenatalprescription table
-        $insertPrescriptionQuery = "INSERT INTO prenatalprescription (philhealthId, medication, dosage, comment, instructions)
-                                VALUES ('$philhealthId', '$medication', '$dosage', '$comment', '$instructions')";
+        $insertPrescriptionQuery = "INSERT INTO prenatalprescription (philhealthId, medication, icDoctor, dosage, comment, instructions)
+                                VALUES ('$philhealthId', '$medication', '$icDoctor', '$dosage', '$comment', '$instructions')";
         $result = mysqli_query($con, $insertPrescriptionQuery);
         // echo $result;
         if ($result) {
@@ -106,6 +108,7 @@
                                             <div class="panel panel-default">
                                                 <div class="panel-heading">Prescription Information</div>
                                                 <div class="panel-body">
+                                                     <input type="hidden" name="icDoctor" value="<?php echo $userRow3['icDoctor'] ?>">
                                                     <input type="hidden" name="philhealthId" value="<?php echo $userRow['philhealthId'] ?>">
                                                     <div class="form-group">
                                                         <label for="medication">Medication:</label>
