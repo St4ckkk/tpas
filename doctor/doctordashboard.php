@@ -21,9 +21,15 @@ $userRow = mysqli_fetch_array($res, MYSQLI_ASSOC);
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="description" content="">
     <meta name="author" content="">
-    <title>Welcome Dr
-        <?php echo $userRow['doctorFirstName']; ?>
-        <?php echo $userRow['doctorLastName']; ?>
+    <title>
+        <?php
+
+        if ($userRow['doctorRole'] == 'superAdmin') {
+            echo "Welcome " . $userRow['doctorFirstName'] . " " . $userRow['doctorLastName'];
+        } else {
+            echo "Welcome Dr " . $userRow['doctorFirstName'] . " " . $userRow['doctorLastName'];
+        }
+        ?>
     </title>
     <!-- Bootstrap Core CSS -->
     <!-- <link href="assets/css/bootstrap.css" rel="stylesheet"> -->
@@ -48,9 +54,15 @@ $userRow = mysqli_fetch_array($res, MYSQLI_ASSOC);
                     <span class="icon-bar"></span>
                     <span class="icon-bar"></span>
                 </button>
-                <a class="navbar-brand" href="doctordashboard.php">Welcome Dr
-                    <?php echo $userRow['doctorFirstName']; ?>
-                    <?php echo $userRow['doctorLastName']; ?>
+                <a class="navbar-brand" href="doctordashboard.php">
+                    <?php
+
+                    if ($userRow['doctorRole'] == 'superAdmin') {
+                        echo "Welcome " . $userRow['doctorFirstName'] . " " . $userRow['doctorLastName'];
+                    } else {
+                        echo "Welcome Dr " . $userRow['doctorFirstName'] . " " . $userRow['doctorLastName'];
+                    }
+                    ?>
                 </a>
             </div>
             <!-- Top Menu Items -->
@@ -91,7 +103,7 @@ $userRow = mysqli_fetch_array($res, MYSQLI_ASSOC);
                         <li>
                             <a href="adddoctor.php"><i class="fa fa-fw fa-user"></i> Doctor</a>
                         </li>
-                        <li class="active">
+                        <li>
                             <a href="patientlist.php"><i class="fa fa-fw fa-user"></i> Patient List</a>
                         </li>
                     <?php

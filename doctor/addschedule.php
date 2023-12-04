@@ -49,7 +49,15 @@ VALUES ( '$date', '$scheduleday', '$starttime', '$endtime', '$bookavail' ) ";
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="description" content="">
     <meta name="author" content="">
-    <title>Welcome Dr <?php echo $userRow['doctorFirstName']; ?> <?php echo $userRow['doctorLastName']; ?></title>
+    <title>
+        <?php
+        if ($userRow['doctorRole'] == 'superAdmin') {
+            echo "Welcome " . $userRow['doctorFirstName'] . " " . $userRow['doctorLastName'];
+        } else {
+            echo "Welcome Dr " . $userRow['doctorFirstName'] . " " . $userRow['doctorLastName'];
+        }
+        ?>
+    </title>
     <!-- Bootstrap Core CSS -->
     <!-- <link href="assets/css/bootstrap.css" rel="stylesheet"> -->
     <link href="assets/css/material.css" rel="stylesheet">
@@ -99,7 +107,16 @@ VALUES ( '$date', '$scheduleday', '$starttime', '$endtime', '$bookavail' ) ";
                     <span class="icon-bar"></span>
                     <span class="icon-bar"></span>
                 </button>
-                <a class="navbar-brand" href="doctordashboard.php">Welcome Dr <?php echo $userRow['doctorFirstName']; ?> <?php echo $userRow['doctorLastName']; ?></a>
+                <a class="navbar-brand" href="doctordashboard.php">
+                    <?php
+
+                    if ($userRow['doctorRole'] == 'superAdmin') {
+                        echo "Welcome " . $userRow['doctorFirstName'] . " " . $userRow['doctorLastName'];
+                    } else {
+                        echo "Welcome Dr " . $userRow['doctorFirstName'] . " " . $userRow['doctorLastName'];
+                    }
+                    ?>
+                </a>
             </div>
             <!-- Top Menu Items -->
             <ul class="nav navbar-right top-nav">
@@ -122,7 +139,7 @@ VALUES ( '$date', '$scheduleday', '$starttime', '$endtime', '$bookavail' ) ";
             <!-- Sidebar Menu Items - These collapse to the responsive navigation menu on small screens -->
             <div class="collapse navbar-collapse navbar-ex1-collapse">
                 <ul class="nav navbar-nav side-nav">
-                    <li >
+                    <li>
                         <a href="doctordashboard.php"><i class="fa fa-fw fa-dashboard"></i> Dashboard</a>
                     </li>
                     <?php
@@ -130,7 +147,7 @@ VALUES ( '$date', '$scheduleday', '$starttime', '$endtime', '$bookavail' ) ";
                     if ($userRow['doctorRole'] == 'superAdmin') {
                         // Display the following options for the superAdmin role
                     ?>
-                        <li>
+                        <li class="active">
                             <a href="addschedule.php"><i class="fa fa-fw fa-table"></i> Doctor Schedule</a>
                         </li>
                         <li>
@@ -152,7 +169,7 @@ VALUES ( '$date', '$scheduleday', '$starttime', '$endtime', '$bookavail' ) ";
                         <li class="active">
                             <a href="addschedule.php"><i class="fa fa-fw fa-table"></i> Doctor Schedule</a>
                         </li>
-                        <li >
+                        <li>
                             <a href="patientlist.php"><i class="fa fa-fw fa-user"></i> Patient List</a>
                         </li>
                     <?php
