@@ -265,6 +265,7 @@ if (isset($_POST['addDoctor'])) {
                                     <th>First Name</th>
                                     <th>Last Name</th>
                                     <th>Specialty</th>
+                                    <th>Action</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -277,12 +278,16 @@ if (isset($_POST['addDoctor'])) {
                                     echo "<td>" . $doctor['doctorFirstName'] . "</td>";
                                     echo "<td>" . $doctor['doctorLastName'] . "</td>";
                                     echo "<td>" . $doctor['doctorRole'] . "</td>";
-
+                                    echo '<td><a href="#" class=" assignBtn" data-doctor-id="' . $doctor['doctorId'] . '">Assign</a></td>';
                                     echo "</tr>";
                                 }
+
                                 ?>
+
                             </tbody>
+
                         </table>
+
                         <!-- End List of Doctors Table -->
                     </div>
                 </div>
@@ -305,6 +310,40 @@ if (isset($_POST['addDoctor'])) {
     <!-- Include Date Range Picker -->
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.4.1/js/bootstrap-datepicker.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.4.1/css/bootstrap-datepicker3.css" />
+    <script>
+        $(document).ready(function() {
+            $('.assignBtn').click(function() {
+                var doctorId = $(this).data('doctor-id');
+
+                $.ajax({
+                    url: 'get_doctor_role.php',
+                    method: 'POST',
+                    data: {
+                        doctorId: doctorId
+                    },
+                    dataType: 'json',
+                    success: function(response) {
+                        var doctorRole = response.doctorRole;
+
+                        if (doctorRole === 'Pulmonologist') {
+                            window.location.href = 'tb_patient_list.php'; // Replace with your actual TB patient list page URL
+                        } else if (doctorRole === 'Obstetrician') {
+                            window.location.href = 'prenatal_patient_list.php'; // Replace with your actual prenatal patient list page URL
+                        } else {
+                            // Handle other roles or show an error message
+                            alert('Invalid doctor role');
+                        }
+                    },
+                    error: function() {
+                        // Handle AJAX error
+                        alert('Failed to retrieve doctor role');
+                    }
+                });
+            });
+        });
+    </script>
+
+
     <script>
         $(document).ready(function() {
             var date_input = $('input[name="doctorDOB"]'); //our date input has the name "date"
