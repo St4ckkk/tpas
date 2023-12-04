@@ -87,7 +87,7 @@ $userRow = mysqli_fetch_array($res, MYSQLI_ASSOC);
                         <a href="patientlist.php"><i class="fa fa-fw fa-user"></i> Patient List</a>
                     </li>
                      <li>
-                        <a href="addschedule.php"><i class="fa fa-fw fa-contact"></i>Monitor Patient</a>
+                        <a href="adddoctor.php"><i class="fa fa-fw fa-user"></i>Doctor</a>
                     </li>
                 </ul>
             </div>
