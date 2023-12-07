@@ -246,7 +246,7 @@ if (!empty($prescriptionQuery)) {
                             </div>
                         </div>
                         <div class="message-container">
-                            <div class="message">
+                            <div class="message">   
                                 <!-- Add a form for sending messages -->
                                 <form action="sendmessage.php" method="post">
                                     <input type="hidden" name="doctorId" value="<?php echo $prescriptionRow['icDoctor']; ?>">
@@ -258,11 +258,11 @@ if (!empty($prescriptionQuery)) {
                         <?php
                         $messageQuery = "SELECT * FROM doctormessages WHERE receiverId=" . $userRow['philhealthId'] . " AND senderId=" . $prescriptionRow['icDoctor'];
                         $messageResult = mysqli_query($con, $messageQuery);
-
+                        
                         if ($messageResult) {
                             if (mysqli_num_rows($messageResult) > 0) {
                                 while ($messageRow = mysqli_fetch_array($messageResult, MYSQLI_ASSOC)) {
-                                    $messageSender = ($messageRow['senderId'] == $userRow['philhealthId']) ? 'You' : 'Dr. ' . $prescriptionRow['doctorLastName'];
+                                    $messageSender ='Dr. ' . $prescriptionRow['doctorLastName'];
                         ?>
                                     <div class="message-container user-message">
                                         <div class="message">

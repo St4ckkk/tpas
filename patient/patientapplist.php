@@ -1,24 +1,25 @@
 <?php
 session_start();
 include_once '../assets/conn/dbconnect.php';
-$session=$_SESSION[ 'patientSession'];
-$res=mysqli_query($con, "SELECT a.*, b.*,c.* FROM patient a
+$session = $_SESSION['patientSession'];
+$res = mysqli_query($con, "SELECT a.*, b.*,c.* FROM patient a
 	JOIN appointment b
 		On a.philhealthId = b.philhealthId
 	JOIN doctorschedule c
 		On b.scheduleId=c.scheduleId
 	WHERE b.philhealthId ='$session'");
-	if (!$res) {
-		die( "Error running $sql: " . mysqli_error($con));
-	}
-	$userRow=mysqli_fetch_array($res);
-	if (!$userRow) {
-    // Handle the case when no results are found
-    echo 'No Appointment';
-}else {
+if (!$res) {
+	die("Error running $sql: " . mysqli_error($con));
+}
+$userRow = mysqli_fetch_array($res);
+if (!$userRow) {
+	// Handle the case when no results are found
+	echo 'No Appointment';
+} else {
 ?>
-<!DOCTYPE html>
-<html>
+	<!DOCTYPE html>
+	<html>
+
 	<head>
 		<meta charset="utf-8">
 		<meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -27,12 +28,13 @@ $res=mysqli_query($con, "SELECT a.*, b.*,c.* FROM patient a
 		<title>Make Appoinment</title>
 		<!-- <link href="assets/css/bootstrap.min.css" rel="stylesheet"> -->
 		<link href="assets/css/material.css" rel="stylesheet">
-		
+
 		<link href="assets/css/default/style.css" rel="stylesheet">
 		<link href="assets/css/default/blocks.css" rcel="stylesheet">
 		<link rel="stylesheet" href="assets/font-awesome/css/font-awesome.min.css" />
 
 	</head>
+
 	<body>
 		<!-- navigation -->
 		<nav class="navbar navbar-default " role="navigation">
@@ -40,11 +42,11 @@ $res=mysqli_query($con, "SELECT a.*, b.*,c.* FROM patient a
 				<!-- Brand and toggle get grouped for better mobile display -->
 				<div class="navbar-header">
 					<button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
-					<span class="sr-only">Toggle navigation</span>
-					<span class="icon-bar"></span>
-					<span class="icon-bar"></span>
-					<span class="icon-bar"></span>
-					</button>	
+						<span class="sr-only">Toggle navigation</span>
+						<span class="icon-bar"></span>
+						<span class="icon-bar"></span>
+						<span class="icon-bar"></span>
+					</button>
 					<a class="navbar-brand" href="patient.php"><img alt="Brand" src="assets/img/cd-logo.png" height="20px"></a>
 				</div>
 				<!-- Collect the nav links, forms, and other content for toggling -->
@@ -56,7 +58,7 @@ $res=mysqli_query($con, "SELECT a.*, b.*,c.* FROM patient a
 							<li><a href="patientapplist.php?patientId=<?php echo $userRow['philhealthId']; ?>">Appointment</a></li>
 						</ul>
 					</ul>
-					
+
 					<ul class="nav navbar-nav navbar-right">
 						<li class="dropdown">
 							<a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-user"></i> <?php echo $userRow['patientFirstName']; ?> <?php echo $userRow['patientLastName']; ?><b class="caret"></b></a>
@@ -66,6 +68,9 @@ $res=mysqli_query($con, "SELECT a.*, b.*,c.* FROM patient a
 								</li>
 								<li>
 									<a href="patientapplist.php?patientId=<?php echo $userRow['philhealthId']; ?>"><i class="glyphicon glyphicon-file"></i> Appointment</a>
+								</li>
+								<li>
+									<a href="inbox.php?patientId=<?php echo $userRow['philhealthId'] ?>"><i class="fa fa-fw fa-envelope"></i> Inbox</a>
 								</li>
 								<li class="divider"></li>
 								<li>
@@ -78,32 +83,32 @@ $res=mysqli_query($con, "SELECT a.*, b.*,c.* FROM patient a
 			</div>
 		</nav>
 		<!-- navigation -->
-<!-- display appoinment start -->
-<?php
+		<!-- display appoinment start -->
+	<?php
 
 
-echo "<div class='container'>";
-echo "<div class='row'>";
-echo "<div class='page-header'>";
-echo "<h1>Your appointment list. </h1>";
-echo "</div>";
-echo "<div class='panel panel-primary'>";
-echo "<div class='panel-heading'>List of Appointment</div>";
-echo "<div class='panel-body'>";
-echo "<table class='table table-hover'>";
-echo "<thead>";
-echo "<tr>";
-echo "<th>App Id</th>";
-echo "<th>Philhealth ID </th>";
-echo "<th>patientLastName </th>";
-echo "<th>scheduleDay </th>";
-echo "<th>scheduleDate </th>";
-echo "<th>startTime </th>";
-echo "<th>endTime </th>";
-echo "<th>Print </th>";
-echo "</tr>";
-echo "</thead>";
-$res = mysqli_query($con, "SELECT a.*, b.*,c.*
+	echo "<div class='container'>";
+	echo "<div class='row'>";
+	echo "<div class='page-header'>";
+	echo "<h1>Your appointment list. </h1>";
+	echo "</div>";
+	echo "<div class='panel panel-primary'>";
+	echo "<div class='panel-heading'>List of Appointment</div>";
+	echo "<div class='panel-body'>";
+	echo "<table class='table table-hover'>";
+	echo "<thead>";
+	echo "<tr>";
+	echo "<th>App Id</th>";
+	echo "<th>Philhealth ID </th>";
+	echo "<th>patientLastName </th>";
+	echo "<th>scheduleDay </th>";
+	echo "<th>scheduleDate </th>";
+	echo "<th>startTime </th>";
+	echo "<th>endTime </th>";
+	echo "<th>Print </th>";
+	echo "</tr>";
+	echo "</thead>";
+	$res = mysqli_query($con, "SELECT a.*, b.*,c.*
 		FROM patient a
 		JOIN appointment b
 		On a.philhealthId = b.philhealthId
@@ -111,36 +116,36 @@ $res = mysqli_query($con, "SELECT a.*, b.*,c.*
 		On b.scheduleId=c.scheduleId
 		WHERE b.philhealthId ='$session'");
 
-if (!$res) {
-die("Error running $sql: " . mysqli_error($con));
-}
+	if (!$res) {
+		die("Error running $sql: " . mysqli_error($con));
+	}
 
 
-while ($userRow = mysqli_fetch_array($res)) {
-echo "<tbody>";
-echo "<tr>";
-echo "<td>" . $userRow['appId'] . "</td>";
-echo "<td>" . $userRow['philhealthId'] . "</td>";
-echo "<td>" . $userRow['patientLastName'] . "</td>";
-echo "<td>" . $userRow['scheduleDay'] . "</td>";
-echo "<td>" . $userRow['scheduleDate'] . "</td>";
-echo "<td>" . $userRow['startTime'] . "</td>";
-echo "<td>" . $userRow['endTime'] . "</td>";
-echo "<td><a href='invoice.php?appid=".$userRow['appId']."' target='_blank'><span class='glyphicon glyphicon-print' aria-hidden='true'></span></a> </td>";
-}
+	while ($userRow = mysqli_fetch_array($res)) {
+		echo "<tbody>";
+		echo "<tr>";
+		echo "<td>" . $userRow['appId'] . "</td>";
+		echo "<td>" . $userRow['philhealthId'] . "</td>";
+		echo "<td>" . $userRow['patientLastName'] . "</td>";
+		echo "<td>" . $userRow['scheduleDay'] . "</td>";
+		echo "<td>" . $userRow['scheduleDate'] . "</td>";
+		echo "<td>" . $userRow['startTime'] . "</td>";
+		echo "<td>" . $userRow['endTime'] . "</td>";
+		echo "<td><a href='invoice.php?appid=" . $userRow['appId'] . "' target='_blank'><span class='glyphicon glyphicon-print' aria-hidden='true'></span></a> </td>";
+	}
 
-echo "</tr>";
-echo "</tbody>";
-echo "</table>";
+	echo "</tr>";
+	echo "</tbody>";
+	echo "</table>";
 }
-?> 
+	?>
 	</div>
-</div>
-</div>
-</div>
-<!-- display appoinment end -->
-<script src="assets/js/jquery.js"></script>
-<script src="assets/js/bootstrap.min.js"></script>
-</body>
+	</div>
+	</div>
+	</div>
+	<!-- display appoinment end -->
+	<script src="assets/js/jquery.js"></script>
+	<script src="assets/js/bootstrap.min.js"></script>
+	</body>
 
-</html>
+	</html>

@@ -13,19 +13,21 @@
     $userRow1 = mysqli_fetch_array($res1, MYSQLI_ASSOC);
 
     if (isset($_POST['prescription'])) {
-        
         $philhealthId = mysqli_real_escape_string($con, $userRow['philhealthId']);
         $icDoctor = mysqli_real_escape_string($con, $userRow3['icDoctor']);
         $medication = mysqli_real_escape_string($con, $_POST['medication']);
         $dosage = mysqli_real_escape_string($con, $_POST['dosage']);
         $comment = mysqli_real_escape_string($con, $_POST['comment']);
         $instructions = mysqli_real_escape_string($con, $_POST['instructions']);
+        $pregnancyWeek = mysqli_real_escape_string($con, $_POST['pregnancyWeek']);
+        $weight = mysqli_real_escape_string($con, $_POST['weight']);
+        $bloodPressure = mysqli_real_escape_string($con, $_POST['bloodPressure']);
 
         // Insert data into prenatalprescription table
-        $insertPrescriptionQuery = "INSERT INTO prenatalprescription (philhealthId, medication, icDoctor, dosage, comment, instructions)
-                                VALUES ('$philhealthId', '$medication', '$icDoctor', '$dosage', '$comment', '$instructions')";
+        $insertPrescriptionQuery = "INSERT INTO prenatalprescription (philhealthId, medication, icDoctor, dosage, comment, instructions, pregnancyWeek, weight, bloodPressure)
+                                VALUES ('$philhealthId', '$medication', '$icDoctor', '$dosage', '$comment', '$instructions', '$pregnancyWeek', '$weight', '$bloodPressure')";
         $result = mysqli_query($con, $insertPrescriptionQuery);
-        // echo $result;
+
         if ($result) {
     ?>
             <script type="text/javascript">
@@ -40,7 +42,6 @@
     <?php
         }
     }
-
     ?>
     <!DOCTYPE html>
     <html>
@@ -91,24 +92,27 @@
                                 <div class="panel panel-default">
                                     <div class="panel-body">
 
-                                        
-                                            <div class="panel panel-default">
-                                                <div class="panel-heading">Patient Information</div>
-                                                <div class="panel-body">
-                                                    Patient Name: <?php echo $userRow['patientFirstName'] ?> <?php echo $userRow['patientLastName'] ?><br>
-                                                    Philhealth ID: <?php echo $userRow['philhealthId'] ?><br>
-                                                    Contact Number: <?php echo $userRow['patientPhone'] ?><br>
-                                                    Address: <?php echo $userRow['patientAddress'] ?><br>
-                                                    Symptoms/Concerns: <?php echo $userRow1['appSymptom'] ?><br>
-                                                    Comments: <?php echo $userRow1['appComment'] ?>
-                                                </div>
+
+                                        <div class="panel panel-default">
+                                            <div class="panel-heading">Patient Information</div>
+                                            <div class="panel-body">
+                                                Patient Name: <?php echo $userRow['patientFirstName'] ?> <?php echo $userRow['patientLastName'] ?><br>
+                                                Philhealth ID: <?php echo $userRow['philhealthId'] ?><br>
+                                                Contact Number: <?php echo $userRow['patientPhone'] ?><br>
+                                                Address: <?php echo $userRow['patientAddress'] ?><br>
+                                                Symptoms/Concerns: <?php echo $userRow1['appSymptom'] ?><br>
+                                                Comments: <?php echo $userRow1['appComment'] ?><br>
+                                                Pregnancy Week: <?php echo $userRow1['pregnancyWeek'] ?><br>
+                                                Weight: <?php echo $userRow1['weight'] ?><br>
+                                                Blood Pressure: <?php echo $userRow1['bloodPressure'] ?><br>
                                             </div>
+                                        </div>
 
                                         <form action="" method="POST">
                                             <div class="panel panel-default">
                                                 <div class="panel-heading">Prescription Information</div>
                                                 <div class="panel-body">
-                                                     <input type="hidden" name="icDoctor" value="<?php echo $userRow3['icDoctor'] ?>">
+                                                    <input type="hidden" name="icDoctor" value="<?php echo $userRow3['icDoctor'] ?>">
                                                     <input type="hidden" name="philhealthId" value="<?php echo $userRow['philhealthId'] ?>">
                                                     <div class="form-group">
                                                         <label for="medication">Medication:</label>

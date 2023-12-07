@@ -25,19 +25,12 @@ $userRow = mysqli_fetch_array($res, MYSQLI_ASSOC);
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
-	<!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
 	<title>Patient Dashboard</title>
-	<!-- Bootstrap -->
-	<!-- <link href="assets/css/bootstrap.min.css" rel="stylesheet"> -->
 	<link href="assets/css/material.css" rel="stylesheet">
 	<link href="assets/css/default/style.css" rel="stylesheet">
-	<!-- <link href="assets/css/default/style1.css" rel="stylesheet"> -->
 	<link href="assets/css/default/blocks.css" rel="stylesheet">
 	<link href="assets/css/date/bootstrap-datepicker.css" rel="stylesheet">
 	<link href="assets/css/date/bootstrap-datepicker3.css" rel="stylesheet">
-	<!-- Special version of Bootstrap that only affects content wrapped in .bootstrap-iso -->
-	<!-- <link rel="stylesheet" href="https://formden.com/static/cdn/bootstrap-iso.css" /> -->
-	<!--Font Awesome (added because you use icons in your prepend/append)-->
 	<link rel="stylesheet" href="assets/font-awesome/css/font-awesome.min.css" />
 
 </head>
@@ -101,7 +94,7 @@ $userRow = mysqli_fetch_array($res, MYSQLI_ASSOC);
 								<a href="patientapplist.php?patientId=<?php echo $userRow['philhealthId']; ?>"><i class="glyphicon glyphicon-file"></i> Appointment</a>
 							</li>
 							<li>
-								<a href="inbox.php?patientId=<?php echo $userRow['philhealthId']?>"><i class="fa fa-fw fa-envelope"></i> Inbox</a>
+								<a href="inbox.php?patientId=<?php echo $userRow['philhealthId'] ?>"><i class="fa fa-fw fa-envelope"></i> Inbox</a>
 							</li>
 							<li class="divider"></li>
 							<li>

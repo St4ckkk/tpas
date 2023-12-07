@@ -187,6 +187,10 @@ $userRow = mysqli_fetch_array($res, MYSQLI_ASSOC);
                                     <th><input type="text" class="form-control" placeholder="Address" disabled></th>
                                     <th><input type="text" class="form-control" placeholder="Symptoms" disabled></th>
                                     <th><input type="text" class="form-control" placeholder="Appointment Type" disabled></th>
+                                    <th><input type="text" class="form-control" placeholder="Pregnancy Week" disabled></th>
+                                    <th><input type="text" class="form-control" placeholder="Weight" disabled></th>
+                                    <th><input type="text" class="form-control" placeholder="Blood Pressure" disabled></th>
+                                    <th>Actions</th>
                                 </tr>
                             </thead>
 
@@ -200,13 +204,14 @@ $userRow = mysqli_fetch_array($res, MYSQLI_ASSOC);
                                 // Create a condition to filter by allowed appointment types
                                 $appointmentTypeFilter = "AND a.appointmentType IN ('" . implode("', '", $allowedAppointmentTypes) . "')";
                             }
-
-                            $result = mysqli_query($con, "SELECT a.*, c.*, d.appSymptom, a.appointmentType
+                            $result = mysqli_query($con, "SELECT a.*, c.*, d.appSymptom, a.appointmentType,
+                                      d.pregnancyWeek, d.weight, d.bloodPressure
                                FROM patient a
                                JOIN appointment d ON a.philhealthId = d.philhealthId
                                LEFT JOIN doctorschedule c ON d.scheduleId = c.scheduleId
                                WHERE 1 $appointmentTypeFilter
                                ORDER BY d.appId DESC");
+
 
                             if (!$result) {
                                 die('Error: ' . mysqli_error($con));
@@ -226,6 +231,9 @@ $userRow = mysqli_fetch_array($res, MYSQLI_ASSOC);
                                 echo "<td>" . $patientRow['patientDOB'] . "</td>";
                                 echo "<td>" . $patientRow['patientAddress'] . "</td>";
                                 echo "<td>" . $patientRow['appSymptom'] . "</td>";
+                                echo "<td>" . $patientRow['pregnancyWeek'] . "</td>";
+                                echo "<td>" . $patientRow['weight'] . "</td>";
+                                echo "<td>" . $patientRow['bloodPressure'] . "</td>";
                                 echo "<td>" . $patientRow['appointmentType'] . "</td>";
                                 if ($patientRow['appointmentType'] == 'prenatal') {
                                     echo "<td class=''><a href='prenatalPrescription.php?philhealthId=" . $patientRow['philhealthId'] . "' class='prescription-btn'>Give Prescription</a></td>";

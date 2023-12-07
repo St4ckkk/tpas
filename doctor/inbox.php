@@ -261,21 +261,23 @@ if ($res) {
                                 </div>
                                 <?php
                                 $messageQuery = "SELECT m.*, p.philhealthId AS senderPhilhealthId, p.patientLastName 
-                                FROM usermessages m
-                                JOIN patient p ON m.senderId = p.philhealthId
-                                WHERE m.receiverId = " . $userRow['icDoctor'];
-
+                FROM usermessages m
+                JOIN patient p ON m.senderId = p.philhealthId
+                WHERE m.receiverId = " . $userRow['icDoctor'] . " AND m.senderId = " . $userRow['icDoctor'];
 
                                 $messageResult = mysqli_query($con, $messageQuery);
 
                                 if ($messageResult) {
                                     if (mysqli_num_rows($messageResult) > 0) {
                                         while ($messageRow = mysqli_fetch_array($messageResult, MYSQLI_ASSOC)) {
-                                            $messageSender = ($messageRow['senderId'] == $userRow['icDoctor']) ? 'You' : 'Mr. ' . $messageRow['patientLastName'];
+                                            $messageSender = 'Mr. ' . $messageRow['patientLastName'];
+                                            $philhealthId = $messageRow['senderPhilhealthId'];
+
                                 ?>
-                                            <div class="message-container user-message">
+                                            <div class="message-container <?php echo ($messageRow['senderId'] == $userRow['icDoctor']) ? 'doctor-message' : 'user-message'; ?>">
                                                 <div class="message">
                                                     <p><strong>Sender:</strong> <?php echo $messageSender; ?></p>
+                                                    <p><strong>Philhealth ID:</strong> <?php echo $philhealthId; ?></p>
                                                     <p><strong>Message:</strong> <?php echo $messageRow['messageContent']; ?></p>
                                                     <p><strong>Timestamp:</strong> <?php echo $messageRow['timestamp']; ?></p>
                                                     <form action="deleteMessage.php" method="post">
@@ -293,6 +295,7 @@ if ($res) {
                                     echo "Error in SQL query: " . mysqli_error($con);
                                 }
                                 ?>
+
 
 
 
