@@ -15,6 +15,18 @@ if ($res === false) {
 }
 
 $userRow = mysqli_fetch_array($res, MYSQLI_ASSOC);
+function getAppointmentLink($appointmentType, $patientId)
+{
+	if ($appointmentType == 'tb') {
+		return "tbpatientapplist.php?patientId=$patientId";
+	} elseif ($appointmentType == 'prenatal') {
+		return "patientapplist.php?patientId=$patientId";
+	} else {
+		// Add default case or handle other appointment types as needed
+		return "#"; // Replace "#" with the default link
+	}
+}
+
 ?>
 
 
@@ -98,7 +110,9 @@ $userRow = mysqli_fetch_array($res, MYSQLI_ASSOC);
 					<ul class="nav navbar-nav">
 						<li><a href="patient.php">Home</a></li>
 						<!-- <li><a href="profile.php?patientId=<?php echo $userRow['philhealthId']; ?>" >Profile</a></li> -->
-						<li><a href="patientapplist.php?patientId=<?php echo $userRow['philhealthId']; ?>">Appointment</a></li>
+						<li>
+							<a href="<?php echo getAppointmentLink($userRow['appointmentType'], $userRow['philhealthId']); ?>">Appointment</a>
+						</li>
 					</ul>
 				</ul>
 
@@ -110,7 +124,7 @@ $userRow = mysqli_fetch_array($res, MYSQLI_ASSOC);
 								<a href="profile.php?patientId=<?php echo $userRow['philhealthId']; ?>"><i class="fa fa-fw fa-user"></i> Profile</a>
 							</li>
 							<li>
-								<a href="patientapplist.php?patientId=<?php echo $userRow['philhealthId']; ?>"><i class="glyphicon glyphicon-file"></i> Appointment</a>
+								<a href="<?php echo getAppointmentLink($userRow['appointmentType'], $userRow['philhealthId']); ?>"> <i class="glyphicon glyphicon-file"></i> Appointment</a>
 							</li>
 							<li>
 								<a href="inbox.php?patientId=<?php echo $userRow['philhealthId'] ?>"><i class="fa fa-fw fa-envelope"></i> Inbox</a>

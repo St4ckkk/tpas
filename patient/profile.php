@@ -51,6 +51,17 @@ if ($userRow['patientMaritialStatus'] == 'single') {
 } elseif ($userRow['patientMaritialStatus'] == 'widowed') {
 	$widowed = "checked";
 }
+function getAppointmentLink($appointmentType, $patientId)
+{
+	if ($appointmentType == 'tb') {
+		return "tbpatientapplist.php?patientId=$patientId";
+	} elseif ($appointmentType == 'prenatal') {
+		return "patientapplist.php?patientId=$patientId";
+	} else {
+		// Add default case or handle other appointment types as needed
+		return "#"; // Replace "#" with the default link
+	}
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -96,7 +107,9 @@ if ($userRow['patientMaritialStatus'] == 'single') {
 					<ul class="nav navbar-nav">
 						<li><a href="patient.php">Home</a></li>
 						<!-- <li><a href="profile.php?patientId=<?php echo $userRow['philhealthId']; ?>" >Profile</a></li> -->
-						<li><a href="patientapplist.php?patientId=<?php echo $userRow['philhealthId']; ?>">Appointment</a></li>
+						<li>
+							<a href="<?php echo getAppointmentLink($userRow['appointmentType'], $userRow['philhealthId']); ?>"> Appointment</a>
+						</li>
 					</ul>
 				</ul>
 
@@ -108,11 +121,11 @@ if ($userRow['patientMaritialStatus'] == 'single') {
 								<a href="profile.php?patientId=<?php echo $userRow['philhealthId']; ?>"><i class="fa fa-fw fa-user"></i> Profile</a>
 							</li>
 							<li>
-								<a href="patientapplist.php?patientId=<?php echo $userRow['philhealthId']; ?>"><i class="glyphicon glyphicon-file"></i> Appointment</a>
+								<a href="<?php echo getAppointmentLink($userRow['appointmentType'], $userRow['philhealthId']); ?>"><i class="glyphicon glyphicon-file"></i> Appointment</a>
 							</li>
 							<li>
 								<a href="inbox.php?patientId=<?php echo $userRow['philhealthId'] ?>"><i class="fa fa-fw fa-envelope"></i> Inbox</a>
-							</li>	
+							</li>
 							<li class="divider"></li>
 							<li>
 								<a href="patientlogout.php?logout"><i class="fa fa-fw fa-power-off"></i> Log Out</a>

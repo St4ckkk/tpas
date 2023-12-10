@@ -96,6 +96,17 @@ if (isset($_POST['tbappointment'])) {
 <?php
     }
 }
+function getAppointmentLink($appointmentType, $patientId)
+{
+    if ($appointmentType == 'tb') {
+        return "tbpatientapplist.php?patientId=$patientId";
+    } elseif ($appointmentType == 'prenatal') {
+        return "patientapplist.php?patientId=$patientId";
+    } else {
+        // Add default case or handle other appointment types as needed
+        return "#"; // Replace "#" with the default link
+    }
+}
 ?>
 <!DOCTYPE html>
 <html>
@@ -136,7 +147,9 @@ if (isset($_POST['tbappointment'])) {
                     <ul class="nav navbar-nav">
                         <li><a href="patient.php">Home</a></li>
                         <!-- <li><a href="profile.php?patientId=<?php echo $userRow['philhealthId']; ?>" >Profile</a></li> -->
-                        <li><a href="patientapplist.php?patientId=<?php echo $userRow['philhealthId']; ?>">Appointment</a>
+                        <li>
+                            <a href="<?php echo getAppointmentLink($userRow['appointmentType'], $userRow['philhealthId']); ?>"><i class="glyphicon glyphicon-file"></i> Appointment</a>
+                        </li>
                         </li>
                     </ul>
                 </ul>
@@ -152,7 +165,7 @@ if (isset($_POST['tbappointment'])) {
                                 <a href="profile.php?patientId=<?php echo $userRow['philhealthId']; ?>"><i class="fa fa-fw fa-user"></i> Profile</a>
                             </li>
                             <li>
-                                <a href="patientapplist.php?patientId=<?php echo $userRow['philhealthId']; ?>"><i class="glyphicon glyphicon-file"></i> Appointment</a>
+                                <a href="<?php echo getAppointmentLink($userRow['appointmentType'], $userRow['philhealthId']); ?>"><i class="glyphicon glyphicon-file"></i> Appointment</a>
                             </li>
                             <li class="divider"></li>
                             <li>

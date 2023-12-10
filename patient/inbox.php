@@ -51,7 +51,17 @@ if (!empty($prescriptionQuery)) {
     exit;
 }
 
-// Rest of your code...
+function getAppointmentLink($appointmentType, $patientId)
+{
+    if ($appointmentType == 'tb') {
+        return "tbpatientapplist.php?patientId=$patientId";
+    } elseif ($appointmentType == 'prenatal') {
+        return "patientapplist.php?patientId=$patientId";
+    } else {
+        // Add default case or handle other appointment types as needed
+        return "#"; // Replace "#" with the default link
+    }
+}
 ?>
 
 
@@ -173,7 +183,9 @@ if (!empty($prescriptionQuery)) {
             <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
                 <ul class="nav navbar-nav">
                     <li><a href="patient.php">Home</a></li>
-                    <li><a href="patientapplist.php?patientId=<?php echo $userRow['philhealthId']; ?>">Appointment</a></li>
+                    <li>
+                        <a href="<?php echo getAppointmentLink($userRow['appointmentType'], $userRow['philhealthId']); ?>">Appointment</a>
+                    </li>
                 </ul>
                 <ul class="nav navbar-nav navbar-right">
                     <li class="dropdown">
@@ -183,7 +195,7 @@ if (!empty($prescriptionQuery)) {
                                 <a href="profile.php?patientId=<?php echo $userRow['philhealthId']; ?>"><i class="fa fa-fw fa-user"></i> Profile</a>
                             </li>
                             <li>
-                                <a href="patientapplist.php?patientId=<?php echo $userRow['philhealthId']; ?>"><i class="glyphicon glyphicon-file"></i> Appointment</a>
+                                <a href="<?php echo getAppointmentLink($userRow['appointmentType'], $userRow['philhealthId']); ?>"><i class="glyphicon glyphicon-file"></i> Appointment</a>
                             </li>
                             <li>
                                 <a href="inbox.php?patientId=<?php echo $userRow['philhealthId'] ?>"><i class="fa fa-fw fa-envelope"></i> Inbox</a>
