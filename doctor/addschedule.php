@@ -17,13 +17,22 @@ if (isset($_POST['submit'])) {
     $starttime = isset($_POST['starttime']) ? mysqli_real_escape_string($con, $_POST['starttime']) : '';
     $endtime = isset($_POST['endtime']) ? mysqli_real_escape_string($con, $_POST['endtime']) : '';
     $bookavail = isset($_POST['bookavail']) ? mysqli_real_escape_string($con, $_POST['bookavail']) : '';
-    $doctorId = $usersession;
-    //INSERT
+
+    // Check the user's role
+    if ($userRow['doctorRole'] == 'superAdmin') {
+        // If user is 'superAdmin', use the selected doctor from the dropdown
+        $selectedDoctorId = mysqli_real_escape_string($con, $_POST['selectDoctor']);
+    } else {
+        // For other doctors, use their own doctorId
+        $selectedDoctorId = $usersession;
+    }
+
+    // INSERT
     $query = "INSERT INTO doctorschedule (scheduleDate, scheduleDay, startTime, endTime, bookAvail, doctorId)
-          VALUES ('$date', '$scheduleday', '$starttime', '$endtime', '$bookavail', '$doctorId')";
+              VALUES ('$date', '$scheduleday', '$starttime', '$endtime', '$bookavail', '$selectedDoctorId')";
 
     $result = mysqli_query($con, $query);
-    // echo $result;
+
     if ($result) {
 ?>
         <script type="text/javascript">
@@ -38,6 +47,7 @@ if (isset($_POST['submit'])) {
 <?php
     }
 }
+
 ?>
 
 <!DOCTYPE html>
@@ -219,6 +229,29 @@ if (isset($_POST['submit'])) {
                                 <div class="row">
                                     <div class="col-md-12 col-sm-12 col-xs-12">
                                         <form class="form-horizontal" method="post">
+                                            <?php if ($userRow['doctorRole'] == 'superAdmin') { ?>
+                                                <div class="form-group form-group-lg">
+                                                    <label class="control-label col-sm-2 requiredField" for="selectDoctor">
+                                                        Select Doctor
+                                                        <span class="asteriskField">*</span>
+                                                    </label>
+                                                    <div class="col-sm-10">
+                                                        <select class="select form-control" id="selectDoctor" name="selectDoctor" required>
+                                                            <?php
+                                                            // Fetch the list of doctors from the database
+                                                            $doctorQuery = "SELECT * FROM doctor";
+                                                            $doctorResult = mysqli_query($con, $doctorQuery);
+
+                                                            if ($doctorResult) {
+                                                                while ($doctorRow = mysqli_fetch_assoc($doctorResult)) {
+                                                                    echo "<option value='" . $doctorRow['doctorId'] . "'>" . $doctorRow['doctorFirstName'] . " " . $doctorRow['doctorLastName'] . "</option>";
+                                                                }
+                                                            }
+                                                            ?>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                            <?php } ?>
                                             <div class="form-group form-group-lg">
                                                 <label class="control-label col-sm-2 requiredField" for="date">
                                                     Date
@@ -482,7 +515,7 @@ if (isset($_POST['submit'])) {
                             location.reload();
                         },
                         error: function(xhr, status, error) {
-                           location.reload();
+                            location.reload();
                         }
                     });
                 });

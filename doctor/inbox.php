@@ -125,7 +125,7 @@ if ($res) {
     }
 </style>
 
-
+<body>
 
     <div id="wrapper">
         <!-- Navigation -->
@@ -154,16 +154,10 @@ if ($res) {
 
 
                 <li class="dropdown">
-                    <a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-user"></i>
-                        <?php echo $userRow['doctorFirstName']; ?>
-                        <?php echo $userRow['doctorLastName']; ?><b class="caret"></b>
-                    </a>
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-user"></i> <?php echo $userRow['doctorFirstName']; ?> <?php echo $userRow['doctorLastName']; ?><b class="caret"></b></a>
                     <ul class="dropdown-menu">
                         <li>
                             <a href="doctorprofile.php"><i class="fa fa-fw fa-user"></i> Profile</a>
-                        </li>
-                        <li>
-                            <a href="inbox.php?logout"><i class="fa fa-fw fa-envelope"></i> Inbox</a>
                         </li>
 
                         <li class="divider"></li>
@@ -227,82 +221,55 @@ if ($res) {
 
                                 <div class="message-container">
                                     <div class="message">
+                                        <?php
+                                        // Execute the messageQuery
+                                        $messageQuery = "SELECT m.*, p.philhealthId AS senderPhilhealthId, p.patientLastName 
+                                            FROM usermessages m
+                                            JOIN patient p ON m.senderId = p.philhealthId
+                                            WHERE m.receiverId = " . $userRow['icDoctor'];
+
+                                        $messageResult = mysqli_query($con, $messageQuery);
+
+                                        // Check if the query was successful and if there are rows
+                                        if ($messageResult) {
+                                            if (mysqli_num_rows($messageResult) > 0) {
+                                                // Fetch the first messageRow to get sender's information
+                                                while ($messageRow = mysqli_fetch_array($messageResult, MYSQLI_ASSOC)) {
+                                                    // Use the $messageRow to display or process the sender's information
+                                                    $philhealthId = $messageRow['senderPhilhealthId'];
+                                        ?>
+                                                    <div class="message-container <?php echo ($messageRow['senderId'] == $userRow['icDoctor']) ? 'doctor-message' : 'user-message'; ?>">
+                                                        <div class="message">
+                                                            <p><strong>Sender:</strong> Mr. <?php echo $messageRow['patientLastName']; ?></p>
+                                                            <p><strong>Philhealth ID:</strong> <?php echo $philhealthId; ?></p>
+                                                            <p><strong>Message:</strong> <?php echo $messageRow['messageContent']; ?></p>
+                                                            <p><strong>Timestamp:</strong> <?php echo $messageRow['timestamp']; ?></p>
+                                                            <form action="deleteMessage.php" method="post">
+                                                                <input type="hidden" name="messageId" value="<?php echo $messageRow['messageId']; ?>">
+                                                                <button type="submit" class="btn btn-danger">Delete</button>
+                                                            </form>
+                                                        </div>
+                                                    </div>
+                                        <?php
+                                                }
+                                            } else {
+                                                // Handle the case where there are no messages
+                                                echo '<p>No messages.</p>';
+                                            }
+                                        } else {
+                                            // Handle the case where the query fails
+                                            echo "Error in SQL query: " . mysqli_error($con);
+                                        }
+                                        ?>
+
                                         <!-- Add a form for sending messages outside of the loop -->
                                         <form action="sendmessage.php" method="post">
-                                            <?php
-                                            // Execute the messageQuery
-                                            $messageQuery = "SELECT m.*, p.philhealthId AS senderPhilhealthId, p.patientLastName 
-    FROM usermessages m
-    JOIN patient p ON m.senderId = p.philhealthId
-    WHERE m.receiverId = " . $userRow['icDoctor'];
-
-                                            $messageResult = mysqli_query($con, $messageQuery);
-
-                                            // Check if the query was successful and if there are rows
-                                            if ($messageResult && mysqli_num_rows($messageResult) > 0) {
-                                                // Fetch the first messageRow to get sender's information
-                                                $messageRow = mysqli_fetch_array($messageResult, MYSQLI_ASSOC);
-                                                // Use the $messageRow to display or process the sender's information
-                                                $philhealthId = $messageRow['senderPhilhealthId'];
-                                            } else {
-                                                // Handle the case where the query fails or there are no rows
-                                                echo "Error in SQL query: " . mysqli_error($con);
-                                            }
-                                            ?>
-                                            <!-- Use the $philhealthId variable in the form -->
-                                            <input type="hidden" name="philhealthId" value="<?php echo $philhealthId; ?>">
-                                            <!-- Include the textarea outside the loop -->
                                             <textarea name="message" placeholder="Type your message here"></textarea>
-                                            <!-- Include the button outside the loop -->
+                                            <input type="hidden" name="philhealthId" value="<?php echo $philhealthId; ?>">
                                             <button type="submit" class="btn btn-primary">Send Message</button>
                                         </form>
-
                                     </div>
                                 </div>
-                                <?php
-                                $messageQuery = "SELECT m.*, p.philhealthId AS senderPhilhealthId, p.patientLastName 
-                                FROM usermessages m
-                                JOIN patient p ON m.senderId = p.philhealthId
-                                WHERE m.receiverId = " . $userRow['icDoctor'] . " AND m.senderId = " . $userRow['icDoctor'];
-
-                                $messageResult = mysqli_query($con, $messageQuery);
-
-                                if ($messageResult) {
-                                    if (mysqli_num_rows($messageResult) > 0) {
-                                        while ($messageRow = mysqli_fetch_array($messageResult, MYSQLI_ASSOC)) {
-                                            $messageSender = 'Mr. ' . $messageRow['patientLastName'];
-                                            $philhealthId = $messageRow['senderPhilhealthId'];
-
-                                ?>
-                                            <div class="message-container <?php echo ($messageRow['senderId'] == $userRow['icDoctor']) ? 'doctor-message' : 'user-message'; ?>">
-                                                <div class="message">
-                                                    <p><strong>Sender:</strong> <?php echo $messageSender; ?></p>
-                                                    <p><strong>Philhealth ID:</strong> <?php echo $philhealthId; ?></p>
-                                                    <p><strong>Message:</strong> <?php echo $messageRow['messageContent']; ?></p>
-                                                    <p><strong>Timestamp:</strong> <?php echo $messageRow['timestamp']; ?></p>
-                                                    <form action="deleteMessage.php" method="post">
-                                                        <input type="hidden" name="messageId" value="<?php echo $messageRow['messageId']; ?>">
-                                                        <button type="submit" class="btn btn-danger">Delete</button>
-                                                    </form>
-                                                </div>
-                                            </div>
-                                <?php
-                                        }
-                                    } else {
-                                        echo '<div class="message-container user-message"><p>No messages.</p></div>';
-                                    }
-                                }
-                                $messageResult = mysqli_query($con, $messageQuery);
-
-                                if (!$messageResult) {
-                                    echo "Error in SQL query: " . mysqli_error($con);
-                                } else {
-                                    // Continue processing the results...
-                                }
-                                ?>
-
-
-
 
                             </div>
                         </div>
