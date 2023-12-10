@@ -68,7 +68,6 @@ if (isset($_POST['submit'])) {
     <link href="assets/font-awesome/css/font-awesome.css" rel="stylesheet">
     <!-- Special version of Bootstrap that only affects content wrapped in .bootstrap-iso -->
     <link rel="stylesheet" href="https://formden.com/static/cdn/bootstrap-iso.css" />
-
     <!--Font Awesome (added because you use icons in your prepend/append)-->
     <link rel="stylesheet" href="https://formden.com/static/cdn/font-awesome/4.4.0/css/font-awesome.min.css" />
 
@@ -129,7 +128,7 @@ if (isset($_POST['submit'])) {
                             <a href="doctorprofile.php"><i class="fa fa-fw fa-user"></i> Profile</a>
                         </li>
                         <li>
-                            <a href="inbox.php?logout"><i class="fa fa-fw fa-"></i> Inbox</a>
+                            <a href="inbox.php"><i class="fa fa-fw fa-envelope"></i> Inbox</a>
                         </li>
                         <li class="divider"></li>
                         <li>
@@ -385,23 +384,30 @@ if (isset($_POST['submit'])) {
 
                             while ($row = mysqli_fetch_assoc($result)) {
                                 echo "<tbody>";
-                                echo "<tr>";
+                                echo "<tr class='filters'>";
                                 echo "<td>" . $row['doctorFirstName'] . " " . $row['doctorLastName'] . "</td>";
                                 echo "<td>" . $row['scheduleDate'] . "</td>";
                                 echo "<td>" . $row['scheduleDay'] . "</td>";
                                 echo "<td>" . $row['startTime'] . "</td>";
                                 echo "<td>" . $row['endTime'] . "</td>";
                                 echo "<td>" . $row['bookAvail'] . "</td>";
-                                echo "<td class='text-center'><a href='#' id='" . $row['scheduleId'] . "' class='delete'><span class='glyphicon glyphicon-trash' aria-hidden='true'></span></a></td>";
+                                echo "<td class='text-center'>
+        <button type='button' class='btn btn-danger'>
+            <a href='#' id='" . $row['scheduleId'] . "' class='delete'>Delete</a>
+        </button>
+       <button type='submit' class='btn btn-primary update-btn' data-schedule-id='" . $row['scheduleId'] . "' id='" . $row['scheduleId'] . "'>Update</button>
+    </td>";
+
                                 echo "</tr>";
                                 echo "</tbody>";
                             }
                             echo "</table>";
                             echo "<div class='panel panel-default'>";
                             echo "<div class='col-md-offset-3 pull-right'>";
-                            echo "<button class='btn btn-primary' type='submit' value='Submit' name='submit'>Update</button>";
+
                             echo "</div>";
                             echo "</div>";
+
                             ?>
 
                             <!-- panel content end -->
@@ -461,6 +467,26 @@ if (isset($_POST['submit'])) {
                     }
                     return false;
                 });
+                $(".update-btn").click(function() {
+                    var scheduleId = $(this).attr("id");
+                    $.ajax({
+                        type: "POST",
+                        url: "updatestatus.php",
+                        data: {
+                            updateSchedule: true,
+                            scheduleId: scheduleId
+                        },
+                        dataType: 'json',
+                        success: function() {
+                            // Reload the page after the update is successful
+                            location.reload();
+                        },
+                        error: function(xhr, status, error) {
+                           location.reload();
+                        }
+                    });
+                });
+
             });
         </script>
         <script type="text/javascript">

@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Dec 04, 2023 at 08:10 PM
+-- Generation Time: Dec 10, 2023 at 02:05 PM
 -- Server version: 10.4.28-MariaDB
 -- PHP Version: 8.0.28
 
@@ -33,16 +33,18 @@ CREATE TABLE `appointment` (
   `scheduleId` int(10) NOT NULL,
   `appSymptom` varchar(100) NOT NULL,
   `appComment` varchar(100) NOT NULL,
-  `status` varchar(10) NOT NULL DEFAULT 'process'
+  `status` varchar(10) NOT NULL DEFAULT 'process',
+  `pregnancyWeek` int(11) DEFAULT NULL,
+  `weight` decimal(5,2) DEFAULT NULL,
+  `bloodPressure` varchar(20) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
 
 --
 -- Dumping data for table `appointment`
 --
 
-INSERT INTO `appointment` (`appId`, `philhealthId`, `scheduleId`, `appSymptom`, `appComment`, `status`) VALUES
-(94, 1234, 66, 'Cough', 'With bloood', 'process'),
-(95, 123, 67, 'QJWE0QJ', 'HQIEHQIWE', 'process');
+INSERT INTO `appointment` (`appId`, `philhealthId`, `scheduleId`, `appSymptom`, `appComment`, `status`, `pregnancyWeek`, `weight`, `bloodPressure`) VALUES
+(96, 123, 67, 'quweoiq', 'qiwjeio', 'done', 2, 100.00, '100');
 
 -- --------------------------------------------------------
 
@@ -92,10 +94,10 @@ CREATE TABLE `doctormessages` (
 
 INSERT INTO `doctormessages` (`messageId`, `senderId`, `receiverId`, `messageContent`, `timestamp`) VALUES
 (31, 2467, 1234, 'qwe', '2023-12-04 18:00:18'),
-(32, 123, 123, 'qweqwe', '2023-12-04 18:11:55'),
 (34, 2467, 1234, 'qweqwe', '2023-12-04 19:00:32'),
 (38, 2467, 1234, 'nigger', '2023-12-04 19:08:57'),
-(39, 123, 123, 'nigger ako', '2023-12-04 19:10:06');
+(40, 123, 123, 'Hi po', '2023-12-07 04:39:25'),
+(43, 123, 123, 'qwe', '2023-12-10 08:25:04');
 
 -- --------------------------------------------------------
 
@@ -118,8 +120,8 @@ CREATE TABLE `doctorschedule` (
 --
 
 INSERT INTO `doctorschedule` (`scheduleId`, `scheduleDate`, `scheduleDay`, `startTime`, `endTime`, `bookAvail`, `doctorId`) VALUES
-(66, '2023-12-05', 'Tuesday', '01:05:00', '12:00:00', 'notavail', 2468),
-(67, '2023-12-05', 'Tuesday', '02:00:00', '05:00:00', 'notavail', 321);
+(67, '2023-12-10', 'Wednesday', '02:00:00', '05:00:00', 'available', 321),
+(68, '2023-12-10', 'Wednesday', '01:00:00', '05:00:00', 'notavail', 2468);
 
 -- --------------------------------------------------------
 
@@ -146,8 +148,9 @@ CREATE TABLE `patient` (
 --
 
 INSERT INTO `patient` (`philhealthId`, `password`, `patientFirstName`, `patientLastName`, `patientMaritialStatus`, `patientDOB`, `patientGender`, `patientAddress`, `patientPhone`, `patientEmail`, `appointmentType`) VALUES
-(123, '123', 'test', 'patient', '', '1996-01-17', 'female', '', '', 'test@gmail.com', 'prenatal'),
-(1234, '123', 'test2', 'patient2', '', '2000-03-16', 'male', '', '', 'test2@gmail.com', 'tb');
+(123, '123', 'test', 'patient', 'single', '1996-01-17', 'female', 'qwe', '123', 'test@gmail.com', 'prenatal'),
+(1234, '123', 'test2', 'patient2', '', '2000-03-16', 'male', '', '', 'test2@gmail.com', 'tb'),
+(123456, '123', 'Lance', 'Lester', '', '1997-12-18', 'male', '', '', 'lancelester@gmail.com', 'tb');
 
 -- --------------------------------------------------------
 
@@ -171,7 +174,33 @@ CREATE TABLE `prenatalprescription` (
 --
 
 INSERT INTO `prenatalprescription` (`prescriptionId`, `philhealthId`, `medication`, `icDoctor`, `dosage`, `comment`, `instructions`, `prescriptionDate`) VALUES
-(28, 123, 'NIGGER', 123, 'NIGGER', 'NIGGER', 'NIGGER', '2023-12-05');
+(35, 123, 'qwe', 123, 'qwe', 'qwe', 'qwe', '2023-12-10');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `tbappointment`
+--
+
+CREATE TABLE `tbappointment` (
+  `appId` int(11) NOT NULL,
+  `philhealthId` bigint(20) NOT NULL,
+  `scheduleId` int(11) NOT NULL,
+  `appSymptom` text NOT NULL,
+  `currentMedications` varchar(255) DEFAULT NULL,
+  `symptomDuration` varchar(50) DEFAULT NULL,
+  `allergies` varchar(255) DEFAULT NULL,
+  `status` varchar(50) DEFAULT 'process',
+  `additionalInfo` text DEFAULT NULL,
+  `createdAt` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `tbappointment`
+--
+
+INSERT INTO `tbappointment` (`appId`, `philhealthId`, `scheduleId`, `appSymptom`, `currentMedications`, `symptomDuration`, `allergies`, `status`, `additionalInfo`, `createdAt`) VALUES
+(6, 1234, 68, 'qwe', 'qwe', 'qwe', 'qwe', 'process', 'qwe', '2023-12-10 02:55:47');
 
 -- --------------------------------------------------------
 
@@ -216,11 +245,12 @@ CREATE TABLE `usermessages` (
 --
 
 INSERT INTO `usermessages` (`messageId`, `senderId`, `receiverId`, `messageContent`, `timestamp`) VALUES
-(15, 1234, 123456789, 'TEST', '2023-12-04 16:47:56'),
 (16, 1234, 2467, 'qweqwe', '2023-12-04 17:50:58'),
 (17, 123, 123, 'qweqwe', '2023-12-04 18:11:46'),
 (18, 1234, 2467, 'qwe', '2023-12-04 18:57:09'),
-(19, 123, 123, '123', '2023-12-04 18:57:38');
+(19, 123, 123, '123', '2023-12-04 18:57:38'),
+(20, 123, 123, 'qwe', '2023-12-07 04:41:40'),
+(23, 1234, 2467, 'hi doc', '2023-12-10 12:12:03');
 
 --
 -- Indexes for dumped tables
@@ -272,6 +302,14 @@ ALTER TABLE `prenatalprescription`
   ADD KEY `fk_icDoctor` (`icDoctor`);
 
 --
+-- Indexes for table `tbappointment`
+--
+ALTER TABLE `tbappointment`
+  ADD PRIMARY KEY (`appId`),
+  ADD KEY `scheduleId` (`scheduleId`),
+  ADD KEY `fk_tbappointment_patient` (`philhealthId`);
+
+--
 -- Indexes for table `tbprescription`
 --
 ALTER TABLE `tbprescription`
@@ -295,37 +333,43 @@ ALTER TABLE `usermessages`
 -- AUTO_INCREMENT for table `appointment`
 --
 ALTER TABLE `appointment`
-  MODIFY `appId` int(3) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=96;
+  MODIFY `appId` int(3) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=97;
 
 --
 -- AUTO_INCREMENT for table `doctormessages`
 --
 ALTER TABLE `doctormessages`
-  MODIFY `messageId` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=40;
+  MODIFY `messageId` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=44;
 
 --
 -- AUTO_INCREMENT for table `doctorschedule`
 --
 ALTER TABLE `doctorschedule`
-  MODIFY `scheduleId` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=68;
+  MODIFY `scheduleId` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=69;
 
 --
 -- AUTO_INCREMENT for table `prenatalprescription`
 --
 ALTER TABLE `prenatalprescription`
-  MODIFY `prescriptionId` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=33;
+  MODIFY `prescriptionId` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=36;
+
+--
+-- AUTO_INCREMENT for table `tbappointment`
+--
+ALTER TABLE `tbappointment`
+  MODIFY `appId` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT for table `tbprescription`
 --
 ALTER TABLE `tbprescription`
-  MODIFY `prescriptionId` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `prescriptionId` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT for table `usermessages`
 --
 ALTER TABLE `usermessages`
-  MODIFY `messageId` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=20;
+  MODIFY `messageId` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=24;
 
 --
 -- Constraints for dumped tables
@@ -357,6 +401,13 @@ ALTER TABLE `doctorschedule`
 ALTER TABLE `prenatalprescription`
   ADD CONSTRAINT `fk_icDoctor` FOREIGN KEY (`icDoctor`) REFERENCES `doctor` (`icDoctor`),
   ADD CONSTRAINT `prenatalprescription_ibfk_1` FOREIGN KEY (`philhealthId`) REFERENCES `patient` (`philhealthId`);
+
+--
+-- Constraints for table `tbappointment`
+--
+ALTER TABLE `tbappointment`
+  ADD CONSTRAINT `fk_tbappointment_patient` FOREIGN KEY (`philhealthId`) REFERENCES `patient` (`philhealthId`),
+  ADD CONSTRAINT `tbappointment_ibfk_1` FOREIGN KEY (`scheduleId`) REFERENCES `doctorschedule` (`scheduleId`);
 
 --
 -- Constraints for table `tbprescription`

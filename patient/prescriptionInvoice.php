@@ -169,7 +169,7 @@ $userRow = mysqli_fetch_array($res1, MYSQLI_ASSOC);
                     <br>
                     <div>
                         <img src="assets/img/signature.png" alt="" srcset="" width="50px"><br>
-                        <?php echo $prescriptionRow['doctorFirstName'] . ' ' . $prescriptionRow['doctorLastName']; ?><br>
+                        <?php echo 'Dr. ' . $prescriptionRow['doctorFirstName'] . ' ' . $prescriptionRow['doctorLastName']; ?><br>
                         <strong>Date of Signature:</strong> <?php echo date("d-m-Y"); ?>
                     </div>
                 </td>

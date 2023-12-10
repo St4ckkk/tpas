@@ -86,38 +86,18 @@ if (!empty($prescriptionQuery)) {
         margin: 0;
     }
 
-    .navbar {
-        background-color: #fff;
-        border: 1px solid #ddd;
-        border-radius: 0;
-        margin-bottom: 0;
-    }
-
-    .navbar-brand img {
-        margin-top: -7px;
-    }
-
-    .navbar-toggle {
-        background-color: #fff;
-    }
-
-    .navbar-nav>li>a {
-        padding-top: 15px;
-        padding-bottom: 15px;
-    }
-
-    .navbar-default .navbar-nav>li>a:hover,
-    .navbar-default .navbar-nav>li>a:focus {
-        background-color: #ddd;
-    }
 
     .container {
-        background-color: #fff;
+        background-color: rgba(0, 0, 0, 0.1);
+        /* Adjust the alpha (last value) for transparency */
         padding: 20px;
         border: 1px solid #ddd;
         border-radius: 4px;
         margin-top: 20px;
+        color: #fff;
+        /* Set text color to white or your preferred color */
     }
+
 
     .message-container {
         margin-bottom: 20px;
@@ -130,6 +110,7 @@ if (!empty($prescriptionQuery)) {
         border: 1px solid #ddd;
         border-radius: 4px;
         box-shadow: 0 1px 1px rgba(0, 0, 0, 0.05);
+        color: #000;
     }
 
     .doctor-message {
@@ -246,7 +227,7 @@ if (!empty($prescriptionQuery)) {
                             </div>
                         </div>
                         <div class="message-container">
-                            <div class="message">   
+                            <div class="message">
                                 <!-- Add a form for sending messages -->
                                 <form action="sendmessage.php" method="post">
                                     <input type="hidden" name="doctorId" value="<?php echo $prescriptionRow['icDoctor']; ?>">
@@ -258,11 +239,11 @@ if (!empty($prescriptionQuery)) {
                         <?php
                         $messageQuery = "SELECT * FROM doctormessages WHERE receiverId=" . $userRow['philhealthId'] . " AND senderId=" . $prescriptionRow['icDoctor'];
                         $messageResult = mysqli_query($con, $messageQuery);
-                        
+
                         if ($messageResult) {
                             if (mysqli_num_rows($messageResult) > 0) {
                                 while ($messageRow = mysqli_fetch_array($messageResult, MYSQLI_ASSOC)) {
-                                    $messageSender ='Dr. ' . $prescriptionRow['doctorLastName'];
+                                    $messageSender = 'Dr. ' . $prescriptionRow['doctorLastName'];
                         ?>
                                     <div class="message-container user-message">
                                         <div class="message">

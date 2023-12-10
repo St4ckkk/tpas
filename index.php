@@ -137,6 +137,10 @@ if (isset($_POST['signup'])) {
     .schedule-container h2, p {
         color: #fff;
     }
+    .input-group input, i{
+        color: #fff;
+    }
+    
 </style>
 
 <body>
@@ -365,7 +369,7 @@ if (isset($_POST['signup'])) {
         <div class="container">
             <div class="row">
                 <div class="col-md-6  col-md-offset-1 schedule-container">
-                    <h2>Make appointment today!</h2>
+                    <h2>Make an appointment today!</h2>
                     <p>This is Doctor's Schedule. Please <span class="label label-danger">login</span> to make an
                         appointment. </p>
                     <div class="input-group" style="margin-bottom:10px;">

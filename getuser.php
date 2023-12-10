@@ -20,10 +20,20 @@ if (!$res) {
 
 <head>
 
-    <!-- <link href="assets/css/bootstrap.min.css" rel="stylesheet"> -->
+    
 
 </head>
-
+<style> 
+    .table-hover tbody tr {
+        color: #fff;
+    }
+    .table-hover thead {
+        color: #fff;
+    }
+    .table-hover tbody tr:hover{
+        background-color: #000;
+    }
+</style>
 <body>
     <?php
 

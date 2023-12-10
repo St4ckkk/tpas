@@ -87,7 +87,7 @@ if (isset($_POST['submit'])) {
             <!-- Sidebar Menu Items - These collapse to the responsive navigation menu on small screens -->
             <div class="collapse navbar-collapse navbar-ex1-collapse">
                 <ul class="nav navbar-nav side-nav">
-                    <li>
+                    <li class="active">
                         <a href="doctordashboard.php"><i class="fa fa-fw fa-dashboard"></i> Dashboard</a>
                     </li>
                     <?php
@@ -114,7 +114,7 @@ if (isset($_POST['submit'])) {
                     if (in_array($userRow['doctorRole'], $allowedRoles)) {
                         // Display the following options for specific roles
                     ?>
-                        <li class="active">
+                        <li class="">
                             <a href="addschedule.php"><i class="fa fa-fw fa-table"></i> Doctor Schedule</a>
                         </li>
                         <li>

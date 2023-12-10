@@ -125,7 +125,7 @@ if ($res) {
     }
 </style>
 
-<body>
+
 
     <div id="wrapper">
         <!-- Navigation -->

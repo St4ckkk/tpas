@@ -19,13 +19,10 @@
         $dosage = mysqli_real_escape_string($con, $_POST['dosage']);
         $comment = mysqli_real_escape_string($con, $_POST['comment']);
         $instructions = mysqli_real_escape_string($con, $_POST['instructions']);
-        $pregnancyWeek = mysqli_real_escape_string($con, $_POST['pregnancyWeek']);
-        $weight = mysqli_real_escape_string($con, $_POST['weight']);
-        $bloodPressure = mysqli_real_escape_string($con, $_POST['bloodPressure']);
 
         // Insert data into prenatalprescription table
-        $insertPrescriptionQuery = "INSERT INTO prenatalprescription (philhealthId, medication, icDoctor, dosage, comment, instructions, pregnancyWeek, weight, bloodPressure)
-                                VALUES ('$philhealthId', '$medication', '$icDoctor', '$dosage', '$comment', '$instructions', '$pregnancyWeek', '$weight', '$bloodPressure')";
+        $insertPrescriptionQuery = "INSERT INTO prenatalprescription (philhealthId, medication, icDoctor, dosage, comment, instructions)
+                                VALUES ('$philhealthId', '$medication', '$icDoctor', '$dosage', '$comment', '$instructions')";
         $result = mysqli_query($con, $insertPrescriptionQuery);
 
         if ($result) {

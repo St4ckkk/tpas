@@ -54,7 +54,8 @@ $prescriptionRow = mysqli_fetch_array($res, MYSQLI_ASSOC);
 
 <head>
     <meta charset="utf-8">
-    <title>Prescription Invoice - Your Clinic Name</title>
+    <title>Prescription Invoice - ScheduCare
+    </title>
     <link rel="stylesheet" type="text/css" href="assets/css/invoice.css">
 </head>
 
@@ -152,7 +153,7 @@ $prescriptionRow = mysqli_fetch_array($res, MYSQLI_ASSOC);
                     <br>
                     <div>
                         <img src="assets/img/signature.png" alt="" srcset="" width="50px"><br>
-                       <?php echo $prescriptionRow['doctorFirstName'] . ' ' . $prescriptionRow['doctorLastName']; ?><br>
+                       <?php echo 'Dr. ' . $prescriptionRow['doctorFirstName'] . ' ' . $prescriptionRow['doctorLastName']; ?><br>
                         <strong>Date of Signature:</strong> <?php echo date("d-m-Y"); ?>
                     </div>
                 </td>

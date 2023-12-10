@@ -80,13 +80,10 @@ $userRow = mysqli_fetch_array($res, MYSQLI_ASSOC);
                     </a>
                     <ul class="dropdown-menu">
                         <li>
-                            <a href="#"><i class="fa fa-fw fa-user"></i> Profile</a>
+                            <a href="doctorprofile.php"><i class="fa fa-fw fa-user"></i> Profile</a>
                         </li>
                         <li>
-                            <a href="#"><i class="fa fa-fw fa-envelope"></i> Inbox</a>
-                        </li>
-                        <li>
-                            <a href="#"><i class="fa fa-fw fa-gear"></i> Settings</a>
+                            <a href="inbox.php"><i class="fa fa-fw fa-envelope"></i> Inbox</a>
                         </li>
                         <li class="divider"></li>
                         <li>
@@ -154,7 +151,7 @@ $userRow = mysqli_fetch_array($res, MYSQLI_ASSOC);
                         </h2>
                         <ol class="breadcrumb">
                             <li class="active">
-                                <i class="fa fa-calendar"></i>Prenatal Patient List
+                                <i class="fa fa-calendar"></i> Prenatal Patient List
                             </li>
                         </ol>
                     </div>

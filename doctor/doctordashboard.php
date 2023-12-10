@@ -204,20 +204,19 @@ $userRow = mysqli_fetch_array($res, MYSQLI_ASSOC);
                             $doctorRole = $userRow['doctorRole'];
 
                             if ($doctorRole == 'superAdmin') {
-                                // Display all appointments including TB appointments
-                                $sqlQuery = "SELECT a.*, b.*, c.*, 'regular' AS appointmentType
-                FROM patient a
-                JOIN appointment b ON a.philhealthId = b.philhealthId
-                JOIN doctorschedule c ON b.scheduleId = c.scheduleId
-                ORDER BY b.appId DESC";
-                            } else {
-                                // Display only TB appointments
                                 $sqlQuery = "SELECT a.*, b.*, c.*, NULL AS pregnancyWeek, NULL AS weight, NULL AS bloodPressure
-                FROM patient a
-                JOIN tbappointment b ON a.philhealthId = b.philhealthId
-                JOIN doctorschedule c ON b.scheduleId = c.scheduleId
-                ORDER BY b.appId DESC";
-                            }if ($doctorRole == 'Pulmonologist') {
+                 FROM patient a
+                 JOIN appointment b ON a.philhealthId = b.philhealthId
+                 JOIN doctorschedule c ON b.scheduleId = c.scheduleId
+                 WHERE a.appointmentType = 'tb'
+                 UNION
+                 SELECT a.*, b.*, c.*
+                 FROM patient a
+                 JOIN tbappointment b ON a.philhealthId = b.philhealthId
+                 JOIN doctorschedule c ON b.scheduleId = c.scheduleId
+                 WHERE a.appointmentType = 'tb'
+                 ORDER BY appId DESC";
+                            }else if ($doctorRole == 'Pulmonologist') {
                                 $sqlQuery = "SELECT a.*, b.*, c.*
                                 FROM patient a
                                 JOIN tbappointment b ON a.philhealthId = b.philhealthId

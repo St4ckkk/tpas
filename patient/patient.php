@@ -36,15 +36,30 @@ $userRow = mysqli_fetch_array($res, MYSQLI_ASSOC);
 </head>
 <style>
 	.promo-1 {
-		background: url("assets/img/cd-cover2.jpg") center no-repeat;
-		height: 94vh;
+		position: relative;
+		height: 95vh;
+		overflow: hidden;
+	}
+
+	.promo-1::before {
+		content: "";
+		position: absolute;
+		top: 0;
+		left: 0;
+		width: 100%;
+		height: 100%;
+		background: rgba(0, 0, 0, 0.2);
+	}
+
+	.promo-1 {
+		background: url("assets/img/Female-Doctor.png") center no-repeat;
 		-webkit-background-size: cover;
 		-moz-background-size: cover;
 		-o-background-size: cover;
 		background-size: cover;
 		overflow: hidden;
-
 	}
+
 
 	.promo-1 .video-wrapper {
 		position: relative;
@@ -55,6 +70,10 @@ $userRow = mysqli_fetch_array($res, MYSQLI_ASSOC);
 		background-color: #fff;
 		padding: 16px;
 		box-shadow: 0 12px 15px 0 rgba(0, 0, 0, 0.24);
+	}
+
+	h2 {
+		color: #fff;
 	}
 </style>
 
@@ -130,7 +149,8 @@ $userRow = mysqli_fetch_array($res, MYSQLI_ASSOC);
 					}
 					?>
 					<!-- notification end -->
-					<h2>Hi! <?php echo $userRow['patientFirstName']; ?> <?php echo $userRow['patientLastName']; ?>. Make appointment today!</h2>
+
+					<h2 style="color: white;">Hi! <?php echo $userRow['patientFirstName']; ?> <?php echo $userRow['patientLastName']; ?>. Make appointment today!</h2>
 					<div class="input-group" style="margin-bottom:10px;">
 						<div class="input-group-addon">
 							<i class="fa fa-calendar">
