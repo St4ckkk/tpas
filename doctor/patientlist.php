@@ -113,7 +113,10 @@ $userRow = mysqli_fetch_array($res, MYSQLI_ASSOC);
                             <a href="doctor.php"><i class="fa fa-fw fa-user"></i> Doctor</a>
                         </li>
                         <li class="active">
-                            <a href="patientlist.php"><i class="fa fa-fw fa-user"></i> Patient List</a>
+                            <a href="patientlist.php"><i class="fa fa-fw fa-user"></i>Prenatal Patient List</a>
+                        </li>
+                        <li>
+                            <a href="tbpatientlist.php"><i class="fa fa-fw fa-user"></i>TB Patient List</a>
                         </li>
                     <?php
                     }
@@ -147,11 +150,11 @@ $userRow = mysqli_fetch_array($res, MYSQLI_ASSOC);
                 <div class="row">
                     <div class="col-lg-12">
                         <h2 class="page-header">
-                            Patient List
+                            Prenatal Patient List
                         </h2>
                         <ol class="breadcrumb">
                             <li class="active">
-                                <i class="fa fa-calendar"></i> Patient List
+                                <i class="fa fa-calendar"></i>Prenatal Patient List
                             </li>
                         </ol>
                     </div>
@@ -190,6 +193,7 @@ $userRow = mysqli_fetch_array($res, MYSQLI_ASSOC);
                                     <th><input type="text" class="form-control" placeholder="Pregnancy Week" disabled></th>
                                     <th><input type="text" class="form-control" placeholder="Weight" disabled></th>
                                     <th><input type="text" class="form-control" placeholder="Blood Pressure" disabled></th>
+                                    <th>Actions</th>
                                     <th>Actions</th>
                                 </tr>
                             </thead>

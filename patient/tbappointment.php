@@ -36,7 +36,7 @@ if (isset($_POST['appointment'])) {
 
     if (!empty($symptoms)) {
         $avail = "notavail";
-        $query = "INSERT INTO tbappointment (philhealthId, scheduleId, symptoms, currentMedications, symptomDuration, allergies, additionalInfo)
+        $query = "INSERT INTO tbappointment (philhealthId, scheduleId, appSymptom, currentMedications, symptomDuration, allergies, additionalInfo)
                   VALUES ('$philhealthId', '$scheduleid', '$symptoms', '$currentMedications', '$symptomDuration', '$allergies', '$additionalInfo')";
 
         // Update table appointment schedule

@@ -13,7 +13,7 @@ $userRow3 = mysqli_fetch_array($res3, MYSQLI_ASSOC);
 $res = mysqli_query($con, "SELECT * FROM patient WHERE philHealthId=" . $_GET['philhealthId']);
 $userRow = mysqli_fetch_array($res, MYSQLI_ASSOC);
 
-$res1 = mysqli_query($con, "SELECT * FROM appointment WHERE philHealthId=" . $_GET['philhealthId']);
+$res1 = mysqli_query($con, "SELECT * FROM tbappointment WHERE philHealthId=" . $_GET['philhealthId']);
 $userRow1 = mysqli_fetch_array($res1, MYSQLI_ASSOC);
 
 if (isset($_POST['prescription'])) {
@@ -102,7 +102,11 @@ if (isset($_POST['prescription'])) {
                                             Contact Number: <?php echo $userRow['patientPhone'] ?><br>
                                             Address: <?php echo $userRow['patientAddress'] ?><br>
                                             Symptoms/Concerns: <?php echo $userRow1['appSymptom'] ?><br>
-                                            Comments: <?php echo $userRow1['appComment'] ?>
+                                            Current Medication: <?php echo $userRow1['currentMedications'] ?><br>
+                                            Allergies: <?php echo $userRow1['allergies'] ?> <br>
+                                            Symptoms Duration: <?php echo $userRow1['symptomDuration'] ?><br>
+                                            Additional Info: <?php echo $userRow1['additionalInfo'] ?>
+
                                         </div>
                                     </div>
 

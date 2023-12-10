@@ -156,7 +156,10 @@ if (isset($_POST['submit'])) {
                             <a href="doctor.php"><i class="fa fa-fw fa-user"></i> Doctor</a>
                         </li>
                         <li>
-                            <a href="patientlist.php"><i class="fa fa-fw fa-user"></i> Patient List</a>
+                            <a href="patientlist.php"><i class="fa fa-fw fa-user"></i>Prenatal Patient List</a>
+                        </li>
+                        <li>
+                            <a href="tbpatientlist.php"><i class="fa fa-fw fa-user"></i>TB Patient List</a>
                         </li>
                     <?php
                     }

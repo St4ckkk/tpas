@@ -126,7 +126,10 @@ $userRow = mysqli_fetch_array($res, MYSQLI_ASSOC);
                         <a href="adddoctor.php"><i class="fa fa-fw fa-user"></i> Doctor</a>
                     </li>
                     <li>
-                        <a href="patientlist.php"><i class="fa fa-fw fa-user"></i> Patient List</a>
+                        <a href="patientlist.php"><i class="fa fa-fw fa-user"></i>Prenatal Patient List</a>
+                    </li>
+                    <li>
+                        <a href="tbpatientlist.php"><i class="fa fa-fw fa-user"></i>TB Patient List</a>
                     </li>
                 </ul>
             </div>
@@ -299,60 +302,60 @@ $userRow = mysqli_fetch_array($res, MYSQLI_ASSOC);
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.4.1/js/bootstrap-datepicker.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.4.1/css/bootstrap-datepicker3.css" />
     <script type="text/javascript">
-            $(function() {
-                $(".delete").click(function() {
-                    var element = $(this);
-                    var id = element.attr("id");
-                    var info = 'id=' + id;
-                    if (confirm("Are you sure you want to delete this?")) {
-                        $.ajax({
-                            type: "POST",
-                            url: "deletedoctor.php",
-                            data: info,
-                            success: function() {}
-                        });
-                        $(this).parent().parent().fadeOut(300, function() {
-                            $(this).remove();
-                        });
-                    }
-                    return false;
-                });
-            });
-        </script>
-    <script>
-    $(document).ready(function() {
-        $("#addDoctorBtn").click(function() {
-            // Gather form data
-            var formData = {
-                icDoctor: $("#icDoctor").val(),
-                doctorId: $("#doctorId").val(),
-                password: $("#password").val(),
-                doctorFirstName: $("#doctorFirstName").val(),
-                doctorLastName: $("#doctorLastName").val(),
-                doctorAddress: $("#doctorAddress").val(),
-                doctorPhone: $("#doctorPhone").val(),
-                doctorEmail: $("#doctorEmail").val(),
-                doctorDOB: $("#doctorDOB").val(),
-                doctorRole: $("#doctorRole").val()
-            };
-
-            // Send AJAX request
-            $.ajax({
-                type: "POST",
-                url: "adddoctor.php",
-                data: formData,
-                success: function(response) {
-                    // Handle the response here, for example, show an alert
-                    if (response === 'success') {
-                        alert('Doctor added successfully.');
-                    } else {
-                        alert('Adding doctor failed. Please try again.');
-                    }
+        $(function() {
+            $(".delete").click(function() {
+                var element = $(this);
+                var id = element.attr("id");
+                var info = 'id=' + id;
+                if (confirm("Are you sure you want to delete this?")) {
+                    $.ajax({
+                        type: "POST",
+                        url: "deletedoctor.php",
+                        data: info,
+                        success: function() {}
+                    });
+                    $(this).parent().parent().fadeOut(300, function() {
+                        $(this).remove();
+                    });
                 }
+                return false;
             });
         });
-    });
-</script>
+    </script>
+    <script>
+        $(document).ready(function() {
+            $("#addDoctorBtn").click(function() {
+                // Gather form data
+                var formData = {
+                    icDoctor: $("#icDoctor").val(),
+                    doctorId: $("#doctorId").val(),
+                    password: $("#password").val(),
+                    doctorFirstName: $("#doctorFirstName").val(),
+                    doctorLastName: $("#doctorLastName").val(),
+                    doctorAddress: $("#doctorAddress").val(),
+                    doctorPhone: $("#doctorPhone").val(),
+                    doctorEmail: $("#doctorEmail").val(),
+                    doctorDOB: $("#doctorDOB").val(),
+                    doctorRole: $("#doctorRole").val()
+                };
+
+                // Send AJAX request
+                $.ajax({
+                    type: "POST",
+                    url: "adddoctor.php",
+                    data: formData,
+                    success: function(response) {
+                        // Handle the response here, for example, show an alert
+                        if (response === 'success') {
+                            alert('Doctor added successfully.');
+                        } else {
+                            alert('Adding doctor failed. Please try again.');
+                        }
+                    }
+                });
+            });
+        });
+    </script>
 
     <script>
         $(document).ready(function() {

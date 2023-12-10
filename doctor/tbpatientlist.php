@@ -93,10 +93,13 @@ $userRow = mysqli_fetch_array($res, MYSQLI_ASSOC);
                         <a href="addschedule.php"><i class="fa fa-fw fa-table"></i> Doctor Schedule</a>
                     </li>
                     <li>
-                        <a href="adddoctor.php"><i class="fa fa-fw fa-user"></i> Doctor</a>
+                        <a href="doctor.php"><i class="fa fa-fw fa-user"></i> Doctor</a>
+                    </li>
+                    <li>
+                        <a href="patientlist.php"><i class="fa fa-fw fa-user"></i>Prenatal Patient List</a>
                     </li>
                     <li class="active">
-                        <a href="patientlist.php"><i class="fa fa-fw fa-edit"></i> Patient List</a>
+                        <a href="tbpatientlist.php"><i class="fa fa-fw fa-user"></i>TB Patient List</a>
                     </li>
                 </ul>
             </div>
@@ -151,13 +154,15 @@ $userRow = mysqli_fetch_array($res, MYSQLI_ASSOC);
                                     <th><input type="text" class="form-control" placeholder="Address" disabled></th>
                                     <th><input type="text" class="form-control" placeholder="Symptoms" disabled></th>
                                     <th><input type="text" class="form-control" placeholder="Appointment Type" disabled></th>
+                                    <th>Actions</th>
+                                    <th>Actions</th>
                                 </tr>
                             </thead>
 
                             <?php
                             $result = mysqli_query($con, "SELECT a.*, d.appSymptom
                             FROM patient a
-                            JOIN appointment d ON a.philhealthId = d.philhealthId
+                            JOIN tbappointment d ON a.philhealthId = d.philhealthId
                             WHERE a.appointmentType = 'tb'
                             ORDER BY d.appId DESC");
 
@@ -187,7 +192,9 @@ $userRow = mysqli_fetch_array($res, MYSQLI_ASSOC);
                                 } else if ($patientRow['appointmentType'] == 'tb') {
                                     echo "<td class=''><a href='tbPrescription.php?philhealthId=" . $patientRow['philhealthId'] . "' class='prescription-btn'>Give Prescription</a></td>";
                                 }
-                                echo "<form method='POST'>";;
+                                echo "<form method='POST'>";
+                                echo "<td class='text-center'><a href='#' id='" . $patientRow['philhealthId'] . "' class='delete'>Delete</a>
+                            </td>";
                             }
                             echo "</tr>";
                             echo "</tbody>";

@@ -107,7 +107,10 @@ $userRow = mysqli_fetch_array($res, MYSQLI_ASSOC);
                             <a href="doctor.php"><i class="fa fa-fw fa-user"></i> Doctor</a>
                         </li>
                         <li>
-                            <a href="patientlist.php"><i class="fa fa-fw fa-user"></i> Patient List</a>
+                            <a href="patientlist.php"><i class="fa fa-fw fa-user"></i>Prenatal Patient List</a>
+                        </li>
+                        <li>
+                            <a href="tbpatientlist.php"><i class="fa fa-fw fa-user"></i>TB Patient List</a>
                         </li>
                     <?php
                     }
@@ -123,7 +126,18 @@ $userRow = mysqli_fetch_array($res, MYSQLI_ASSOC);
                             <a href="addschedule.php"><i class="fa fa-fw fa-table"></i> Doctor Schedule</a>
                         </li>
                         <li>
-                            <a href="patientlist.php"><i class="fa fa-fw fa-user"></i> Patient List</a>
+                            <?php
+                            // Check if the doctor role is Pulmonologist
+                            if ($userRow['doctorRole'] == 'Pulmonologist') {
+                            ?>
+                                <a href="tbpatientlist.php"><i class="fa fa-fw fa-user"></i> TB Patient List</a>
+                            <?php
+                            } elseif ($userRow['doctorRole'] == 'Obstetrician') {
+                            ?>
+                                <a href="patientlist.php"><i class="fa fa-fw fa-user"></i> Patient List</a>
+                            <?php
+                            }
+                            ?>
                         </li>
                     <?php
                     }
@@ -189,27 +203,34 @@ $userRow = mysqli_fetch_array($res, MYSQLI_ASSOC);
                             // Check the user's role
                             $doctorRole = $userRow['doctorRole'];
 
-                            // Modify the SQL query based on the doctor's role
                             if ($doctorRole == 'superAdmin') {
+                                // Display all appointments including TB appointments
+                                $sqlQuery = "SELECT a.*, b.*, c.*, 'regular' AS appointmentType
+                FROM patient a
+                JOIN appointment b ON a.philhealthId = b.philhealthId
+                JOIN doctorschedule c ON b.scheduleId = c.scheduleId
+                ORDER BY b.appId DESC";
+                            } else {
+                                // Display only TB appointments
+                                $sqlQuery = "SELECT a.*, b.*, c.*, NULL AS pregnancyWeek, NULL AS weight, NULL AS bloodPressure
+                FROM patient a
+                JOIN tbappointment b ON a.philhealthId = b.philhealthId
+                JOIN doctorschedule c ON b.scheduleId = c.scheduleId
+                ORDER BY b.appId DESC";
+                            }if ($doctorRole == 'Pulmonologist') {
                                 $sqlQuery = "SELECT a.*, b.*, c.*
-                 FROM patient a
-                 JOIN appointment b ON a.philhealthId = b.philhealthId
-                 JOIN doctorschedule c ON b.scheduleId = c.scheduleId
-                 ORDER BY appId DESC";
-                            } elseif ($doctorRole == 'Pulmonologist') {
-                                $sqlQuery = "SELECT a.*, b.*, c.*
-                 FROM patient a
-                 JOIN appointment b ON a.philhealthId = b.philhealthId
-                 JOIN doctorschedule c ON b.scheduleId = c.scheduleId
-                 WHERE a.appointmentType = 'tb'
-                 ORDER BY appId DESC";
+                                FROM patient a
+                                JOIN tbappointment b ON a.philhealthId = b.philhealthId
+                                JOIN doctorschedule c ON b.scheduleId = c.scheduleId
+                                WHERE a.appointmentType = 'tb'
+                                ORDER BY appId DESC";
                             } elseif ($doctorRole == 'Obstetrician') {
                                 $sqlQuery = "SELECT a.*, b.*, c.*
-                 FROM patient a
-                 JOIN appointment b ON a.philhealthId = b.philhealthId
-                 JOIN doctorschedule c ON b.scheduleId = c.scheduleId
-                 WHERE a.appointmentType = 'prenatal'
-                 ORDER BY appId DESC";
+                                FROM patient a
+                                JOIN appointment b ON a.philhealthId = b.philhealthId
+                                JOIN doctorschedule c ON b.scheduleId = c.scheduleId
+                                WHERE a.appointmentType = 'prenatal'
+                                ORDER BY appId DESC";
                             }
 
                             $res = mysqli_query($con, $sqlQuery);

@@ -261,9 +261,9 @@ if ($res) {
                                 </div>
                                 <?php
                                 $messageQuery = "SELECT m.*, p.philhealthId AS senderPhilhealthId, p.patientLastName 
-                FROM usermessages m
-                JOIN patient p ON m.senderId = p.philhealthId
-                WHERE m.receiverId = " . $userRow['icDoctor'] . " AND m.senderId = " . $userRow['icDoctor'];
+                                FROM usermessages m
+                                JOIN patient p ON m.senderId = p.philhealthId
+                                WHERE m.receiverId = " . $userRow['icDoctor'] . " AND m.senderId = " . $userRow['icDoctor'];
 
                                 $messageResult = mysqli_query($con, $messageQuery);
 
@@ -291,8 +291,13 @@ if ($res) {
                                     } else {
                                         echo '<div class="message-container user-message"><p>No messages.</p></div>';
                                     }
-                                } else {
+                                }
+                                $messageResult = mysqli_query($con, $messageQuery);
+
+                                if (!$messageResult) {
                                     echo "Error in SQL query: " . mysqli_error($con);
+                                } else {
+                                    // Continue processing the results...
                                 }
                                 ?>
 
