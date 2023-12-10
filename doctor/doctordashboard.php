@@ -204,19 +204,22 @@ $userRow = mysqli_fetch_array($res, MYSQLI_ASSOC);
                             $doctorRole = $userRow['doctorRole'];
 
                             if ($doctorRole == 'superAdmin') {
-                                $sqlQuery = "SELECT a.*, b.*, c.*, NULL AS pregnancyWeek, NULL AS weight, NULL AS bloodPressure
-                 FROM patient a
-                 JOIN appointment b ON a.philhealthId = b.philhealthId
-                 JOIN doctorschedule c ON b.scheduleId = c.scheduleId
-                 WHERE a.appointmentType = 'tb'
-                 UNION
-                 SELECT a.*, b.*, c.*
-                 FROM patient a
-                 JOIN tbappointment b ON a.philhealthId = b.philhealthId
-                 JOIN doctorschedule c ON b.scheduleId = c.scheduleId
-                 WHERE a.appointmentType = 'tb'
-                 ORDER BY appId DESC";
-                            }else if ($doctorRole == 'Pulmonologist') {
+                                $sqlQuery = "SELECT 
+    a.*, 
+    b.*, 
+    c.philhealthId AS tbPhilhealthId,
+    c.status AS tbStatus,
+    d.scheduleDay, 
+    d.scheduleDate, 
+    d.startTime, 
+    d.endTime
+FROM patient a
+LEFT JOIN appointment b ON a.philhealthId = b.philhealthId
+LEFT JOIN tbappointment c ON a.philhealthId = c.philhealthId
+LEFT JOIN doctorschedule d ON COALESCE(b.scheduleId, c.scheduleId) = d.scheduleId
+WHERE (b.appId IS NOT NULL OR c.appId IS NOT NULL)
+ORDER BY COALESCE(b.appId, c.appId) DESC";
+                            } else if ($doctorRole == 'Pulmonologist') {
                                 $sqlQuery = "SELECT a.*, b.*, c.*
                                 FROM patient a
                                 JOIN tbappointment b ON a.philhealthId = b.philhealthId
