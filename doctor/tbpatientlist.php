@@ -92,12 +92,6 @@ $userRow = mysqli_fetch_array($res, MYSQLI_ASSOC);
                     <li>
                         <a href="addschedule.php"><i class="fa fa-fw fa-table"></i> Doctor Schedule</a>
                     </li>
-                    <li>
-                        <a href="doctor.php"><i class="fa fa-fw fa-user"></i> Doctor</a>
-                    </li>
-                    <li>
-                        <a href="patientlist.php"><i class="fa fa-fw fa-user"></i>Prenatal Patient List</a>
-                    </li>
                     <li class="active">
                         <a href="tbpatientlist.php"><i class="fa fa-fw fa-user"></i>TB Patient List</a>
                     </li>

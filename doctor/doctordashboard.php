@@ -293,12 +293,27 @@ ORDER BY COALESCE(b.appId, c.appId) DESC";
                 <script type="text/javascript">
                     function chkit(uid, chk) {
                         chk = (chk == true ? "1" : "0");
-                        var url = "checkdb.php?userid=" + uid + "&chkYesNo=" + chk;
+                        var doctorRole = "<?php echo $userRow['doctorRole']; ?>";
+                        var url = "";
+
+                        // Set the URL based on the doctorRole
+                        if (doctorRole === 'superAdmin') {
+                            url = "checkdb.php";
+                        } else if (doctorRole === 'Pulmonologist') {
+                            url = "checkdb2.php";
+                        } else if (doctorRole === 'Obstetrician') {
+                            url = "checkdb.php";
+                        }
+
+                        // Append the query parameters
+                        url += "?userid=" + uid + "&chkYesNo=" + chk;
+
                         if (window.XMLHttpRequest) {
                             req = new XMLHttpRequest();
                         } else if (window.ActiveXObject) {
                             req = new ActiveXObject("Microsoft.XMLHTTP");
                         }
+
                         // Use get instead of post.
                         req.open("GET", url, true);
                         req.send(null);
