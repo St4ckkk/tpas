@@ -131,7 +131,7 @@ if (!$userRow) {
 		echo "<td>" . $userRow['scheduleDate'] . "</td>";
 		echo "<td>" . $userRow['startTime'] . "</td>";
 		echo "<td>" . $userRow['endTime'] . "</td>";
-		echo "<td><a href='tbinvoice.php?appid=" . $userRow['appId'] . "' target='_blank'><span class='glyphicon glyphicon-print' aria-hidden='true'></span></a> </td>";
+		echo "<td><a href='invoice2.php?appid=" . $userRow['appId'] . "' target='_blank'><span class='glyphicon glyphicon-print' aria-hidden='true'></span></a> </td>";
 	}
 
 	echo "</tr>";
