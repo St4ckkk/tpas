@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Dec 10, 2023 at 02:05 PM
+-- Generation Time: Dec 10, 2023 at 09:27 PM
 -- Server version: 10.4.28-MariaDB
 -- PHP Version: 8.0.28
 
@@ -34,17 +34,10 @@ CREATE TABLE `appointment` (
   `appSymptom` varchar(100) NOT NULL,
   `appComment` varchar(100) NOT NULL,
   `status` varchar(10) NOT NULL DEFAULT 'process',
-  `pregnancyWeek` int(11) DEFAULT NULL,
-  `weight` decimal(5,2) DEFAULT NULL,
+  `pregnancyWeek` varchar(255) DEFAULT NULL,
+  `weight` varchar(255) DEFAULT NULL,
   `bloodPressure` varchar(20) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
-
---
--- Dumping data for table `appointment`
---
-
-INSERT INTO `appointment` (`appId`, `philhealthId`, `scheduleId`, `appSymptom`, `appComment`, `status`, `pregnancyWeek`, `weight`, `bloodPressure`) VALUES
-(96, 123, 67, 'quweoiq', 'qiwjeio', 'done', 2, 100.00, '100');
 
 -- --------------------------------------------------------
 
@@ -93,11 +86,8 @@ CREATE TABLE `doctormessages` (
 --
 
 INSERT INTO `doctormessages` (`messageId`, `senderId`, `receiverId`, `messageContent`, `timestamp`) VALUES
-(31, 2467, 1234, 'qwe', '2023-12-04 18:00:18'),
-(34, 2467, 1234, 'qweqwe', '2023-12-04 19:00:32'),
-(38, 2467, 1234, 'nigger', '2023-12-04 19:08:57'),
-(40, 123, 123, 'Hi po', '2023-12-07 04:39:25'),
-(43, 123, 123, 'qwe', '2023-12-10 08:25:04');
+(47, 123, 123, 'qweqwk eopqwp qwpq [wke[qpwe ]q', '2023-12-10 17:06:20'),
+(54, 123, 123, 'qweqwe', '2023-12-10 20:03:55');
 
 -- --------------------------------------------------------
 
@@ -120,8 +110,8 @@ CREATE TABLE `doctorschedule` (
 --
 
 INSERT INTO `doctorschedule` (`scheduleId`, `scheduleDate`, `scheduleDay`, `startTime`, `endTime`, `bookAvail`, `doctorId`) VALUES
-(67, '2023-12-10', 'Wednesday', '02:00:00', '05:00:00', 'available', 321),
-(68, '2023-12-10', 'Wednesday', '01:00:00', '05:00:00', 'notavail', 2468);
+(67, '2023-12-11', 'Wednesday', '02:00:00', '05:00:00', 'available', 321),
+(68, '2023-12-11', 'Monday', '01:00:00', '05:00:00', 'notavail', 2468);
 
 -- --------------------------------------------------------
 
@@ -150,6 +140,7 @@ CREATE TABLE `patient` (
 INSERT INTO `patient` (`philhealthId`, `password`, `patientFirstName`, `patientLastName`, `patientMaritialStatus`, `patientDOB`, `patientGender`, `patientAddress`, `patientPhone`, `patientEmail`, `appointmentType`) VALUES
 (123, '123', 'test', 'patient', 'single', '1996-01-17', 'female', 'qwe', '123', 'test@gmail.com', 'prenatal'),
 (1234, '123', 'test2', 'patient2', '', '2000-03-16', 'male', '', '', 'test2@gmail.com', 'tb'),
+(2345, '123', 'Nico', 'Nico', '', '1990-01-12', 'male', '', '', 'nico@gmail.com', 'prenatal'),
 (123456, '123', 'Lance', 'Lester', '', '1997-12-18', 'male', '', '', 'lancelester@gmail.com', 'tb');
 
 -- --------------------------------------------------------
@@ -174,7 +165,7 @@ CREATE TABLE `prenatalprescription` (
 --
 
 INSERT INTO `prenatalprescription` (`prescriptionId`, `philhealthId`, `medication`, `icDoctor`, `dosage`, `comment`, `instructions`, `prescriptionDate`) VALUES
-(35, 123, 'qwe', 123, 'qwe', 'qwe', 'qwe', '2023-12-10');
+(36, 123, 'qwe', 123, 'qwe', 'qwe', 'qwe', '2023-12-11');
 
 -- --------------------------------------------------------
 
@@ -200,7 +191,7 @@ CREATE TABLE `tbappointment` (
 --
 
 INSERT INTO `tbappointment` (`appId`, `philhealthId`, `scheduleId`, `appSymptom`, `currentMedications`, `symptomDuration`, `allergies`, `status`, `additionalInfo`, `createdAt`) VALUES
-(6, 1234, 68, 'qwe', 'qwe', 'qwe', 'qwe', 'process', 'qwe', '2023-12-10 02:55:47');
+(13, 1234, 68, 'qkwne oh', ' hqwo he', 'h oqhw eoiqh ', ' hqiwh eoi', 'process', ' hqoiwheoqiwe', '2023-12-10 18:23:18');
 
 -- --------------------------------------------------------
 
@@ -224,7 +215,7 @@ CREATE TABLE `tbprescription` (
 --
 
 INSERT INTO `tbprescription` (`prescriptionId`, `philhealthId`, `icDoctor`, `medication`, `dosage`, `comment`, `instructions`, `prescriptionDate`) VALUES
-(4, 1234, 2467, 'NIGGER', 'NIGGER', 'NIGGER', 'NIGGE', '2023-12-04 18:31:43');
+(8, 1234, 2467, 'FUCK YOU ', 'QKWJE PO', 'JO QWOEJ ', 'NIGGER', '2023-12-10 18:44:05');
 
 -- --------------------------------------------------------
 
@@ -245,12 +236,12 @@ CREATE TABLE `usermessages` (
 --
 
 INSERT INTO `usermessages` (`messageId`, `senderId`, `receiverId`, `messageContent`, `timestamp`) VALUES
-(16, 1234, 2467, 'qweqwe', '2023-12-04 17:50:58'),
-(17, 123, 123, 'qweqwe', '2023-12-04 18:11:46'),
-(18, 1234, 2467, 'qwe', '2023-12-04 18:57:09'),
-(19, 123, 123, '123', '2023-12-04 18:57:38'),
-(20, 123, 123, 'qwe', '2023-12-07 04:41:40'),
-(23, 1234, 2467, 'hi doc', '2023-12-10 12:12:03');
+(29, 123, 123, 'qweqwe', '2023-12-10 19:15:52'),
+(30, 123, 123, 'fuckyou', '2023-12-10 19:16:12'),
+(34, 123, 123, 'qweqwlkeqwe', '2023-12-10 20:11:18'),
+(35, 123, 123, 'fuck you', '2023-12-10 20:25:04'),
+(36, 123, 123, 'fuck you', '2023-12-10 20:25:06'),
+(37, 123, 123, 'fuck you', '2023-12-10 20:25:28');
 
 --
 -- Indexes for dumped tables
@@ -333,13 +324,13 @@ ALTER TABLE `usermessages`
 -- AUTO_INCREMENT for table `appointment`
 --
 ALTER TABLE `appointment`
-  MODIFY `appId` int(3) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=97;
+  MODIFY `appId` int(3) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=116;
 
 --
 -- AUTO_INCREMENT for table `doctormessages`
 --
 ALTER TABLE `doctormessages`
-  MODIFY `messageId` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=44;
+  MODIFY `messageId` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=55;
 
 --
 -- AUTO_INCREMENT for table `doctorschedule`
@@ -351,25 +342,25 @@ ALTER TABLE `doctorschedule`
 -- AUTO_INCREMENT for table `prenatalprescription`
 --
 ALTER TABLE `prenatalprescription`
-  MODIFY `prescriptionId` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=36;
+  MODIFY `prescriptionId` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=37;
 
 --
 -- AUTO_INCREMENT for table `tbappointment`
 --
 ALTER TABLE `tbappointment`
-  MODIFY `appId` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `appId` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
 
 --
 -- AUTO_INCREMENT for table `tbprescription`
 --
 ALTER TABLE `tbprescription`
-  MODIFY `prescriptionId` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `prescriptionId` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 
 --
 -- AUTO_INCREMENT for table `usermessages`
 --
 ALTER TABLE `usermessages`
-  MODIFY `messageId` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=24;
+  MODIFY `messageId` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=38;
 
 --
 -- Constraints for dumped tables
