@@ -12,7 +12,13 @@ if (!isset($_SESSION['patientSession'])) {
 // Fetch user information
 $res = mysqli_query($con, "SELECT * FROM patient WHERE philhealthId=" . $session);
 $userRow = mysqli_fetch_array($res, MYSQLI_ASSOC);
+// Check for the status parameter in the URL
+$status = isset($_GET['status']) ? $_GET['status'] : '';
 
+// Display confirmation message if status is success
+if ($status === 'success') {
+    echo '<div class="alert alert-success" role="alert">Message sent successfully!</div>';
+}
 // Check if the userRow is not empty and has the 'philhealthId' key
 if (empty($userRow) || !isset($userRow['philhealthId'])) {
     echo "Error: User information not found.";
@@ -109,30 +115,32 @@ function getAppointmentLink($appointmentType, $patientId)
     }
 
 
+    /* Adjustments to the styles */
     .message-container {
         margin-bottom: 20px;
         overflow: hidden;
+        display: flex;
+        align-items: flex-start;
+        /* Align items to the top of the container */
     }
+
+
 
     .message {
         background-color: #fff;
         padding: 15px;
         border: 1px solid #ddd;
-        border-radius: 4px;
+        border-radius: 8px;
+        /* Increased border-radius for a more rounded appearance */
         box-shadow: 0 1px 1px rgba(0, 0, 0, 0.05);
         color: #000;
     }
 
-    .doctor-message {
-        float: left;
-        margin-right: 50px;
-        border-color: #4CAF50;
-    }
-
-    .user-message {
-        float: right;
-        margin-left: 50px;
-        border-color: #337ab7;
+    /* Increase the font size and line height for better readability */
+    .message p {
+        margin: 0 0 10px;
+        font-size: 16px;
+        line-height: 1.4;
     }
 
     .message p {
@@ -164,6 +172,28 @@ function getAppointmentLink($appointmentType, $patientId)
         /* Adjust the height as needed */
         resize: vertical;
         /* Allow vertical resizing */
+    }
+
+
+    .prescriptions-header,
+    .messages-header {
+        margin-bottom: 10px;
+        font-size: 18px;
+        color: #333;
+    }
+
+    .custom-modal {
+        color: #000;
+    }
+
+
+    .prescriptions-header,
+    .messages-header {
+        margin-bottom: 10px;
+        font-size: 18px;
+        color: #333;
+        margin-top: 20px;
+
     }
 </style>
 
@@ -215,12 +245,13 @@ function getAppointmentLink($appointmentType, $patientId)
             <div class="row">
                 <div class="col-md-12">
                     <h2>Welcome, <?php echo $userRow['patientFirstName'] . ' ' . $userRow['patientLastName']; ?>, to your Inbox</h2>
-
+                    <h3 class="prescriptions-header">Prescriptions</h3>
                     <?php
                     while ($prescriptionRow = mysqli_fetch_array($prescriptionResult, MYSQLI_ASSOC)) {
                         $messageClass = ($prescriptionRow['philhealthId']) ? 'doctor-message' : 'user-message';
                     ?>
                         <div class="message-container <?php echo $messageClass; ?>">
+
                             <div class="message">
                                 <!-- Display prescription information -->
                                 <p><strong>Sender:</strong> Dr. <?php echo $prescriptionRow['doctorFirstName'] . ' ' . $prescriptionRow['doctorLastName']; ?></p>
@@ -238,16 +269,28 @@ function getAppointmentLink($appointmentType, $patientId)
                                 </form>
                             </div>
                         </div>
-                        <div class="message-container">
-                            <div class="message">
-                                <!-- Add a form for sending messages -->
-                                <form action="sendmessage.php" method="post">
-                                    <input type="hidden" name="doctorId" value="<?php echo $prescriptionRow['icDoctor']; ?>">
-                                    <textarea name="message" placeholder="Type your message here"></textarea>
-                                    <button type="submit" class="btn btn-primary">Send Message</button>
-                                </form>
+                        <!-- Add this modal structure inside the <body> tag, before the closing </body> tag -->
+                        <div class="modal fade custom-modal" id="sendMessageModal_<?php echo $prescriptionRow['icDoctor']; ?>" tabindex="-1" role="dialog" aria-labelledby="sendMessageModalLabel_<?php echo $prescriptionRow['icDoctor']; ?>">
+                            <div class="modal-dialog" role="document">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                            <span aria-hidden="true">&times;</span>
+                                        </button>
+                                        <h4 class="modal-title" id="sendMessageModalLabel">Send Message</h4>
+                                    </div>
+                                    <div class="modal-body">
+                                        <!-- Add a form for sending messages in the modal -->
+                                        <form id="sendMessageForm">
+                                            <input type="hidden" id="doctorId" name="doctorId" value="">
+                                            <textarea id="message" name="message" placeholder="Type your message here"></textarea>
+                                            <button type="submit" class="btn btn-primary">Send Message</button>
+                                        </form>
+                                    </div>
+                                </div>
                             </div>
                         </div>
+                        <h3 class="messages-header">Messages</h3>
                         <?php
                         $messageQuery = "SELECT * FROM doctormessages WHERE receiverId=" . $userRow['philhealthId'] . " AND senderId=" . $prescriptionRow['icDoctor'];
                         $messageResult = mysqli_query($con, $messageQuery);
@@ -258,14 +301,18 @@ function getAppointmentLink($appointmentType, $patientId)
                                     $messageSender = 'Dr. ' . $prescriptionRow['doctorLastName'];
                         ?>
                                     <div class="message-container user-message">
+
                                         <div class="message">
+
                                             <p><strong>Sender:</strong> <?php echo $messageSender; ?></p>
                                             <p><strong>Message:</strong> <?php echo $messageRow['messageContent']; ?></p>
                                             <p><strong>Timestamp:</strong> <?php echo $messageRow['timestamp']; ?></p>
-                                            <form action="deleteMessage.php" method="post">
+                                            <form action="deleteMessage.php" method="post" style="display: inline-block;">
                                                 <input type="hidden" name="messageId" value="<?php echo $messageRow['messageId']; ?>">
-                                                <button type="submit" class="btn btn-danger">Delete</button>
+                                                <button type="submit" class="btn btn-danger custom-btn">Delete</button>
                                             </form>
+                                            <!-- "Reply" button outside the form -->
+                                            <button class="btn btn-primary custom-btn reply-btn" data-toggle="modal" data-target="#sendMessageModal_<?php echo $prescriptionRow['icDoctor']; ?>" data-doctorid="<?php echo $prescriptionRow['icDoctor']; ?>">Reply</button>
                                         </div>
                                     </div>
                         <?php
@@ -297,6 +344,72 @@ function getAppointmentLink($appointmentType, $patientId)
     <script src="assets/js/jquery.js"></script>
     <script src="assets/js/bootstrap.min.js"></script>
     <!-- Add any additional scripts needed for the inbox page -->
+    <!-- Add this script after the jQuery script -->
+    <script>
+        $(document).ready(function() {
+            function setMaxHeightForUserMessages() {
+                var maxUserMessageHeight = 0;
+
+                // Iterate through all user messages and find the maximum height
+                $('.user-message .message').each(function() {
+                    var height = $(this).outerHeight();
+                    maxUserMessageHeight = Math.max(maxUserMessageHeight, height);
+                });
+
+                $('.user-message .message').css('min-height', function() {
+                    return maxUserMessageHeight + 'px';
+                });
+            }
+
+            // Call the function when the page is ready
+            setMaxHeightForUserMessages();
+
+            // Optionally, call the function when the window is resized (if the message sizes may change dynamically)
+            $(window).resize(function() {
+                setMaxHeightForUserMessages();
+            });
+        });
+    </script>
+
+    <script>
+        $(document).ready(function() {
+            // Handle reply button click
+            $('.user-message button.btn-primary').on('click', function() {
+                var doctorId = $(this).data('doctorid');
+                $('#doctorId').val(doctorId);
+            });
+
+            // Handle form submission
+            $('#sendMessageForm').submit(function(event) {
+                event.preventDefault();
+
+                // Add your AJAX code here to submit the message asynchronously
+                var formData = $(this).serialize();
+
+                // Example AJAX code (replace with your actual endpoint)
+                $.ajax({
+                    type: 'POST',
+                    url: 'sendmessage.php',
+                    data: formData,
+                    success: function(response) {
+                        // Handle success, e.g., close the modal or show a success message
+                        $('#sendMessageModal').modal('hide');
+
+                        // Show a success alert
+                        alert('Message sent successfully!');
+
+                        // Optionally, refresh the messages section to display the new message
+                        // Add your code to refresh the messages section here
+                    },
+                    error: function(error) {
+                        // Handle error, e.g., display an error message
+                        console.error('Error sending message:', error);
+                    }
+                });
+            });
+        });
+    </script>
+
 </body>
 
 </html>

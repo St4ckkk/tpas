@@ -55,7 +55,11 @@ if ($res) {
     <link href="assets/css/sb-admin.css" rel="stylesheet">
     <link href="assets/css/style.css" rel="stylesheet">
     <link href="assets/font-awesome/css/font-awesome.css" rel="stylesheet">
-    <!-- Custom Fonts -->
+    <link href="assets/css/default/style.css" rel="stylesheet">
+    <link href="assets/css/default/blocks.css" rel="stylesheet">
+
+</head>
+<!-- Custom Fonts -->
 </head>
 
 <style>
@@ -68,36 +72,58 @@ if ($res) {
 
 
     .container {
-        background-color: #fff;
+        background-color: rgba(0, 0, 0, 0.1);
+        /* Adjust the alpha (last value) for transparency */
         padding: 20px;
         border: 1px solid #ddd;
         border-radius: 4px;
         margin-top: 20px;
+        color: #fff;
+        /* Set text color to white or your preferred color */
     }
 
+
+    /* Adjustments to the styles */
     .message-container {
         margin-bottom: 20px;
-        overflow: hidden;
+        display: flex;
+        align-items: flex-start;
+    }
+
+    /* Add a border between each message container */
+    .doctor-message,
+    .user-message {
+        border-bottom: 10px solid #f2f2f2;
+        padding-bottom: 10px;
+    }
+
+    .message-container:last-child {
+        border-bottom: none;
     }
 
     .message {
         background-color: #fff;
         padding: 15px;
         border: 1px solid #ddd;
-        border-radius: 4px;
+        border-radius: 8px;
         box-shadow: 0 1px 1px rgba(0, 0, 0, 0.05);
+        color: #000;
+        margin-right: 10px;
+        /* Adjust the margin as needed */
     }
 
-    .doctor-message {
-        float: left;
-        margin-right: 50px;
-        border-color: #4CAF50;
+    .messages-header {
+        margin-bottom: 10px;
+        font-size: 18px;
+        color: #333;
+        margin-top: 20px;
     }
 
-    .user-message {
-        float: right;
-        margin-left: 50px;
-        border-color: #337ab7;
+    /* Increase the font size and line height for better readability */
+    .message p {
+        margin: 0 0 10px;
+        font-size: 16px;
+        line-height: 1.4;
     }
 
     .message p {
@@ -115,6 +141,13 @@ if ($res) {
         border-color: #204d74;
     }
 
+    .custom-btn {
+        height: 30px;
+
+        line-height: 1.5;
+
+    }
+
     /* Increase the height of the message textarea */
     form textarea {
         height: 165px;
@@ -122,6 +155,28 @@ if ($res) {
         /* Adjust the height as needed */
         resize: vertical;
         /* Allow vertical resizing */
+    }
+
+
+    .prescriptions-header,
+    .messages-header {
+        margin-bottom: 10px;
+        font-size: 18px;
+        color: #333;
+    }
+
+    .custom-modal {
+        color: #000;
+    }
+
+
+    .prescriptions-header,
+    .messages-header {
+        margin-bottom: 10px;
+        font-size: 18px;
+        color: #333;
+        margin-top: 20px;
+
     }
 </style>
 
@@ -219,6 +274,7 @@ if ($res) {
                             <div class="col-md-12">
                                 <h2>Welcome, <?php echo $userRow['doctorFirstName'] . ' ' . $userRow['doctorLastName']; ?>, to your Inbox</h2>
 
+                                <h3 class="messages-header">Messages</h3>
                                 <div class="message-container">
                                     <div class="message">
                                         <?php
@@ -238,16 +294,51 @@ if ($res) {
                                                     // Use the $messageRow to display or process the sender's information
                                                     $philhealthId = $messageRow['senderPhilhealthId'];
                                         ?>
-                                                    <div class="message-container <?php echo ($messageRow['senderId'] == $userRow['icDoctor']) ? 'doctor-message' : 'user-message'; ?>">
-                                                        <div class="message">
-                                                            <p><strong>Sender:</strong> Mr. <?php echo $messageRow['patientLastName']; ?></p>
-                                                            <p><strong>Philhealth ID:</strong> <?php echo $philhealthId; ?></p>
-                                                            <p><strong>Message:</strong> <?php echo $messageRow['messageContent']; ?></p>
-                                                            <p><strong>Timestamp:</strong> <?php echo $messageRow['timestamp']; ?></p>
-                                                            <form action="deleteMessage.php" method="post">
-                                                                <input type="hidden" name="messageId" value="<?php echo $messageRow['messageId']; ?>">
-                                                                <button type="submit" class="btn btn-danger">Delete</button>
-                                                            </form>
+
+                                                    <div class="row">
+                                                        <?php
+                                                        while ($messageRow = mysqli_fetch_array($messageResult, MYSQLI_ASSOC)) {
+                                                            $philhealthId = $messageRow['senderPhilhealthId'];
+                                                        ?>
+                                                            <div class="col-md-12">
+                                                                <div class="message-container <?php echo ($messageRow['senderId'] == $userRow['icDoctor']) ? 'doctor-message' : 'user-message'; ?>">
+                                                                    <div class="message">
+                                                                        <p><strong>Sender:</strong> Mr. <?php echo $messageRow['patientLastName']; ?></p>
+                                                                        <p><strong>Philhealth ID:</strong> <?php echo $philhealthId; ?></p>
+                                                                        <p><strong>Message:</strong> <?php echo $messageRow['messageContent']; ?></p>
+                                                                        <p><strong>Timestamp:</strong> <?php echo $messageRow['timestamp']; ?></p>
+                                                                        <form action="deleteMessage.php" method="post">
+                                                                            <input type="hidden" name="messageId" value="<?php echo $messageRow['messageId']; ?>">
+                                                                            <button type="submit" class="btn btn-danger">Delete</button>
+                                                                        </form>
+                                                                        <button class="btn btn-primary custom-btn reply-btn" data-toggle="modal" data-target="#sendMessageModal_<?php echo $philhealthId ?>" data-doctorid="<?php echo $philhealthId; ?>">Reply</button>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        <?php
+                                                        }
+                                                        ?>
+                                                    </div>
+
+                                                    <!-- Modal for sending messages -->
+                                                    <div class="modal fade custom-modal" id="sendMessageModal_<?php echo $philhealthId; ?>" tabindex="-1" role="dialog" aria-labelledby="sendMessageModalLabel_<?php echo $philhealthId; ?>">
+                                                        <div class="modal-dialog" role="document">
+                                                            <div class="modal-content">
+                                                                <div class="modal-header">
+                                                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                                        <span aria-hidden="true">&times;</span>
+                                                                    </button>
+                                                                    <h4 class="modal-title" id="sendMessageModalLabel">Send Message</h4>
+                                                                </div>
+                                                                <div class="modal-body">
+                                                                    <!-- Add a form for sending messages in the modal -->
+                                                                    <form id="sendMessageForm">
+                                                                        <input type="hidden" id="philhealthId" name="philhealthId" value="<?php echo $philhealthId; ?>">
+                                                                        <textarea id="message" name="message" placeholder="Type your message here"></textarea>
+                                                                        <button type="submit" class="btn btn-primary">Send Message</button>
+                                                                    </form>
+                                                                </div>
+                                                            </div>
                                                         </div>
                                                     </div>
                                         <?php
@@ -262,12 +353,7 @@ if ($res) {
                                         }
                                         ?>
 
-                                        <!-- Add a form for sending messages outside of the loop -->
-                                        <form action="sendmessage.php" method="post">
-                                            <textarea name="message" placeholder="Type your message here"></textarea>
-                                            <input type="hidden" name="philhealthId" value="<?php echo $philhealthId; ?>">
-                                            <button type="submit" class="btn btn-primary">Send Message</button>
-                                        </form>
+
                                     </div>
                                 </div>
 
@@ -285,6 +371,45 @@ if ($res) {
     <script src="assets/js/jquery.js"></script>
     <script src="assets/js/bootstrap.min.js"></script>
     <!-- Add any additional scripts needed for the inbox page -->
+    <!-- Add this script after the jQuery script -->
+    <script>
+        $(document).ready(function() {
+            // Handle reply button click
+            $('.user-message button.btn-primary').on('click', function() {
+                var philhealthId = $(this).data('philhealthId');
+                $('#philhealtId').val(philhealthId);
+            });
+
+            // Handle form submission
+            $('#sendMessageForm').submit(function(event) {
+                event.preventDefault();
+
+                // Add your AJAX code here to submit the message asynchronously
+                var formData = $(this).serialize();
+
+                // Example AJAX code (replace with your actual endpoint)
+                $.ajax({
+                    type: 'POST',
+                    url: 'sendmessage.php',
+                    data: formData,
+                    success: function(response) {
+                        // Handle success, e.g., close the modal or show a success message
+                        $('#sendMessageModal').modal('hide');
+
+                        // Show a success alert
+                        alert('Message sent successfully!');
+
+                        // Optionally, refresh the messages section to display the new message
+                        // Add your code to refresh the messages section here
+                    },
+                    error: function(error) {
+                        // Handle error, e.g., display an error message
+                        console.error('Error sending message:', error);
+                    }
+                });
+            });
+        });
+    </script>
 
 </body>
 
