@@ -51,19 +51,19 @@ if (isset($_POST['appointment'])) {
 		$result = mysqli_query($con, $query);
 
 		if ($result) {
-?>
+			?>
 			<script type="text/javascript">
 				alert('Appointment made successfully.');
 			</script>
-		<?php
+			<?php
 			header("Location: patientapplist.php");
 		} else {
 			echo mysqli_error($con);
-		?>
+			?>
 			<script type="text/javascript">
 				alert('Appointment booking failed. Please try again.');
 			</script>
-		<?php
+			<?php
 			header("Location: appointment.php");
 		}
 	} else {
@@ -72,7 +72,7 @@ if (isset($_POST['appointment'])) {
 		<script type="text/javascript">
 			alert('Please fill in all the appointment details.');
 		</script>
-<?php
+		<?php
 	}
 }
 ?>
@@ -101,13 +101,15 @@ if (isset($_POST['appointment'])) {
 		<div class="container-fluid">
 			<!-- Brand and toggle get grouped for better mobile display -->
 			<div class="navbar-header">
-				<button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+				<button type="button" class="navbar-toggle collapsed" data-toggle="collapse"
+					data-target="#bs-example-navbar-collapse-1">
 					<span class="sr-only">Toggle navigation</span>
 					<span class="icon-bar"></span>
 					<span class="icon-bar"></span>
 					<span class="icon-bar"></span>
 				</button>
-				<a class="navbar-brand" href="patient.php"><img alt="Brand" src="assets/img/cd-logo.png" height="20px"></a>
+				<a class="navbar-brand" href="patient.php"><img alt="Brand" src="assets/img/cd-logo.png"
+						height="20px"></a>
 			</div>
 			<!-- Collect the nav links, forms, and other content for toggling -->
 			<div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
@@ -115,19 +117,26 @@ if (isset($_POST['appointment'])) {
 					<ul class="nav navbar-nav">
 						<li><a href="patient.php">Home</a></li>
 						<!-- <li><a href="profile.php?patientId=<?php echo $userRow['philhealthId']; ?>" >Profile</a></li> -->
-						<li><a href="patientapplist.php?patientId=<?php echo $userRow['philhealthId']; ?>">Appointment</a></li>
+						<li><a
+								href="patientapplist.php?patientId=<?php echo $userRow['philhealthId']; ?>">Appointment</a>
+						</li>
 					</ul>
 				</ul>
 
 				<ul class="nav navbar-nav navbar-right">
 					<li class="dropdown">
-						<a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-user"></i> <?php echo $userRow['patientFirstName']; ?> <?php echo $userRow['patientLastName']; ?><b class="caret"></b></a>
+						<a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-user"></i>
+							<?php echo $userRow['patientFirstName']; ?>
+							<?php echo $userRow['patientLastName']; ?><b class="caret"></b>
+						</a>
 						<ul class="dropdown-menu">
 							<li>
-								<a href="profile.php?patientId=<?php echo $userRow['philhealthId']; ?>"><i class="fa fa-fw fa-user"></i> Profile</a>
+								<a href="profile.php?patientId=<?php echo $userRow['philhealthId']; ?>"><i
+										class="fa fa-fw fa-user"></i> Profile</a>
 							</li>
 							<li>
-								<a href="patientapplist.php?patientId=<?php echo $userRow['philhealthId']; ?>"><i class="glyphicon glyphicon-file"></i> Appointment</a>
+								<a href="patientapplist.php?patientId=<?php echo $userRow['philhealthId']; ?>"><i
+										class="glyphicon glyphicon-file"></i> Appointment</a>
 							</li>
 							<li class="divider"></li>
 							<li>
@@ -151,8 +160,12 @@ if (isset($_POST['appointment'])) {
 						<div class="user-wrapper">
 							<img src="assets/img/patient.png" class="img-responsive" />
 							<div class="description">
-								<h4><?php echo $userRow['patientFirstName']; ?> <?php echo $userRow['patientLastName']; ?></h4>
-								<button type="button" class="btn btn-primary" data-toggle="modal" data-target="#myModal">Update Profile</button>
+								<h4>
+									<?php echo $userRow['patientFirstName']; ?>
+									<?php echo $userRow['patientLastName']; ?>
+								</h4>
+								<button type="button" class="btn btn-primary" data-toggle="modal"
+									data-target="#myModal">Update Profile</button>
 							</div>
 						</div>
 					</div>
@@ -170,18 +183,27 @@ if (isset($_POST['appointment'])) {
 											<div class="panel-heading">Patient Information</div>
 											<div class="panel-body">
 
-												Patient Name: <?php echo $userRow['patientFirstName'] ?> <?php echo $userRow['patientLastName'] ?><br>
-												Philhealth ID: <?php echo $userRow['philhealthId'] ?><br>
-												Contact Number: <?php echo $userRow['patientPhone'] ?><br>
-												Address: <?php echo $userRow['patientAddress'] ?>
+												Patient Name:
+												<?php echo $userRow['patientFirstName'] ?>
+												<?php echo $userRow['patientLastName'] ?><br>
+												Philhealth ID:
+												<?php echo $userRow['philhealthId'] ?><br>
+												Contact Number:
+												<?php echo $userRow['patientPhone'] ?><br>
+												Address:
+												<?php echo $userRow['patientAddress'] ?>
 											</div>
 										</div>
 										<div class="panel panel-default">
 											<div class="panel-heading">Appointment Information</div>
 											<div class="panel-body">
-												Day: <?php echo $userRow['scheduleDay'] ?><br>
-												Date: <?php echo $userRow['scheduleDate'] ?><br>
-												Time: <?php echo $userRow['startTime'] ?> - <?php echo $userRow['endTime'] ?><br>
+												Day:
+												<?php echo $userRow['scheduleDay'] ?><br>
+												Date:
+												<?php echo $userRow['scheduleDate'] ?><br>
+												Time:
+												<?php echo $userRow['startTime'] ?> -
+												<?php echo $userRow['endTime'] ?><br>
 											</div>
 										</div>
 
@@ -189,19 +211,24 @@ if (isset($_POST['appointment'])) {
 											<div class="panel-heading">Prenatal Consultation Information</div>
 											<div class="panel-body">
 												<div class="form-group">
-													<label for="pregnancy-week" class="control-label">Pregnancy Week:</label>
-													<input type="text" class="form-control" name="pregnancy_week" required>
+													<label for="pregnancy-week" class="control-label">Pregnancy
+														Week:</label>
+													<input type="text" class="form-control" name="pregnancy_week"
+														required>
 												</div>
 												<div class="form-group">
 													<label for="weight" class="control-label">Weight:</label>
 													<input type="text" class="form-control" name="weight" required>
 												</div>
 												<div class="form-group">
-													<label for="blood-pressure" class="control-label">Blood Pressure:</label>
-													<input type="text" class="form-control" name="blood_pressure" required>
+													<label for="blood-pressure" class="control-label">Blood
+														Pressure:</label>
+													<input type="text" class="form-control" name="blood_pressure"
+														required>
 												</div>
 												<div class="form-group">
-													<label for="symptom" class="control-label">Symptoms/Concerns:</label>
+													<label for="symptom"
+														class="control-label">Symptoms/Concerns:</label>
 													<input type="text" class="form-control" name="symptom" required>
 												</div>
 												<div class="form-group">
@@ -209,7 +236,8 @@ if (isset($_POST['appointment'])) {
 													<textarea class="form-control" name="comment" required></textarea>
 												</div>
 												<div class="form-group">
-													<input type="submit" name="appointment" id="submit" class="btn btn-primary" value="Make Appointment">
+													<input type="submit" name="appointment" id="submit"
+														class="btn btn-primary" value="Make Appointment">
 												</div>
 											</div>
 										</div>

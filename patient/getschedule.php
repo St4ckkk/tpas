@@ -21,65 +21,71 @@ if (!$res) {
 ?>
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <link href="assets/css/bootstrap.min.css" rel="stylesheet">
 </head>
-<body>
-<?php
-if (mysqli_num_rows($res) == 0) {
-    echo "<div class='alert alert-danger' role='alert'>Doctor is not available at the moment. Please try again later.</div>";
 
-} else {
-    echo "   <table class='table table-hover'>";
-    echo " <thead>";
-    echo " <tr>";
-    echo " <th>App Id</th>";
-    echo " <th>Doctor Name</th>";
-    echo " <th>Speciality</th>";
-    echo " <th>Day</th>";
-    echo " <th>Date</th>";
-    echo "  <th>Start Time</th>";
-    echo "  <th>End Time</th>";
-    echo " <th>Availability</th>";
-    echo "  <th>Book Now!</th>";
-    echo " </tr>";
-    echo "  </thead>";
-    echo "  <tbody>";
-    while ($row = mysqli_fetch_array($res)) {
-        $avail = null;
-        $btnstate = "";
-        $btnclick = "";
-        
-        // Add conditions based on the patient's appointment type and doctor's role
-        if (($patientAppointmentType == 'prenatal' && $row['doctorRole'] == 'Obstetrician') ||
-            ($patientAppointmentType == 'tb' && $row['doctorRole'] == 'Pulmonologist')) {
-            
-            if ($row['bookAvail'] != 'available') {
-                $avail = "danger";
-                $btnstate = "disabled";
-                $btnclick = "danger";
-            } else {
-                $avail = "primary";
-                $btnstate = "";
-                $btnclick = "primary";
+<body>
+    <?php
+    if (mysqli_num_rows($res) == 0) {
+        echo "<div class='alert alert-danger' role='alert'>Doctor is not available at the moment. Please try again later.</div>";
+    } else {
+        echo "   <table class='table table-hover'>";
+        echo " <thead>";
+        echo " <tr>";
+        echo " <th>App Id</th>";
+        echo " <th>Doctor Name</th>";
+        echo " <th>Speciality</th>";
+        echo " <th>Day</th>";
+        echo " <th>Date</th>";
+        echo "  <th>Start Time</th>";
+        echo "  <th>End Time</th>";
+        echo " <th>Availability</th>";
+        echo "  <th>Book Now!</th>";
+        echo " </tr>";
+        echo "  </thead>";
+        echo "  <tbody>";
+        while ($row = mysqli_fetch_array($res)) {
+            $avail = null;
+            $btnstate = "";
+            $btnclick = "";
+
+            // Add conditions based on the patient's appointment type and doctor's role
+            if (
+                ($patientAppointmentType == 'prenatal' && $row['doctorRole'] == 'Obstetrician') ||
+                ($patientAppointmentType == 'tb' && $row['doctorRole'] == 'Pulmonologist')
+            ) {
+
+                if ($row['bookAvail'] != 'available') {
+                    $avail = "danger";
+                    $btnstate = "disabled";
+                    $btnclick = "danger";
+                } else {
+                    $avail = "primary";
+                    $btnstate = "";
+                    $btnclick = "primary";
+                }
+
+                echo "<tr>";
+                echo "<td>" . $row['scheduleId'] . "</td>";
+                echo "<td>" . $row['doctorlastName'] . "</td>";
+                echo "<td>" . $row['doctorRole'] . "</td>";
+                echo "<td>" . $row['scheduleDay'] . "</td>";
+                echo "<td>" . $row['scheduleDate'] . "</td>";
+                echo "<td>" . $row['startTime'] . "</td>";
+                echo "<td>" . $row['endTime'] . "</td>";
+                echo "<td> <span class='label label-" . $avail . "'>" . $row['bookAvail'] . "</span></td>";
+                // Adjust the links based on the patient's appointment type
+                $appointmentLink = ($patientAppointmentType == 'tb') ? 'tbappointment.php' : 'appointment.php';
+                echo "<td><a href='$appointmentLink?&appid=" . $row['scheduleId'] . "&scheduleDate=" . $q . "' class='btn btn-" . $btnclick . " btn-xs' role='button' " . $btnstate . ">Book Now</a></td>";
+                echo "</tr>";
             }
-            
-            echo "<tr>";
-            echo "<td>" . $row['scheduleId'] . "</td>";
-            echo "<td>" . $row['doctorlastName'] . "</td>";
-            echo "<td>" . $row['doctorRole'] . "</td>";
-            echo "<td>" . $row['scheduleDay'] . "</td>";
-            echo "<td>" . $row['scheduleDate'] . "</td>";
-            echo "<td>" . $row['startTime'] . "</td>";
-            echo "<td>" . $row['endTime'] . "</td>";
-            echo "<td> <span class='label label-" . $avail . "'>" . $row['bookAvail'] . "</span></td>";
-            echo "<td><a href='appointment.php?&appid=" . $row['scheduleId'] . "&scheduleDate=" . $q . "' class='btn btn-" . $btnclick . " btn-xs' role='button' " . $btnstate . ">Book Now</a></td>";
-            echo "</tr>";
         }
+        echo "</tbody>";
+        echo "</table>";
     }
-    echo "</tbody>";
-    echo "</table>";
-}
-?>
+    ?>
 </body>
+
 </html>
