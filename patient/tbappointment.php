@@ -25,7 +25,7 @@ if (!empty($_GET['scheduleDate']) && !empty($_GET['appid'])) {
 }
 
 // INSERT
-if (isset($_POST['appointment'])) {
+if (isset($_POST['tbappointment'])) {
     $philhealthId = mysqli_real_escape_string($con, $userRow['philhealthId']);
     $scheduleid = mysqli_real_escape_string($con, $appid);
     $symptoms = mysqli_real_escape_string($con, $_POST['symptoms']);
@@ -34,36 +34,59 @@ if (isset($_POST['appointment'])) {
     $allergies = mysqli_real_escape_string($con, $_POST['allergies']);
     $additionalInfo = mysqli_real_escape_string($con, $_POST['additional_info']);
 
-    if (!empty($symptoms)) {
-        $avail = "notavail";
-        $query = "INSERT INTO tbappointment (philhealthId, scheduleId, appSymptom, currentMedications, symptomDuration, allergies, additionalInfo)
-                  VALUES ('$philhealthId', '$scheduleid', '$symptoms', '$currentMedications', '$symptomDuration', '$allergies', '$additionalInfo')";
+    if (!empty($symptoms) && !empty($additionalInfo)) {
+        // Check if there's an existing appointment
+        $existingAppointmentQuery = "SELECT * FROM tbappointment WHERE scheduleId = $scheduleid AND philhealthId = '$philhealthId'";
+        $existingAppointmentResult = mysqli_query($con, $existingAppointmentQuery);
 
-        // Update table appointment schedule
-        $sql = "UPDATE doctorschedule SET bookAvail = '$avail' WHERE scheduleId = $scheduleid";
-        $scheduleres = mysqli_query($con, $sql);
-
-        if ($scheduleres) {
-            $btn = "disable";
-        }
-
-        $result = mysqli_query($con, $query);
-
-        if ($result) {
-?>
-            <script type="text/javascript">
-                alert('Appointment made successfully.');
-            </script>
-        <?php
-            header("Location: tbpatientapplist.php");
+        if ($existingAppointmentResult && mysqli_num_rows($existingAppointmentResult) > 0) {
+            // Existing appointment found, display an alert
+            echo "<script>alert('You already have an existing appointment for this schedule.');</script>";
         } else {
-            echo mysqli_error($con);
-        ?>
-            <script type="text/javascript">
-                alert('Appointment booking failed. Please try again.');
-            </script>
+            // Check if the appointment date is missed
+            $missedAppointmentQuery = "SELECT * FROM doctorschedule WHERE scheduleId = $scheduleid AND scheduleDate < CURDATE()";
+            $missedAppointmentResult = mysqli_query($con, $missedAppointmentQuery);
+
+            if ($missedAppointmentResult && mysqli_num_rows($missedAppointmentResult) > 0) {
+                // Appointment date is missed, update the status to "missed"
+                $updateMissedStatusQuery = "UPDATE tbappointment SET status = 'missed' WHERE scheduleId = $scheduleid AND philhealthId = '$philhealthId'";
+                $updateMissedStatusResult = mysqli_query($con, $updateMissedStatusQuery);
+
+                if (!$updateMissedStatusResult) {
+                    echo "Error updating appointment status: " . mysqli_error($con);
+                }
+            } else {
+                // Proceed with creating a new appointment
+                $avail = "notavail";
+                $query = "INSERT INTO tbappointment (philhealthId, scheduleId, appSymptom, currentMedications, symptomDuration, allergies, additionalInfo)
+                          VALUES ('$philhealthId', '$scheduleid', '$symptoms', '$currentMedications', '$symptomDuration', '$allergies', '$additionalInfo')";
+
+                // Update table appointment schedule
+                $sql = "UPDATE doctorschedule SET bookAvail = '$avail' WHERE scheduleId = $scheduleid";
+                $scheduleres = mysqli_query($con, $sql);
+
+                if ($scheduleres) {
+                    $btn = "disable";
+                }
+
+                $result = mysqli_query($con, $query);
+
+                if ($result) {
+?>
+                    <script type="text/javascript">
+                        alert('Appointment made successfully.');
+                        window.location.href = "tbpatientapplist.php";
+                    </script>
+                <?php
+                } else {
+                    echo mysqli_error($con);
+                ?>
+                    <script type="text/javascript">
+                        alert('Appointment booking failed. Please try again.');
+                    </script>
         <?php
-            header("Location: appointment.php");
+                }
+            }
         }
     } else {
         ?>
@@ -73,7 +96,6 @@ if (isset($_POST['appointment'])) {
 <?php
     }
 }
-
 ?>
 <!DOCTYPE html>
 <html>
@@ -227,7 +249,7 @@ if (isset($_POST['appointment'])) {
                                                 </div>
 
                                                 <div class="form-group">
-                                                    <input type="submit" name="appointment" id="submit" class="btn btn-primary" value="Make Appointment">
+                                                    <input type="submit" name="tbappointment" id="submit" class="btn btn-primary" value="Make Appointment">
                                                 </div>
                                             </div>
 

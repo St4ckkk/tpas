@@ -23,7 +23,6 @@ if (!empty($_GET['scheduleDate']) && !empty($_GET['appid'])) {
 	echo "Error: Schedule date and appointment ID are not set.";
 	exit;
 }
-
 // INSERT
 if (isset($_POST['appointment'])) {
 	$philhealthId = mysqli_real_escape_string($con, $userRow['philhealthId']);
@@ -33,42 +32,64 @@ if (isset($_POST['appointment'])) {
 	$pregnancyWeek = mysqli_real_escape_string($con, $_POST['pregnancy_week']);
 	$weight = mysqli_real_escape_string($con, $_POST['weight']);
 	$bloodPressure = mysqli_real_escape_string($con, $_POST['blood_pressure']);
-
 	if (!empty($symptom) && !empty($comment)) {
-		$avail = "notavail";
-		$query = "INSERT INTO appointment (philhealthId, scheduleId, appSymptom, appComment, pregnancyWeek, weight, bloodPressure)
-              VALUES ('$philhealthId', '$scheduleid', '$symptom', '$comment', '$pregnancyWeek', '$weight', '$bloodPressure')";
+		// Check if there's an existing appointment
+		$existingAppointmentQuery = "SELECT * FROM appointment WHERE scheduleId = $scheduleid AND philhealthId = '$philhealthId' AND status = 'process'";
+		$existingAppointmentResult = mysqli_query($con, $existingAppointmentQuery);
 
-
-		// Update table appointment schedule
-		$sql = "UPDATE doctorschedule SET bookAvail = '$avail' WHERE scheduleId = $scheduleid";
-		$scheduleres = mysqli_query($con, $sql);
-
-		if ($scheduleres) {
-			$btn = "disable";
-		}
-
-		$result = mysqli_query($con, $query);
-
-		if ($result) {
-?>
-			<script type="text/javascript">
-				alert('Appointment made successfully.');
-			</script>
-		<?php
-			header("Location: patientapplist.php");
+		if ($existingAppointmentResult && mysqli_num_rows($existingAppointmentResult) > 0) {
+			// Existing appointment found, display an alert
+			echo "<script>alert('You already have an existing appointment for this schedule.');</script>";
 		} else {
-			echo mysqli_error($con);
-		?>
-			<script type="text/javascript">
-				alert('Appointment booking failed. Please try again.');
-			</script>
+			// Check if the appointment date is missed
+			$missedAppointmentQuery = "SELECT * FROM doctorschedule WHERE scheduleId = $scheduleid AND scheduleDate < CURDATE()";
+			$missedAppointmentResult = mysqli_query($con, $missedAppointmentQuery);
+
+			if ($missedAppointmentResult && mysqli_num_rows($missedAppointmentResult) > 0) {
+				// Appointment date is missed, update the status to "missed"
+				$updateMissedStatusQuery = "UPDATE appointment SET status = 'missed' WHERE scheduleId = $scheduleid AND philhealthId = '$philhealthId'";
+				$updateMissedStatusResult = mysqli_query($con, $updateMissedStatusQuery);
+
+				if (!$updateMissedStatusResult) {
+					echo "Error updating appointment status: " . mysqli_error($con);
+				}
+			} else {
+				// Proceed with creating a new appointment
+				$avail = "notavail";
+				$query = "INSERT INTO appointment (philhealthId, scheduleId, appSymptom, appComment, pregnancyWeek, weight, bloodPressure)
+          VALUES ('$philhealthId', '$scheduleid', '$symptom', '$comment', '$pregnancyWeek', '$weight', '$bloodPressure')";
+
+
+
+				// Update table appointment schedule
+				$sql = "UPDATE doctorschedule SET bookAvail = '$avail' WHERE scheduleId = $scheduleid";
+				$scheduleres = mysqli_query($con, $sql);
+
+				if ($scheduleres) {
+					$btn = "disable";
+				}
+
+				$result = mysqli_query($con, $query);
+
+				if ($result) {
+?>
+					<script type="text/javascript">
+						alert('Appointment made successfully.');
+						window.location.href = "patientapplist.php";
+					</script>
+				<?php
+				} else {
+					echo mysqli_error($con);
+				?>
+					<script type="text/javascript">
+						alert('Appointment booking failed. Please try again.');
+					</script>
 		<?php
-			header("Location: appointment.php");
+				}
+			}
 		}
 	} else {
 		?>
-
 		<script type="text/javascript">
 			alert('Please fill in all the appointment details.');
 		</script>
@@ -76,6 +97,7 @@ if (isset($_POST['appointment'])) {
 	}
 }
 ?>
+
 <!DOCTYPE html>
 <html>
 
@@ -188,6 +210,7 @@ if (isset($_POST['appointment'])) {
 										<div class="panel panel-default">
 											<div class="panel-heading">Prenatal Consultation Information</div>
 											<div class="panel-body">
+
 												<div class="form-group">
 													<label for="pregnancy-week" class="control-label">Pregnancy Week:</label>
 													<input type="text" class="form-control" name="pregnancy_week" required>
