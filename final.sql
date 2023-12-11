@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Dec 11, 2023 at 08:07 AM
+-- Generation Time: Dec 11, 2023 at 08:43 AM
 -- Server version: 10.4.28-MariaDB
 -- PHP Version: 8.0.28
 
@@ -39,13 +39,6 @@ CREATE TABLE `appointment` (
   `bloodPressure` varchar(20) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
 
---
--- Dumping data for table `appointment`
---
-
-INSERT INTO `appointment` (`appId`, `philhealthId`, `scheduleId`, `appSymptom`, `appComment`, `status`, `pregnancyWeek`, `weight`, `bloodPressure`) VALUES
-(117, 123, 67, '1', '1', 'process', '1', '1', '1');
-
 -- --------------------------------------------------------
 
 --
@@ -70,8 +63,8 @@ CREATE TABLE `doctor` (
 --
 
 INSERT INTO `doctor` (`icDoctor`, `password`, `doctorId`, `doctorFirstName`, `doctorLastName`, `doctorAddress`, `doctorPhone`, `doctorEmail`, `doctorDOB`, `doctorRole`) VALUES
-(123, '123', 321, 'Abdul', 'Marot', 'Tuka', '09262408442', 'jimbo@gmail.com', '2023-12-04', 'Obstetrician'),
-(2467, '123', 2468, 'Jimbo', 'Ulama', 'Brgy. Ambalgan Poblacion Of Sto Nino South Cotabato', '09262408442', 'admin@gmail.com', '2023-12-05', 'Pulmonologist'),
+(123123, '123', 1234, 'Doctor', 'NGGA', 'ngga@gmail.com', '09262408442', 'ngga@gmail.com', '2023-12-11', 'Obstetrician'),
+(12345678, '123', 2468, 'Doctor', 'Kwak-Kwak', 'Poblacion, Tupi, South Cotabato', '123456789', 'kwakwak@gmail.com', '2023-12-11', 'Pulmonologist'),
 (123456789, '123', 123, 'Super', 'Admin', 'Tupi', '09262408442', 'nena@gmail.com', '2023-12-12', 'superAdmin');
 
 -- --------------------------------------------------------
@@ -88,24 +81,6 @@ CREATE TABLE `doctormessages` (
   `timestamp` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
---
--- Dumping data for table `doctormessages`
---
-
-INSERT INTO `doctormessages` (`messageId`, `senderId`, `receiverId`, `messageContent`, `timestamp`) VALUES
-(73, 123, 123, 'hello', '2023-12-11 05:06:00'),
-(74, 123, 123, 'HOW ARE YOU?', '2023-12-11 05:06:56'),
-(75, 123456789, 123, 'hi', '2023-12-11 05:07:29'),
-(76, 123, 123, 'qweqwe', '2023-12-11 05:43:33'),
-(77, 123, 123, 'fytfytfuyf', '2023-12-11 05:47:43'),
-(78, 123, 123, 'qweqwe', '2023-12-11 05:48:48'),
-(79, 123, 123, 'qweqwe123', '2023-12-11 05:53:30'),
-(80, 123, 123, 'k', '2023-12-11 06:09:57'),
-(81, 123, 123, 'kk', '2023-12-11 06:10:11'),
-(82, 123, 123, 'qweqwe', '2023-12-11 06:11:37'),
-(83, 123, 123, 'fuck you ka\r\n', '2023-12-11 06:24:52'),
-(84, 123456789, 123, 'qweqwe', '2023-12-11 07:06:10');
-
 -- --------------------------------------------------------
 
 --
@@ -121,14 +96,6 @@ CREATE TABLE `doctorschedule` (
   `bookAvail` varchar(10) CHARACTER SET latin1 COLLATE latin1_swedish_ci NOT NULL,
   `doctorId` int(11) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
-
---
--- Dumping data for table `doctorschedule`
---
-
-INSERT INTO `doctorschedule` (`scheduleId`, `scheduleDate`, `scheduleDay`, `startTime`, `endTime`, `bookAvail`, `doctorId`) VALUES
-(67, '2023-12-11', 'Wednesday', '02:00:00', '05:00:00', 'notavail', 321),
-(68, '2023-12-11', 'Monday', '01:00:00', '05:00:00', 'available', 2468);
 
 -- --------------------------------------------------------
 
@@ -150,16 +117,6 @@ CREATE TABLE `patient` (
   `appointmentType` enum('tb','prenatal') NOT NULL DEFAULT 'tb'
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
 
---
--- Dumping data for table `patient`
---
-
-INSERT INTO `patient` (`philhealthId`, `password`, `patientFirstName`, `patientLastName`, `patientMaritialStatus`, `patientDOB`, `patientGender`, `patientAddress`, `patientPhone`, `patientEmail`, `appointmentType`) VALUES
-(123, '123', 'test', 'patient', 'single', '1996-01-17', 'female', 'qwe', '123', 'test@gmail.com', 'prenatal'),
-(1234, '123', 'test2', 'patient2', '', '2000-03-16', 'male', '', '', 'test2@gmail.com', 'tb'),
-(2345, '123', 'Nico', 'Nico', '', '1990-01-12', 'male', '', '', 'nico@gmail.com', 'prenatal'),
-(123456, '123', 'Lance', 'Lester', '', '1997-12-18', 'male', '', '', 'lancelester@gmail.com', 'tb');
-
 -- --------------------------------------------------------
 
 --
@@ -176,13 +133,6 @@ CREATE TABLE `prenatalprescription` (
   `instructions` text NOT NULL,
   `prescriptionDate` date DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Dumping data for table `prenatalprescription`
---
-
-INSERT INTO `prenatalprescription` (`prescriptionId`, `philhealthId`, `medication`, `icDoctor`, `dosage`, `comment`, `instructions`, `prescriptionDate`) VALUES
-(37, 123, '1', 123, '1', '1', '1', '2023-12-11');
 
 -- --------------------------------------------------------
 
@@ -203,13 +153,6 @@ CREATE TABLE `tbappointment` (
   `createdAt` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
---
--- Dumping data for table `tbappointment`
---
-
-INSERT INTO `tbappointment` (`appId`, `philhealthId`, `scheduleId`, `appSymptom`, `currentMedications`, `symptomDuration`, `allergies`, `status`, `additionalInfo`, `createdAt`) VALUES
-(13, 1234, 68, 'qkwne oh', ' hqwo he', 'h oqhw eoiqh ', ' hqiwh eoi', 'process', ' hqoiwheoqiwe', '2023-12-10 18:23:18');
-
 -- --------------------------------------------------------
 
 --
@@ -227,13 +170,6 @@ CREATE TABLE `tbprescription` (
   `prescriptionDate` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
---
--- Dumping data for table `tbprescription`
---
-
-INSERT INTO `tbprescription` (`prescriptionId`, `philhealthId`, `icDoctor`, `medication`, `dosage`, `comment`, `instructions`, `prescriptionDate`) VALUES
-(8, 1234, 2467, 'FUCK YOU ', 'QKWJE PO', 'JO QWOEJ ', 'NIGGER', '2023-12-10 18:44:05');
-
 -- --------------------------------------------------------
 
 --
@@ -247,15 +183,6 @@ CREATE TABLE `usermessages` (
   `messageContent` text DEFAULT NULL,
   `timestamp` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Dumping data for table `usermessages`
---
-
-INSERT INTO `usermessages` (`messageId`, `senderId`, `receiverId`, `messageContent`, `timestamp`) VALUES
-(42, 123, 123, 'qweqwe', '2023-12-11 06:23:32'),
-(43, 123, 123, 'qweqwe fukc', '2023-12-11 06:23:38'),
-(44, 123, 123, 'qweqwe mdlaskzx mc.s', '2023-12-11 06:24:04');
 
 --
 -- Indexes for dumped tables
