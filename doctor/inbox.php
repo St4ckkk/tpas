@@ -7,23 +7,7 @@ if (!isset($_SESSION['doctorSession'])) {
 $usersession = $_SESSION['doctorSession'];
 $res = mysqli_query($con, "SELECT * FROM doctor WHERE doctorId=" . $usersession);
 $userRow = mysqli_fetch_array($res, MYSQLI_ASSOC);
-if ($res) {
 
-    // Fetching Patient Information
-    $patientQuery = "SELECT * FROM patient WHERE philhealthId=" . $userRow['philhealthId'];
-    $patientResult = mysqli_query($con, $patientQuery);
-
-    if ($patientResult) {
-        $patientRow = mysqli_fetch_array($patientResult, MYSQLI_ASSOC);
-        // Continue with the rest of your code
-    } else {
-        // Handle the case where the patient query fails
-        echo "Error in fetching patient information: " . mysqli_error($con);
-    }
-} else {
-    // Handle the case where the doctor query fails
-    echo "Error in fetching doctor information: " . mysqli_error($con);
-}
 
 
 ?>
@@ -119,6 +103,20 @@ if ($res) {
         margin-top: 20px;
     }
 
+    /* Add this to your existing styles */
+    .message-buttons {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .message-buttons form,
+    .message-buttons button {
+        margin-right: 10px;
+        /* Adjust as needed for spacing */
+    }
+
+
     /* Increase the font size and line height for better readability */
     .message p {
         margin: 0 0 10px;
@@ -177,6 +175,13 @@ if ($res) {
         color: #333;
         margin-top: 20px;
 
+    }
+
+    @media (max-width: 767px) {
+        h2 {
+            padding-top: 20px;
+            /* Adjust as needed */
+        }
     }
 </style>
 
@@ -272,8 +277,12 @@ if ($res) {
                     <section style="padding-bottom: 50px; padding-top: 0;">
                         <div class="row">
                             <div class="col-md-12">
-                                <h2>Welcome, <?php echo $userRow['doctorFirstName'] . ' ' . $userRow['doctorLastName']; ?>, to your Inbox</h2>
-
+                                <br>
+                                <br>
+                                <br>
+                                <h2 class="text-center text-xs-center">
+                                    Welcome, <?php echo $userRow['doctorFirstName'] . ' ' . $userRow['doctorLastName']; ?>, to your Inbox
+                                </h2>
                                 <h3 class="messages-header">Messages</h3>
                                 <div class="message-container">
                                     <div class="message">
@@ -297,7 +306,7 @@ if ($res) {
                                                 foreach ($messages as $messageRow) {
                                                     $philhealthId = $messageRow['senderPhilhealthId'];
                                         ?>
-                                                   
+
                                                     <div class="row">
                                                         <div class="col-md-12">
                                                             <div class="message-container <?php echo ($messageRow['senderId'] == $userRow['icDoctor']) ? 'doctor-message' : 'user-message'; ?>">
@@ -307,11 +316,13 @@ if ($res) {
                                                                     <p><strong>Philhealth ID:</strong> <?php echo $philhealthId; ?></p>
                                                                     <p><strong>Message:</strong> <?php echo $messageRow['messageContent']; ?></p>
                                                                     <p><strong>Timestamp:</strong> <?php echo $messageRow['timestamp']; ?></p>
-                                                                    <form action="deleteMessage.php" method="post">
-                                                                        <input type="hidden" name="messageId" value="<?php echo $messageRow['messageId']; ?>">
-                                                                        <button type="submit" class="btn btn-danger">Delete</button>
-                                                                    </form>
-                                                                    <button class="btn btn-primary custom-btn reply-btn" data-toggle="modal" data-target="#sendMessageModal_<?php echo $philhealthId ?>" data-doctorid="<?php echo $philhealthId; ?>">Reply</button>
+                                                                    <div class="message-buttons">
+                                                                        <form action="deleteMessage.php" method="post">
+                                                                            <input type="hidden" name="messageId" value="<?php echo $messageRow['messageId']; ?>">
+                                                                            <button type="submit" class="btn btn-danger">Delete</button>
+                                                                        </form>
+                                                                        <button class="btn btn-primary custom-btn reply-btn" data-toggle="modal" data-target="#sendMessageModal_<?php echo $philhealthId ?>" data-doctorid="<?php echo $philhealthId; ?>">Reply</button>
+                                                                    </div>
                                                                 </div>
                                                             </div>
                                                         </div>
@@ -329,8 +340,8 @@ if ($res) {
                                         ?>
                                         <!-- Add a form for sending messages outside of the loop -->
                                         <form action="sendmessage.php" method="post">
-                                            <label for="philhealthId">Enter the Philhealth ID of the Patient</label>
-                                             <input type="text" name="philhealthId">
+                                            <label for="philhealthId">Enter the Philhealth ID of the Patient: </label>
+                                            <input type="text" name="philhealthId" style="border: 2px solid #000;">
                                             <textarea name="message" placeholder="Type your message here"></textarea>
                                             <button type="submit" class="btn btn-primary">Send Message</button>
                                         </form>

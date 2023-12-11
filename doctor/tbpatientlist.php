@@ -30,6 +30,7 @@ $userRow = mysqli_fetch_array($res, MYSQLI_ASSOC);
     <!-- Bootstrap Core CSS -->
     <!-- <link href="assets/css/bootstrap.css" rel="stylesheet"> -->
     <link href="assets/css/material.css" rel="stylesheet">
+
     <!-- Custom CSS -->
     <link href="assets/css/sb-admin.css" rel="stylesheet">
     <link href="assets/css/time/bootstrap-clockpicker.css" rel="stylesheet">
@@ -38,6 +39,48 @@ $userRow = mysqli_fetch_array($res, MYSQLI_ASSOC);
     <!-- Special version of Bootstrap that only affects content wrapped in .bootstrap-iso -->
     <!-- Custom Fonts -->
 </head>
+<style>
+    /* Custom Styles for Responsive Table */
+    .table-responsive {
+        overflow-x: auto;
+    }
+
+    .table th,
+    .table td {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+
+
+    .table th {
+        text-align: center;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 100%;
+
+    }
+
+    .filters input {
+        text-align: center;
+        width: 100%;
+    }
+
+    .filters input::placeholder {
+        text-align: center;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 100%;
+        font-size: 12px;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+    }
+</style>
 
 <body>
     <div id="wrapper">
@@ -85,17 +128,58 @@ $userRow = mysqli_fetch_array($res, MYSQLI_ASSOC);
             </ul>
             <!-- Sidebar Menu Items - These collapse to the responsive navigation menu on small screens -->
             <div class="collapse navbar-collapse navbar-ex1-collapse">
+
                 <ul class="nav navbar-nav side-nav">
                     <li>
                         <a href="doctordashboard.php"><i class="fa fa-fw fa-dashboard"></i> Dashboard</a>
                     </li>
-                    <li>
-                        <a href="addschedule.php"><i class="fa fa-fw fa-table"></i> Doctor Schedule</a>
-                    </li>
+                    <?php
+                    // Check if the user's role is "superAdmin"
+                    if ($userRow['doctorRole'] == 'superAdmin') {
+                        // Display the following options for the superAdmin role
+                    ?>
+                        <li>
+                            <a href="addschedule.php"><i class="fa fa-fw fa-table"></i> Doctor Schedule</a>
+                        </li>
+                        <li>
+                            <a href="doctor.php"><i class="fa fa-fw fa-user"></i> Doctor</a>
+                        </li>
+                        <li>
+                            <a href="patientlist.php"><i class="fa fa-fw fa-user"></i>Prenatal Patient List</a>
+                        </li>
+                        <li class="active">
+                            <a href="tbpatientlist.php"><i class="fa fa-fw fa-user"></i>TB Patient List</a>
+                        </li>
+                    <?php
+                    }
+                    ?>
+                    <?php
+                    $allowedRoles = ['Pulmonologist', 'Obstetrician'];
 
-                    <li class="active">
-                        <a href="tbpatientlist.php"><i class="fa fa-fw fa-user"></i>TB Patient List</a>
-                    </li>
+                    // Check if the user's role is in the allowedRoles array
+                    if (in_array($userRow['doctorRole'], $allowedRoles)) {
+                        // Display the following options for specific roles
+                    ?>
+                        <li>
+                            <a href="addschedule.php"><i class="fa fa-fw fa-table"></i> Doctor Schedule</a>
+                        </li>
+                        <li>
+                            <?php
+                            // Check if the doctor role is Pulmonologist
+                            if ($userRow['doctorRole'] == 'Pulmonologist') {
+                            ?>
+                                <a href="tbpatientlist.php"><i class="fa fa-fw fa-user"></i> TB Patient List</a>
+                            <?php
+                            } elseif ($userRow['doctorRole'] == 'Obstetrician') {
+                            ?>
+                                <a href="patientlist.php"><i class="fa fa-fw fa-user"></i> Patient List</a>
+                            <?php
+                            }
+                            ?>
+                        </li>
+                    <?php
+                    }
+                    ?>
                 </ul>
             </div>
             <!-- /.navbar-collapse -->
@@ -136,72 +220,83 @@ $userRow = mysqli_fetch_array($res, MYSQLI_ASSOC);
                     <div class="panel-body">
                         <!-- panel content start -->
                         <!-- Table -->
-                        <table class="table table-hover table-bordered">
-                            <thead>
-                                <tr class="filters">
-                                    <th><input type="text" class="form-control" placeholder="Patient ID" disabled></th>
-                                    <th><input type="text" class="form-control" placeholder="Name" disabled></th>
-                                    <th><input type="text" class="form-control" placeholder="Password" disabled></th>
-                                    <th><input type="text" class="form-control" placeholder="ContactNo." disabled></th>
-                                    <th><input type="text" class="form-control" placeholder="Gender" disabled></th>
-                                    <th><input type="text" class="form-control" placeholder="Status" disabled></th>
-                                    <th><input type="text" class="form-control" placeholder="Birthdate" disabled></th>
-                                    <th><input type="text" class="form-control" placeholder="Address" disabled></th>
-                                    <th><input type="text" class="form-control" placeholder="Symptoms" disabled></th>
-                                    <th><input type="text" class="form-control" placeholder="Appointment Type" disabled></th>
-                                    <th>Actions</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
+                        <div class="table-responsive">
+                            <table class="table table-hover table-bordered">
+                                <thead>
+                                    <tr class="filters">
+                                        <th><input type="text" class="form-control" placeholder="Philhealth ID" disabled></th>
+                                        <th><input type="text" class="form-control" placeholder="Name" disabled></th>
+                                        <th><input type="text" class="form-control" placeholder="Contact" disabled></th>
+                                        <th><input type="text" class="form-control" placeholder="Gender" disabled></th>
+                                        <th><input type="text" class="form-control" placeholder="Status" disabled></th>
+                                        <th><input type="text" class="form-control" placeholder="BOD" disabled></th>
+                                        <th><input type="text" class="form-control" placeholder="Address" disabled></th>
+                                        <th><input type="text" class="form-control" placeholder="Symptoms" disabled></th>
+                                        <th><input type="text" class="form-control" placeholder="Duration" disabled></th>
+                                        <th><input type="text" class="form-control" placeholder="Allergies" disabled></th>
+                                        <th><input type="text" class="form-control" placeholder="Current Meds" disabled></th>
+                                        <th><input type="text" class="form-control" placeholder="Info" disabled></th>
+                                        <th><input type="text" class="form-control" placeholder="Type" disabled></th>
+                                        <th>Actions</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
 
-                            <?php
-                            $result = mysqli_query($con, "SELECT a.*, d.appSymptom
-                            FROM patient a
-                            JOIN tbappointment d ON a.philhealthId = d.philhealthId
-                            WHERE a.appointmentType = 'tb'
-                            ORDER BY d.appId DESC");
-
-
-                            if (!$result) {
-
-                                die('Error: ' . mysqli_error($con));
-                            }
-
-                            while ($patientRow = mysqli_fetch_array($result)) {
+                                <?php
+                                $result = mysqli_query($con, "SELECT a.*, d.appSymptom, d.symptomDuration, d.allergies, d.currentMedications, d.additionalInfo
+FROM patient a
+JOIN tbappointment d ON a.philhealthId = d.philhealthId
+WHERE a.appointmentType = 'tb'
+ORDER BY d.appId DESC
+");
 
 
-                                echo "<tbody>";
-                                echo "<tr>";
-                                echo "<td>" . $patientRow['philhealthId'] . "</td>";
-                                echo "<td>" . $patientRow['patientLastName'] . "</td>";
-                                echo "<td>" . $patientRow['password'] . "</td>";
-                                echo "<td>" . $patientRow['patientPhone'] . "</td>";
-                                echo "<td>" . $patientRow['patientGender'] . "</td>";
-                                echo "<td>" . $patientRow['patientMaritialStatus'] . "</td>";
-                                echo "<td>" . $patientRow['patientDOB'] . "</td>";
-                                echo "<td>" . $patientRow['patientAddress'] . "</td>";
-                                echo "<td>" . $patientRow['appSymptom'] . "</td>";
-                                echo "<td>" . $patientRow['appointmentType'] . "</td>";
-                                if ($patientRow['appointmentType'] == 'prenatal') {
-                                    echo "<td class=''><a href='prenatalPrescription.php?philhealthId=" . $patientRow['philhealthId'] . "' class='prescription-btn'>Give Prescription</a></td>";
-                                } else if ($patientRow['appointmentType'] == 'tb') {
-                                    echo "<td class=''><a href='tbPrescription.php?philhealthId=" . $patientRow['philhealthId'] . "' class='prescription-btn'>Give Prescription</a></td>";
+                                if (!$result) {
+
+                                    die('Error: ' . mysqli_error($con));
                                 }
-                                echo "<form method='POST'>";
-                                echo "<td class='text-center'><a href='#' id='" . $patientRow['philhealthId'] . "' class='delete'>Delete</a>
+
+                                while ($patientRow = mysqli_fetch_array($result)) {
+
+
+                                    echo "<tbody>";
+                                    echo "<tr>";
+                                    echo "<td>" . $patientRow['philhealthId'] . "</td>";
+                                    echo "<td>" . $patientRow['patientLastName'] . "</td>";
+                                    echo "<td>" . $patientRow['patientPhone'] . "</td>";
+                                    echo "<td>" . $patientRow['patientGender'] . "</td>";
+
+                                    echo "<td>" . $patientRow['patientMaritialStatus'] . "</td>";
+                                    echo "<td>" . $patientRow['patientDOB'] . "</td>";
+                                    echo "<td>" . $patientRow['patientAddress'] . "</td>";
+                                    echo "<td>" . $patientRow['appSymptom'] . "</td>";
+                                    echo "<td>" . $patientRow['symptomDuration'] . "</td>";
+                                    echo "<td>" . $patientRow['allergies'] . "</td>";
+                                    echo "<td>" . $patientRow['currentMedications'] . "</td>";
+                                    echo "<td>" . $patientRow['additionalInfo'] . "</td>";
+                                    echo "<td>" . $patientRow['appointmentType'] . "</td>";
+                                    if ($patientRow['appointmentType'] == 'prenatal') {
+                                        echo "<td class=''><a href='prenatalPrescription.php?philhealthId=" . $patientRow['philhealthId'] . "' class='prescription-btn'>Give Prescription</a></td>";
+                                    } else if ($patientRow['appointmentType'] == 'tb') {
+                                        echo "<td class=''><a href='tbPrescription.php?philhealthId=" . $patientRow['philhealthId'] . "' class='prescription-btn'>Give Prescription</a></td>";
+                                    }
+                                    echo "<form method='POST'>";
+                                    echo "<td class='text-center'><a href='#' id='" . $patientRow['philhealthId'] . "' class='delete'>Delete</a>
                             </td>";
-                            }
-                            echo "</tr>";
-                            echo "</tbody>";
-                            echo "</table>";
-                            echo "<div class='panel panel-default'>";
-                            echo "<div class='col-md-offset-3 pull-right'>";
-                            echo "<button class='btn btn-primary' type='submit' value='Submit' name='submit'>Update</button>";
-                            echo "</div>";
-                            echo "</div>";
-                            ?>
-                            <!-- panel content end -->
-                            <!-- panel end -->
+                                }
+                                echo "</tr>";
+                                echo "</tbody>";
+                                echo "</table>";
+                                echo "<div class='panel panel-default'>";
+                                echo "<div class='col-md-offset-3 pull-right'>";
+                                echo "<button class='btn btn-primary' type='submit' value='Submit' name='submit'>Update</button>";
+                                echo "</div>";
+                                echo "</div>";
+                                ?>
+                                <!-- panel content end -->
+                                <!-- panel end -->
+                            </table>
+                        </div>
                     </div>
                 </div>
                 <!-- panel start -->
