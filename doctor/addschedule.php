@@ -500,6 +500,7 @@ if (isset($_POST['submit'])) {
                     }
                     return false;
                 });
+
                 $(".update-btn").click(function() {
                     var scheduleId = $(this).attr("id");
                     $.ajax({

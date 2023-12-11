@@ -23,22 +23,14 @@ if (isset($_POST['addDoctor'])) {
     $doctorDOB = mysqli_real_escape_string($con, $_POST['doctorDOB']);
     $doctorRole = mysqli_real_escape_string($con, $_POST['doctorRole']);
     // INSERT
-    $query = "INSERT INTO doctor (icDoctor, password,doctorId, doctorFirstName, doctorLastName, doctorAddress, doctorPhone, doctorEmail, doctorDOB, doctorRole)
+    $query = "INSERT INTO doctor (icDoctor, password, doctorId, doctorFirstName, doctorLastName, doctorAddress, doctorPhone, doctorEmail, doctorDOB, doctorRole)
               VALUES ('$icDoctor', '$password','$doctorId', '$doctorFirstName', '$doctorLastName', '$doctorAddress', '$doctorPhone', '$doctorEmail', '$doctorDOB', '$doctorRole')";
 
     $result = mysqli_query($con, $query);
 
     if ($result) {
-?>
-        <script type="text/javascript">
-            alert('Doctor added successfully.');
-        </script>
-    <?php
+        echo 'success';
     } else {
-    ?>
-        <script type="text/javascript">
-            alert('Adding doctor failed. Please try again.');
-        </script>
-<?php
+        echo 'Error: ' . mysqli_error($con); // This will show the MySQL error if any
     }
 }

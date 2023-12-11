@@ -164,7 +164,7 @@ $userRow = mysqli_fetch_array($res, MYSQLI_ASSOC);
                                     <!-- Doctor Id -->
                                     <div class="form-group col-md-6">
                                         <label class="control-label requiredField" for="doctorId">Doctor Id <span class="asteriskField">*</span></label>
-                                        <input class="form-control" id="icDoctor" name="doctorId" type="text" required />
+                                        <input class="form-control" id="doctorId" name="doctorId" type="text" required />
                                     </div>
                                     <!-- Password -->
                                     <div class="form-group col-md-6">
@@ -305,14 +305,19 @@ $userRow = mysqli_fetch_array($res, MYSQLI_ASSOC);
         $(function() {
             $(".delete").click(function() {
                 var element = $(this);
-                var id = element.attr("id");
-                var info = 'id=' + id;
+                var doctorId = element.data("doctor-id"); // Use data-doctor-id attribute
+                var info = 'doctorId=' + doctorId; // Use correct parameter name
                 if (confirm("Are you sure you want to delete this?")) {
                     $.ajax({
                         type: "POST",
                         url: "deletedoctor.php",
                         data: info,
-                        success: function() {}
+                        success: function(response) {
+                            // Optionally handle success response
+                        },
+                        error: function(xhr, status, error) {
+                            console.error("Error deleting doctor:", error);
+                        }
                     });
                     $(this).parent().parent().fadeOut(300, function() {
                         $(this).remove();
@@ -325,8 +330,9 @@ $userRow = mysqli_fetch_array($res, MYSQLI_ASSOC);
     <script>
         $(document).ready(function() {
             $("#addDoctorBtn").click(function() {
-                // Gather form data
+
                 var formData = {
+                    addDoctor: true, // Add this line
                     icDoctor: $("#icDoctor").val(),
                     doctorId: $("#doctorId").val(),
                     password: $("#password").val(),
@@ -345,13 +351,13 @@ $userRow = mysqli_fetch_array($res, MYSQLI_ASSOC);
                     url: "adddoctor.php",
                     data: formData,
                     success: function(response) {
-                        // Handle the response here, for example, show an alert
-                        if (response === 'success') {
+                        if ($.trim(response) == 'success') {
                             alert('Doctor added successfully.');
                         } else {
-                            alert('Adding doctor failed. Please try again.');
+                            alert('Adding doctor failed. Please try again. Error: ' + response);
                         }
                     }
+
                 });
             });
         });
