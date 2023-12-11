@@ -280,63 +280,38 @@ if ($res) {
                                         <?php
                                         // Execute the messageQuery
                                         $messageQuery = "SELECT m.*, p.philhealthId AS senderPhilhealthId, p.patientLastName 
-                                            FROM usermessages m
-                                            JOIN patient p ON m.senderId = p.philhealthId
-                                            WHERE m.receiverId = " . $userRow['icDoctor'];
+                                        FROM usermessages m
+                                        JOIN patient p ON m.senderId = p.philhealthId
+                                        WHERE m.receiverId = " . $userRow['icDoctor'];
 
                                         $messageResult = mysqli_query($con, $messageQuery);
 
                                         // Check if the query was successful and if there are rows
                                         if ($messageResult) {
                                             if (mysqli_num_rows($messageResult) > 0) {
-                                                // Fetch the first messageRow to get sender's information
-                                                while ($messageRow = mysqli_fetch_array($messageResult, MYSQLI_ASSOC)) {
-                                                    // Use the $messageRow to display or process the sender's information
+                                                // Fetch all rows at once
+                                                $messages = mysqli_fetch_all($messageResult, MYSQLI_ASSOC);
+
+                                                // Loop through existing messages
+                                                $philhealthId = ""; // Initialize the variable before the loop
+                                                foreach ($messages as $messageRow) {
                                                     $philhealthId = $messageRow['senderPhilhealthId'];
                                         ?>
-
+                                                   
                                                     <div class="row">
-                                                        <?php
-                                                        while ($messageRow = mysqli_fetch_array($messageResult, MYSQLI_ASSOC)) {
-                                                            $philhealthId = $messageRow['senderPhilhealthId'];
-                                                        ?>
-                                                            <div class="col-md-12">
-                                                                <div class="message-container <?php echo ($messageRow['senderId'] == $userRow['icDoctor']) ? 'doctor-message' : 'user-message'; ?>">
-                                                                    <div class="message">
-                                                                        <p><strong>Sender:</strong> Mr. <?php echo $messageRow['patientLastName']; ?></p>
-                                                                        <p><strong>Philhealth ID:</strong> <?php echo $philhealthId; ?></p>
-                                                                        <p><strong>Message:</strong> <?php echo $messageRow['messageContent']; ?></p>
-                                                                        <p><strong>Timestamp:</strong> <?php echo $messageRow['timestamp']; ?></p>
-                                                                        <form action="deleteMessage.php" method="post">
-                                                                            <input type="hidden" name="messageId" value="<?php echo $messageRow['messageId']; ?>">
-                                                                            <button type="submit" class="btn btn-danger">Delete</button>
-                                                                        </form>
-                                                                        <button class="btn btn-primary custom-btn reply-btn" data-toggle="modal" data-target="#sendMessageModal_<?php echo $philhealthId ?>" data-doctorid="<?php echo $philhealthId; ?>">Reply</button>
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                        <?php
-                                                        }
-                                                        ?>
-                                                    </div>
-
-                                                    <!-- Modal for sending messages -->
-                                                    <div class="modal fade custom-modal" id="sendMessageModal_<?php echo $philhealthId; ?>" tabindex="-1" role="dialog" aria-labelledby="sendMessageModalLabel_<?php echo $philhealthId; ?>">
-                                                        <div class="modal-dialog" role="document">
-                                                            <div class="modal-content">
-                                                                <div class="modal-header">
-                                                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                                                        <span aria-hidden="true">&times;</span>
-                                                                    </button>
-                                                                    <h4 class="modal-title" id="sendMessageModalLabel">Send Message</h4>
-                                                                </div>
-                                                                <div class="modal-body">
-                                                                    <!-- Add a form for sending messages in the modal -->
-                                                                    <form id="sendMessageForm">
-                                                                        <input type="hidden" id="philhealthId" name="philhealthId" value="<?php echo $philhealthId; ?>">
-                                                                        <textarea id="message" name="message" placeholder="Type your message here"></textarea>
-                                                                        <button type="submit" class="btn btn-primary">Send Message</button>
+                                                        <div class="col-md-12">
+                                                            <div class="message-container <?php echo ($messageRow['senderId'] == $userRow['icDoctor']) ? 'doctor-message' : 'user-message'; ?>">
+                                                                <div class="message">
+                                                                    <!-- Display message content -->
+                                                                    <p><strong>Sender:</strong> Mr. <?php echo $messageRow['patientLastName']; ?></p>
+                                                                    <p><strong>Philhealth ID:</strong> <?php echo $philhealthId; ?></p>
+                                                                    <p><strong>Message:</strong> <?php echo $messageRow['messageContent']; ?></p>
+                                                                    <p><strong>Timestamp:</strong> <?php echo $messageRow['timestamp']; ?></p>
+                                                                    <form action="deleteMessage.php" method="post">
+                                                                        <input type="hidden" name="messageId" value="<?php echo $messageRow['messageId']; ?>">
+                                                                        <button type="submit" class="btn btn-danger">Delete</button>
                                                                     </form>
+                                                                    <button class="btn btn-primary custom-btn reply-btn" data-toggle="modal" data-target="#sendMessageModal_<?php echo $philhealthId ?>" data-doctorid="<?php echo $philhealthId; ?>">Reply</button>
                                                                 </div>
                                                             </div>
                                                         </div>
@@ -352,6 +327,37 @@ if ($res) {
                                             echo "Error in SQL query: " . mysqli_error($con);
                                         }
                                         ?>
+                                        <!-- Add a form for sending messages outside of the loop -->
+                                        <form action="sendmessage.php" method="post">
+                                            <label for="philhealthId">Enter the Philhealth ID of the Patient</label>
+                                             <input type="text" name="philhealthId">
+                                            <textarea name="message" placeholder="Type your message here"></textarea>
+                                            <button type="submit" class="btn btn-primary">Send Message</button>
+                                        </form>
+
+
+
+                                        <!-- Modal for sending messages -->
+                                        <div class="modal fade custom-modal" id="sendMessageModal_<?php echo $philhealthId; ?>" tabindex="-1" role="dialog" aria-labelledby="sendMessageModalLabel_<?php echo $philhealthId; ?>">
+                                            <div class="modal-dialog" role="document">
+                                                <div class="modal-content">
+                                                    <div class="modal-header">
+                                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                            <span aria-hidden="true">&times;</span>
+                                                        </button>
+                                                        <h4 class="modal-title" id="sendMessageModalLabel">Send Message</h4>
+                                                    </div>
+                                                    <div class="modal-body">
+                                                        <!-- Add a form for sending messages in the modal -->
+                                                        <form id="sendMessageForm">
+                                                            <input type="hidden" id="philhealthId" name="philhealthId" value="<?php echo $philhealthId; ?>">
+                                                            <textarea id="message" name="message" placeholder="Type your message here"></textarea>
+                                                            <button type="submit" class="btn btn-primary">Send Message</button>
+                                                        </form>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
 
 
                                     </div>
@@ -372,6 +378,10 @@ if ($res) {
     <script src="assets/js/bootstrap.min.js"></script>
     <!-- Add any additional scripts needed for the inbox page -->
     <!-- Add this script after the jQuery script -->
+
+
+
+
     <script>
         $(document).ready(function() {
             // Handle reply button click

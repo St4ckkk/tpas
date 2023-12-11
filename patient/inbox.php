@@ -269,6 +269,18 @@ function getAppointmentLink($appointmentType, $patientId)
                                 </form>
                             </div>
                         </div>
+
+                        <div class="message-container">
+                            <div class="message">
+                                <!-- Add a form for sending messages -->
+                                <form action="sendmessage.php" method="post">
+                                    <input type="hidden" name="doctorId" value="<?php echo $prescriptionRow['icDoctor']; ?>">
+                                    <textarea name="message" placeholder="Type your message here"></textarea>
+                                    <button type="submit" class="btn btn-primary">Send Message</button>
+                                </form>
+                            </div>
+                        </div>
+
                         <!-- Add this modal structure inside the <body> tag, before the closing </body> tag -->
                         <div class="modal fade custom-modal" id="sendMessageModal_<?php echo $prescriptionRow['icDoctor']; ?>" tabindex="-1" role="dialog" aria-labelledby="sendMessageModalLabel_<?php echo $prescriptionRow['icDoctor']; ?>">
                             <div class="modal-dialog" role="document">
@@ -294,7 +306,7 @@ function getAppointmentLink($appointmentType, $patientId)
                         <?php
                         $messageQuery = "SELECT * FROM doctormessages WHERE receiverId=" . $userRow['philhealthId'] . " AND senderId=" . $prescriptionRow['icDoctor'];
                         $messageResult = mysqli_query($con, $messageQuery);
-
+                        $icDoctor = "";
                         if ($messageResult) {
                             if (mysqli_num_rows($messageResult) > 0) {
                                 while ($messageRow = mysqli_fetch_array($messageResult, MYSQLI_ASSOC)) {
