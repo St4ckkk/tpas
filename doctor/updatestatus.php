@@ -11,6 +11,8 @@ if (isset($_POST['scheduleId'])) {
 
     if ($result) {
         echo "success";
+        // Redirect back to addschedule.php after a short delay (e.g., 2 seconds)
+        header("refresh:2;url=addschedule.php");
     } else {
         echo "error";
     }
