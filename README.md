@@ -1,4 +1,4 @@
-# ScheduCare Database Setup
+# TPAS Database Setup
 
 This repository contains the necessary instructions to set up the ScheduCare database named "nena" and import the required SQL file.
 
@@ -12,8 +12,8 @@ Make sure you have the following installed on your system:
 
 1. **Clone the Repository or Download it:**
    ```bash
-   git clone https://github.com/your-username/nena-system.git
-   cd nena-system
+   git clone https://github.com/your-username/TPAS.git
+   cd TPAS
 
 Create the Database:
 Access your database management system and create a new database named "nena."
