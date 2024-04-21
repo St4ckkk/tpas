@@ -55,7 +55,7 @@ if (!$userRow) {
     <script src='https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js'></script>
     <script src='https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js'></script>
     <script src='https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.10.0/fullcalendar.min.js'></script>
-    <link rel="shortcut icon" href="assets/favicon/tpas.ico" type="image/x-icon">
+    <link rel="shortcut icon" href="assets/favicon/tpasss.ico" type="image/x-icon">
     <link rel="stylesheet" href="assets/css/style.css" />
     <title>appointment.one</title>
 </head>
