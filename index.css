@@ -11,28 +11,31 @@ body {
   padding: 0;
   background-color: #c9ddfe;
 }
-nav {
-  margin-top: 50px;
-  text-align: center;
+.header {
+  display: flex;
+  justify-content: space-evenly;
+  align-items: center;
+  font-size: 1.1rem;
+  margin-top: 30px;
+  padding: 0 20px;
 }
-nav .brand img {
-  vertical-align: middle;
-}
-nav ul {
-  display: inline-block;
-  margin: 0;
+
+ul {
+  list-style: none;
   padding: 0;
-  list-style-type: none;
-  text-decoration: no;
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
 }
-nav .tags {
-  display: inline;
-  padding: 0 15px;
-  list-style-type: none;
-  text-decoration: no;
+.left-links,
+.right-links,
+.middle-links {
+  display: flex;
+  align-items: center;
 }
-nav ul li {
-  padding: 0px 20px;
+ul img {
+  height: 50px;
+  width: 50px;
 }
 .left-links {
   align-items: center;
@@ -42,7 +45,7 @@ nav ul li {
   height: 60px;
   margin-bottom: 8px;
 }
-.middle-links li {
+.middle-links li:first-child a {
   text-decoration: none;
   position: relative;
   display: inline-block;
@@ -51,6 +54,17 @@ nav ul li {
 .middle-links li {
   position: relative;
   font-size: 2rem;
+}
+.middle-links a {
+  color: #86888b;
+}
+.middle-links #a-home {
+  color: #000;
+  font-weight: 600;
+}
+.middle-links {
+  justify-content: center;
+  gap: 3rem;
 }
 
 .middle-links a {
@@ -96,6 +110,27 @@ nav ul li {
 .middle-links a:hover::before {
   width: 10px;
 }
+.right-links img {
+  width: 50px;
+  height: 50px;
+}
+.right-links button {
+  border: solid 3px #3e81ec;
+  color: #000;
+  font-size: 1.2rem;
+  font-weight: 500;
+  cursor: pointer;
+  padding: 5px 10px; /* Adjust padding as needed */
+  background-color: transparent;
+}
+.left-links {
+  align-items: center;
+}
+.left-links img {
+  width: 60px;
+  height: 60px;
+  margin-bottom: 8px;
+}
 .tags {
   display: flex;
   align-items: center;
@@ -105,6 +140,17 @@ nav ul li {
 .tags img {
   height: 50px;
   margin-right: 5px;
+}
+.left-links img {
+  background-color: #c9ddfe;
+  padding: 10px;
+  border-radius: 10px;
+  margin-bottom: 0px;
+  width: 70px;
+  height: 70px;
+}
+.left-links {
+  font-weight: bold;
 }
 .tags a {
   color: #86888b;
@@ -116,7 +162,6 @@ nav ul li {
 .brand {
   font-size: 40px;
   color: #000;
-  margin-right: 100px;
 }
 
 .container {

@@ -1,33 +1,48 @@
 <?php
 session_start();
-include_once '../assets/conn/dbconnect.php';
+require_once '../assets/conn/dbconnect.php'; // Use require_once to ensure the script fails if the file is not found.
+
+// Redirect the user if they are not logged in.
 if (!isset($_SESSION['patientSession'])) {
 	header("Location: ../index.php");
+	exit;
 }
 
+// Initialize variables and functions.
 $usersession = $_SESSION['patientSession'];
+$userRow = getUserData($con, $usersession);
 
-
-$res = mysqli_query($con, "SELECT * FROM patient WHERE philhealthId=" . $usersession);
-
-if ($res === false) {
-	echo mysqli_error($con);
+function getUserData($con, $philhealthId)
+{
+	$stmt = $con->prepare("SELECT * FROM patient WHERE philhealthId = ?");
+	$stmt->bind_param("s", $philhealthId);
+	$stmt->execute();
+	$result = $stmt->get_result();
+	if ($result->num_rows === 0) {
+		echo "No records found.";
+		return null;
+	}
+	return $result->fetch_assoc();
 }
 
-$userRow = mysqli_fetch_array($res, MYSQLI_ASSOC);
 function getAppointmentLink($appointmentType, $patientId)
 {
-	if ($appointmentType == 'tb') {
-		return "tbpatientapplist.php?patientId=$patientId";
-	} elseif ($appointmentType == 'prenatal') {
-		return "patientapplist.php?patientId=$patientId";
-	} else {
-		// Add default case or handle other appointment types as needed
-		return "#"; // Replace "#" with the default link
+	switch ($appointmentType) {
+		case 'tb':
+			return "tbpatientapplist.php?patientId=$patientId";
+		case 'prenatal':
+			return "patientapplist.php?patientId=$patientId";
+		default:
+			return "#";
 	}
 }
 
+if (!$userRow) {
+	echo "Failed to fetch user data.";
+}
+
 ?>
+
 
 
 <!DOCTYPE html>
@@ -46,102 +61,47 @@ function getAppointmentLink($appointmentType, $patientId)
 	<link rel="stylesheet" href="assets/font-awesome/css/font-awesome.min.css" />
 
 </head>
-<style>
-	.promo-1 {
-		position: relative;
-		height: 95vh;
-		overflow: hidden;
-	}
-
-	.promo-1::before {
-		content: "";
-		position: absolute;
-		top: 0;
-		left: 0;
-		width: 100%;
-		height: 100%;
-		background: rgba(0, 0, 0, 0.2);
-	}
-
-	.promo-1 {
-		background: url("assets/img/Female-Doctor.png") center no-repeat;
-		-webkit-background-size: cover;
-		-moz-background-size: cover;
-		-o-background-size: cover;
-		background-size: cover;
-		overflow: hidden;
-	}
-
-
-	.promo-1 .video-wrapper {
-		position: relative;
-		display: inline-block;
-		max-width: 600px;
-		margin: 20px auto 0 auto;
-		vertical-align: top;
-		background-color: #fff;
-		padding: 16px;
-		box-shadow: 0 12px 15px 0 rgba(0, 0, 0, 0.24);
-	}
-
-	h2 {
-		color: #fff;
-	}
-</style>
 
 <body>
 
-	<!-- navigation -->
-	<nav class="navbar navbar-default " role="navigation">
+
+	<nav class="navbar navbar-default" role="navigation">
 		<div class="container-fluid">
-			<!-- Brand and toggle get grouped for better mobile display -->
-			<div class="navbar-header ">
+			<div class="navbar-header">
 				<button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
 					<span class="sr-only">Toggle navigation</span>
 					<span class="icon-bar"></span>
 					<span class="icon-bar"></span>
 					<span class="icon-bar"></span>
 				</button>
-				<a class="navbar-brand" href="patient.php"><img alt="Brand" src="assets/img/cd-logo.png" height="20px"></a>
+				<a class="navbar-brand" href="patient.php"><img alt="Brand" src="assets/img/cd-logo.png" height="20"></a>
 			</div>
-			<!-- Collect the nav links, forms, and other content for toggling -->
 			<div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
 				<ul class="nav navbar-nav">
-					<ul class="nav navbar-nav">
-						<li><a href="patient.php">Home</a></li>
-						<!-- <li><a href="profile.php?patientId=<?php echo $userRow['philhealthId']; ?>" >Profile</a></li> -->
-						<li>
-							<a href="<?php echo getAppointmentLink($userRow['appointmentType'], $userRow['philhealthId']); ?>">Appointment</a>
-						</li>
-					</ul>
+					<li><a href="patient.php">Home</a></li>
+					<li><a href="profile.php?patientId=<?php echo $userRow['philhealthId']; ?>">Profile</a></li>
+					<li><a href="<?php echo getAppointmentLink($userRow['appointmentType'], $userRow['philhealthId']); ?>">Appointment</a></li>
 				</ul>
-
 				<ul class="nav navbar-nav navbar-right">
 					<li class="dropdown">
-						<a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-user"></i> <?php echo $userRow['patientFirstName']; ?> <?php echo $userRow['patientLastName']; ?><b class="caret"></b></a>
+						<a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-user"></i> <?php echo $userRow['patientName']; ?> <b class="caret"></b></a>
 						<ul class="dropdown-menu">
-							<li>
-								<a href="profile.php?patientId=<?php echo $userRow['philhealthId']; ?>"><i class="fa fa-fw fa-user"></i> Profile</a>
-							</li>
-							<li>
-								<a href="<?php echo getAppointmentLink($userRow['appointmentType'], $userRow['philhealthId']); ?>"> <i class="glyphicon glyphicon-file"></i> Appointment</a>
-							</li>
-							<li>
-								<a href="inbox.php?patientId=<?php echo $userRow['philhealthId'] ?>"><i class="fa fa-fw fa-envelope"></i> Inbox</a>
-							</li>
+							<li><a href="profile.php?patientId=<?php echo $userRow['philhealthId']; ?>"><i class="fa fa-fw fa-user"></i> Profile</a></li>
+							<li><a href="<?php echo getAppointmentLink($userRow['appointmentType'], $userRow['philhealthId']); ?>"><i class="glyphicon glyphicon-file"></i> Appointment</a></li>
+							<li><a href="inbox.php?patientId=<?php echo $userRow['philhealthId']; ?>"><i class="fa fa-fw fa-envelope"></i> Inbox</a></li>
 							<li class="divider"></li>
-							<li>
-								<a href="patientlogout.php?logout"><i class="fa fa-fw fa-power-off"></i> Log Out</a>
-							</li>
+							<li><a href="patientlogout.php?logout"><i class="fa fa-fw fa-power-off"></i> Log Out</a></li>
 						</ul>
 					</li>
 				</ul>
 			</div>
 		</div>
 	</nav>
-	<!-- navigation -->
 
-	<!-- 1st section start -->
+
+
+
+
 	<section id="promo-1" class="content-block promo-1 min-height-600px bg-offwhite">
 		<div class="container">
 			<div class="row">
@@ -164,7 +124,7 @@ function getAppointmentLink($appointmentType, $patientId)
 					?>
 					<!-- notification end -->
 
-					<h2 style="color: white;">Hi! <?php echo $userRow['patientFirstName']; ?> <?php echo $userRow['patientLastName']; ?>. Make appointment today!</h2>
+					<h2 style="color: white;">Hi! <?php echo $userRow['patientName']; ?>. Make appointment today!</h2>
 					<div class="input-group" style="margin-bottom:10px;">
 						<div class="input-group-addon">
 							<i class="fa fa-calendar">
