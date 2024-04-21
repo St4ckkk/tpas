@@ -1,40 +1,4 @@
-<?php
-include_once 'assets/conn/dbconnect.php';
-// include_once 'assets/conn/server.php';
-?>
 
-
-<!-- login -->
-<!-- check session -->
-<?php
-session_start();
-// session_destroy();
-if (isset($_SESSION['patientSession']) != "") {
-    header("Location: patient/patient.php");
-}
-if (isset($_POST['login'])) {
-    $philhealthId = mysqli_real_escape_string($con, $_POST['philhealthId']);
-    $password = mysqli_real_escape_string($con, $_POST['password']);
-
-    $res = mysqli_query($con, "SELECT * FROM patient WHERE philhealthId = '$philhealthId'");
-    $row = mysqli_fetch_array($res, MYSQLI_ASSOC);
-    if (isset($row) && $row['password'] == $password) {
-        $_SESSION['patientSession'] = $row['philhealthId'];
-?>
-        <script type="text/javascript">
-            alert('Login Success');
-        </script>
-    <?php
-        header("Location: patient/patient.php");
-    } else {
-    ?>
-        <script>
-            alert('wrong input ');
-        </script>
-<?php
-    }
-}
-?>
 <?php
 if (isset($_POST['signup'])) {
     $patientFirstName = mysqli_real_escape_string($con, $_POST['patientFirstName']);
@@ -83,7 +47,7 @@ if (isset($_POST['signup'])) {
     <link rel="shortcut icon" href="assets/favicon/tpas.ico" type="image/x-icon">
 </head>
 
-<body>
+<body style="background-color: #c6f1ff">
     <nav>
         <ul class="left-links">
             <li class="tags brand">
@@ -93,8 +57,8 @@ if (isset($_POST['signup'])) {
         <ul class="middle-links">
             <li class="tags home"><a href="#home">Home</a></li>
             <li class="tags"><a href="#about">About</a></li>
-            <li class="tags"><a href="#sign-up">Create account</a></li>
-            <li class="tags"><a href="auth/index.php" target="_blank" rel="noopener noreferrer">Login</a></li>
+            <li class="tags"><a href="auth/signup.php" target="_blank">Create account</a></li>
+            <li class="tags"><a href="auth/index.php" target="_blank">Login</a></li>
         </ul>
     </nav>
     <!--

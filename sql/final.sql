@@ -106,15 +106,13 @@ CREATE TABLE `doctorschedule` (
 CREATE TABLE `patient` (
   `philhealthId` bigint(12) NOT NULL,
   `password` varchar(20) NOT NULL,
-  `patientFirstName` varchar(20) NOT NULL,
-  `patientLastName` varchar(20) NOT NULL,
+  `patientName` varchar(20) NOT NULL,
   `patientMaritialStatus` varchar(10) NOT NULL,
   `patientDOB` date NOT NULL,
   `patientGender` varchar(10) NOT NULL,
   `patientAddress` varchar(100) NOT NULL,
   `patientPhone` varchar(15) NOT NULL,
-  `patientEmail` varchar(100) NOT NULL,
-  `appointmentType` enum('tb','prenatal') NOT NULL DEFAULT 'tb'
+  `patientEmail` varchar(100) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
 
 -- --------------------------------------------------------
