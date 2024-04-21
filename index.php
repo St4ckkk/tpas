@@ -20,22 +20,21 @@ if (isset($_POST['login'])) {
     $row = mysqli_fetch_array($res, MYSQLI_ASSOC);
     if (isset($row) && $row['password'] == $password) {
         $_SESSION['patientSession'] = $row['philhealthId'];
-        ?>
+?>
         <script type="text/javascript">
             alert('Login Success');
         </script>
-        <?php
+    <?php
         header("Location: patient/patient.php");
     } else {
-        ?>
+    ?>
         <script>
             alert('wrong input ');
         </script>
-        <?php
+<?php
     }
 }
 ?>
-<!-- register -->
 <?php
 if (isset($_POST['signup'])) {
     $patientFirstName = mysqli_real_escape_string($con, $_POST['patientFirstName']);
@@ -50,25 +49,22 @@ if (isset($_POST['signup'])) {
     $patientGender = mysqli_real_escape_string($con, $_POST['patientGender']);
     $appointmentType = mysqli_real_escape_string($con, $_POST['appointmentType']);
 
-    //INSERT
     $query = "INSERT INTO patient (philhealthId, password, patientFirstName, patientLastName, patientDOB, patientGender, patientEmail, appointmentType)
               VALUES ('$philhealthId', '$password', '$patientFirstName', '$patientLastName', '$patientDOB', '$patientGender', '$patientEmail', '$appointmentType')";
     $result = mysqli_query($con, $query);
-    // echo $result;
     if ($result) {
-        ?>
+?>
         <script type="text/javascript">
             alert('Register success. Please Login to make an appointment.');
         </script>
-        <?php
+    <?php
     } else {
-        ?>
+    ?>
         <script type="text/javascript">
             alert('User already registered. Please try again');
         </script>
-        <?php
+<?php
     }
-
 }
 ?>
 <!DOCTYPE html>
@@ -78,73 +74,30 @@ if (isset($_POST['signup'])) {
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
-    <title>ScheduCare - Landing Page</title>
-    <!-- Bootstrap -->
-    <!-- <link href="assets/css/bootstrap.min.css" rel="stylesheet"> -->
-    <link href="assets/css/style.css" rel="stylesheet">
-    <link href="assets/css/style1.css" rel="stylesheet">
-    <link href="assets/css/blocks.css" rel="stylesheet">
+    <title>appointment.one - Home</title>
+    <link href="assets/css/index.css" rel="stylesheet">
     <link href="assets/css/date/bootstrap-datepicker.css" rel="stylesheet">
     <link href="assets/css/date/bootstrap-datepicker3.css" rel="stylesheet">
     <link rel="stylesheet" href="https://formden.com/static/cdn/font-awesome/4.4.0/css/font-awesome.min.css" />
     <link href="assets/css/material.css" rel="stylesheet">
+    <link rel="shortcut icon" href="assets/favicon/tpas.ico" type="image/x-icon">
 </head>
-<style>
-    .promo-1 {
-        background: url("assets/img/Female-Doctor.png") center no-repeat;
-        -webkit-background-size: cover;
-        -moz-background-size: cover;
-        -o-background-size: cover;
-        background-size: cover;
-        height: 100%;
-        overflow: hidden;
-    }
-
-    .promo-1 .video-wrapper {
-        position: relative;
-        display: inline-block;
-        max-width: 600px;
-        margin: 20px auto 0 auto;
-        vertical-align: top;
-        background-color: #fff;
-        padding: 16px;
-        box-shadow: 0 12px 15px 0 rgba(0, 0, 0, 0.24);
-    }
-
-    .navbar-nav .dropdown-menu li p.navbar-text {
-        text-align: center;
-    }
-
-    .navbar-nav .dropdown-menu li p.navbar-text a {
-        font-size: 20px;
-        color: #3b5998;
-        text-decoration: none;
-    }
-
-    .navbar-nav .dropdown-menu li p.navbar-text a:hover {
-        text-decoration: underline;
-    }
-
-    .schedule-container {
-        float: right;
-        width: 100%;
-        margin-top: 50px;
-        background: rgba(0, 0, 0, .5);
-        padding: 20px;
-        border-radius: 10px;
-    }
-    .schedule-container h2, p {
-        color: #fff;
-    }
-    .input-group input, i{
-        color: #fff;
-    }
-    
-</style>
 
 <body>
-    <!-- navigation -->
+    <nav>
+        <ul class="left-links">
+            <li class="tags brand">
+                <img src="assets/img/cd-logoo.png"> appointment.one</span>
+            </li>
+        </ul>
+        <ul class="middle-links">
+            <li class="tags home"><a href="#home">Home</a></li>
+            <li class="tags"><a href="#about">About</a></li>
+            <li class="tags"><a href="#sign-up">Create account</a></li>
+            <li class="tags"><a href="auth/index.php" target="_blank" rel="noopener noreferrer">Login</a></li>
+        </ul>
+    </nav>
+    <!--
     <nav class="navbar navbar-default navbar-fixed-top" role="navigation">
         <div class="container-fluid">
             <div class="navbar-header">
@@ -155,10 +108,11 @@ if (isset($_POST['signup'])) {
                     <span class="icon-bar"></span>
                     <span class="icon-bar"></span>
                 </button>
-                <img src="assets/img/cd-logo.png" alt="" height="50">
                 <a href="" class="navbar-brand">ScheduCare</a>
+                <img src="assets/img/cd-logoo.png" alt="" height="50">
             </div>
-           
+-->
+    <!--
             <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
                 <ul class="nav navbar-nav navbar-right">
                     <li class="dropdown">
@@ -195,50 +149,41 @@ if (isset($_POST['signup'])) {
             </div>
         </div>
     </nav>
+-->
     <!-- navigation -->
 
     <!-- modal container start -->
+
     <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <!-- modal content -->
                 <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
-                            aria-hidden="true">&times;</span></button>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
                     <h3 class="modal-title text-center">Sign Up</h3>
                 </div>
-                <!-- modal body start -->
                 <div class="modal-body">
-
-                    <!-- form start -->
                     <div class="container" id="wrap">
                         <div class="row">
                             <div class="col-md-6">
 
-                                <form action="<?php $_PHP_SELF ?>" method="POST" accept-charset="utf-8" class="form"
-                                    role="form">
+                                <form action="<?php $_PHP_SELF ?>" method="POST" accept-charset="utf-8" class="form" role="form">
                                     <div class="row">
                                         <div class="col-xs-6 col-md-6">
-                                            <input type="text" name="patientFirstName" value=""
-                                                class="form-control input-lg" placeholder="First Name" required />
+                                            <input type="text" name="patientFirstName" value="" class="form-control input-lg" placeholder="First Name" required />
                                         </div>
                                         <div class="col-xs-6 col-md-6">
-                                            <input type="text" name="patientLastName" value=""
-                                                class="form-control input-lg" placeholder="Last Name" required />
+                                            <input type="text" name="patientLastName" value="" class="form-control input-lg" placeholder="Last Name" required />
                                         </div>
                                     </div>
 
-                                    <input type="text" name="patientEmail" value="" class="form-control input-lg"
-                                        placeholder="Your Email" required />
-                                    <input type="number" name="philhealthId" value="" class="form-control input-lg"
-                                        placeholder="Your Philheadt ID Number" required />
+                                    <input type="text" name="patientEmail" value="" class="form-control input-lg" placeholder="Your Email" required />
+                                    <input type="number" name="philhealthId" value="" class="form-control input-lg" placeholder="Your Philheadt ID Number" required />
 
 
-                                    <input type="password" name="password" value="" class="form-control input-lg"
-                                        placeholder="Password" required />
+                                    <input type="password" name="password" value="" class="form-control input-lg" placeholder="Password" required />
 
-                                    <input type="password" name="confirm_password" value=""
-                                        class="form-control input-lg" placeholder="Confirm Password" required />
+                                    <input type="password" name="confirm_password" value="" class="form-control input-lg" placeholder="Confirm Password" required />
                                     <label>Birth Date</label>
                                     <div class="row">
 
@@ -350,8 +295,7 @@ if (isset($_POST['signup'])) {
                                     <br />
                                     <span class="help-block">By clicking Create my account, you agree to our Terms and
                                         that you have read our Data Use Policy, including our Cookie Use.</span>
-                                    <button class="btn btn-lg btn-primary btn-block signup-btn" type="submit"
-                                        name="signup" id="signup">Create my account</button>
+                                    <button class="btn btn-lg btn-primary btn-block signup-btn" type="submit" name="signup" id="signup">Create my account</button>
                                 </form>
 
                             </div>
@@ -361,85 +305,47 @@ if (isset($_POST['signup'])) {
             </div>
         </div>
     </div>
-    <!-- modal end -->
-    <!-- modal container end -->
 
 
-    <section id="promo-1" class="content-block promo-1  min-height-600px bg-offwhite">
-        <div class="container">
-            <div class="row">
-                <div class="col-md-6  col-md-offset-1 schedule-container">
-                    <h2>Make an appointment today!</h2>
-                    <p>This is Doctor's Schedule. Please <span class="label label-danger">login</span> to make an
-                        appointment. </p>
-                    <div class="input-group" style="margin-bottom:10px;">
-                        <div class="input-group-addon">
-                            <i class="fa fa-calendar">
-                            </i>
-                        </div>
-                        <input class="form-control" id="date" name="date" value="<?php echo date("Y-m-d") ?>"
-                            onchange="showUser(this.value)" />
-                    </div>
-                    <script>
-
-                        function showUser(str) {
-
-                            if (str == "") {
-                                document.getElementById("txtHint").innerHTML = "";
-                                return;
-                            } else {
-                                if (window.XMLHttpRequest) {
-                                    // code for IE7+, Firefox, Chrome, Opera, Safari
-                                    xmlhttp = new XMLHttpRequest();
-                                } else {
-                                    // code for IE6, IE5
-                                    xmlhttp = new ActiveXObject("Microsoft.XMLHTTP");
-                                }
-                                xmlhttp.onreadystatechange = function () {
-                                    if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
-                                        document.getElementById("txtHint").innerHTML = xmlhttp.responseText;
-                                    }
-                                };
-                                xmlhttp.open("GET", "getuser.php?q=" + str, true);
-                                console.log(str);
-                                xmlhttp.send();
-                            }
-                        }
-                    </script>
-
-                    <!-- script start end -->
-
-                    <!-- table appointment start -->
-                    <div id="txtHint"><b> </b></div>
-
-                    <!-- table appointment end -->
-                </div>
-
+    <div class="container">
+        <div class="hero">
+            <div class="hero-cta">
+                <h1>Welcome to appoinment.one</h1>
             </div>
-            <!-- /.row -->
+            <div>
+                <h3>Make an appointment today!</h3>
+                <p>This is Doctor's Schedule. Please <span class="label label-danger">login</span> to make an appointment.</p>
+                <div class="input-group" style="margin-bottom:10px;">
+                    <div class="input-group-addon">
+                        <i class="fa fa-calendar"></i>
+                    </div>
+                    <input class="form-control" id="date" name="date" value="<?php echo date("Y-m-d"); ?>" onchange="showUser(this.value)" />
+                </div>
+                <div id="txtHint"><b></b></div>
+            </div>
+
         </div>
-    </section>
+        <div class="hero-image">
+            <img src="assets/img/cd-home.png" class="img-responsive center-block" alt="Doctor" style="max-height: 500px; width: auto;">
+        </div>
+    </div>
+
+
 
 
     </div>
-    <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
     <script src="assets/js/jquery.js"></script>
     <script src="assets/js/date/bootstrap-datepicker.js"></script>
     <script src="assets/js/moment.js"></script>
     <script src="assets/js/transition.js"></script>
     <script src="assets/js/collapse.js"></script>
-    <!-- Include all compiled plugins (below), or include individual files as needed -->
     <script src="assets/js/bootstrap.min.js"></script>
     <script type="text/javascript">
-        $('#myModal').on('shown.bs.modal', function () {
+        $('#myModal').on('shown.bs.modal', function() {
             $('#myInput').focus()
         })
-    </script>
-    <!-- date start -->
-
-    <script>
-        $(document).ready(function () {
-            var date_input = $('input[name="date"]'); //our date input has the name "date"
+        $(document).ready(function() {
+            var date_input = $('input[name="date"]');
             var container = $('.bootstrap-iso form').length > 0 ? $('.bootstrap-iso form').parent() : "body";
             date_input.datepicker({
                 format: 'yyyy-mm-dd',
@@ -450,10 +356,27 @@ if (isset($_POST['signup'])) {
 
         })
 
+        function showUser(str) {
+            if (str == "") {
+                document.getElementById("txtHint").innerHTML = "";
+                return;
+            } else {
+                if (window.XMLHttpRequest) {
+                    xmlhttp = new XMLHttpRequest();
+                } else {
+                    xmlhttp = new ActiveXObject("Microsoft.XMLHTTP");
+                }
+                xmlhttp.onreadystatechange = function() {
+                    if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+                        document.getElementById("txtHint").innerHTML = xmlhttp.responseText;
+                    }
+                };
+                xmlhttp.open("GET", "getuser.php?q=" + str, true);
+                console.log(str);
+                xmlhttp.send();
+            }
+        }
     </script>
-
-    <!-- date end -->
-
 </body>
 
 </html>

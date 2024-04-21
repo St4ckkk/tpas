@@ -1,0 +1,154 @@
+body {
+  margin: 0;
+  padding: 0;
+  background-color: #c9ddfe;
+}
+nav {
+  margin-top: 50px;
+  text-align: center;
+}
+nav .brand img {
+  vertical-align: middle;
+}
+nav ul {
+  display: inline-block;
+  margin: 0;
+  padding: 0;
+  list-style-type: none;
+  text-decoration: no;
+}
+nav .tags {
+  display: inline;
+  padding: 0 15px;
+  list-style-type: none;
+  text-decoration: no;
+}
+nav ul li {
+  padding: 0px 20px;
+}
+.left-links {
+  align-items: center;
+}
+.left-links img {
+  width: 60px;
+  height: 60px;
+  margin-bottom: 8px;
+}
+.middle-links li{
+  text-decoration: none;
+  position: relative;
+  display: inline-block;
+}
+
+.middle-links li {
+  position: relative;
+  font-size: 2rem;
+}
+
+.middle-links a {
+  color: #86888b;
+  transition: color 0.3s ease;
+  text-decoration: none;
+}
+
+.middle-links a:hover {
+  text-decoration: none;
+}
+
+.middle-links #a-home {
+  color: #000;
+  font-weight: 600;
+}
+.middle-links li:first-child a::after {
+  content: "";
+  position: absolute;
+  bottom: -10px;
+  left: 50%;
+  width: 10px;
+  height: 2px;
+  background-color: #0b60b0;
+  display: block;
+  transform: translateX(-50%);
+}
+.middle-links a::before {
+  content: "";
+  position: absolute;
+  bottom: -10px;
+  left: 50%;
+  width: 0;
+  height: 2px;
+  background-color: #0b60b0;
+  transition: all 0.3s ease-in-out;
+  transform: translateX(-50%);
+}
+
+.middle-links a:hover {
+  color: #000;
+}
+.middle-links a:hover::before {
+  width: 10px;
+}
+.tags {
+  display: flex;
+  align-items: center;
+  color: #fff;
+  font-size: 20px;
+}
+.tags img {
+  height: 50px;
+  margin-right: 5px;
+}
+.tags a {
+  color: #86888b;
+  text-decoration: none;
+}
+.home a {
+  color: #000;
+}
+.brand {
+  font-size: 40px;
+  color: #000;
+  margin-right: 100px;
+}
+
+.container {
+  color: #333;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 0 auto;
+  padding: 100px 0px;
+  flex-wrap: wrap;
+  gap: 30px;
+}
+
+.hero,
+.hero-image {
+  flex: 1;
+  max-width: 55%;
+  box-sizing: border-box;
+}
+.hero {
+  margin-right: 40px;
+}
+.hero-cta h1 {
+  color: #0056b3;
+}
+
+.hero-image img {
+  max-height: 500px;
+  width: auto;
+  display: block;
+  margin-left: 100px;
+}
+
+@media (max-width: 768px) {
+  .container {
+    flex-direction: column;
+  }
+
+  .hero,
+  .hero-image {
+    max-width: 100%;
+  }
+}
