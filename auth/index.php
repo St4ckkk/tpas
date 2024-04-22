@@ -4,7 +4,7 @@ session_start();
 
 // Check if already logged in
 if (isset($_SESSION['patientSession']) && $_SESSION['patientSession'] != "") {
-    header("Location: ../patient/patient.php");
+    header("Location: ../patient/userpage.php");
     exit();
 }
 
@@ -30,10 +30,10 @@ if (isset($_POST['login'])) {
     if ($row) {
         if (password_verify($password, $row['password'])) {
             $_SESSION['patientSession'] = $row['philhealthId'];
-            header("Location: ../patient/patient.php");
+            header("Location: ../patient/userpage.php");
             exit();
         } else {
-            $login_error = 'Incorrect details.';
+            $login_error = 'Incorrect details!';
         }
     } else {
         $login_error = 'Incorrect details';
@@ -107,10 +107,16 @@ if (!empty($errors)) {
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <link rel="stylesheet" href="index.css">
     <link rel="shortcut icon" href="assets/favicon/tpasss.ico" type="image/x-icon">
-    <title>appointment.one</title>
+    <title>Make an Appointment!</title>
 </head>
-
-<body>
+<style>
+    .error {
+        color: red;
+        font-weight: 600;
+    }
+</style>
+<body>  
+   
 
     <div class="container" id="container">
         <div class="form-container sign-up">

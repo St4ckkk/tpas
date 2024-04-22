@@ -25,13 +25,13 @@ if (!$res) {
 </head>
 <style> 
     .table-hover tbody tr {
-        color: #fff;
+        color: #000;
     }
     .table-hover thead {
-        color: #fff;
+        color: #000;
     }
     .table-hover tbody tr:hover{
-        background-color: #000;
+        background-color: #fff;
     }
 </style>
 <body>

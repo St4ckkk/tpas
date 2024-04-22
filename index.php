@@ -62,6 +62,49 @@ if (isset($_POST['signup'])) {
     input[name="date"] {
         background-color: #fff !important;
     }
+
+    .header {
+        display: flex;
+        justify-content: space-evenly;
+        align-items: center;
+        padding: 0 20px;
+        width: 100%;
+    }
+
+    .right-links {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+    }
+
+    .right-links button {
+        background-color: #f5f6f8;
+        color: #000;    
+        padding: 10px 40px;
+        border: none;
+        border-radius: 50px;
+        font-size: 16px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        transition: background-color 0.3s;
+        font-weight: bold;
+    }
+
+    .right-links button:hover {
+        background-color: #3e81ec;
+
+    }
+
+    .right-links button img {
+        margin-left: 10px;
+        width: 15px;
+        height: auto;
+
+    }
+    .middle-links a {
+        font-size: 16px;
+    }
 </style>
 
 <body style="background-color: #fff">
@@ -79,7 +122,7 @@ if (isset($_POST['signup'])) {
         </ul>
         <ul class="right-links">
             <button onclick="window.open('auth/index.php', '_blank')">
-                Get Started
+                Book Now <img src="assets/img/up-right-arrow.png" alt="">
             </button>
         </ul>
     </div>
@@ -123,7 +166,7 @@ if (isset($_POST['signup'])) {
             $('#myInput').focus()
         })
         $(document).ready(function() {
-            var date_input = $('#date'); // Make sure the selector correctly identifies your date input
+            var date_input = $('#date');
             date_input.datepicker({
                 format: 'yyyy-mm-dd',
                 autoclose: true,
