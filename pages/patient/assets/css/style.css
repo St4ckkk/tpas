@@ -1,0 +1,74 @@
+.logo-small {
+  height: 30px;
+}
+
+.company-name {
+  font-size: 24px;
+  display: block;
+  font-weight: bold;
+}
+
+.header-area {
+  margin-bottom: 20px;
+  text-align: left;
+  display: flex;
+  margin-right: 50px;
+}
+.header-area img {
+  width: 50px;
+  height: 50px;
+  background-color: #3e81ec;
+  padding: 10px;
+  border-radius: 10px;
+}
+
+.right-link a {
+  color: #86888b;
+  text-decoration: none;
+  margin-left: 10px;
+}
+
+.top-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+
+.card {
+  width: 100%;
+  max-width: 1200px;
+ 
+}
+.card-body {
+  min-height: 500px;
+}
+
+.hero-image img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+.calendar-container {
+  flex: 1; 
+  margin-right: 150px; 
+  
+}
+
+.hero-image {
+  flex: 0 0 50%; 
+}
+#calendar {
+  width: 100%;
+  height: 100%;
+  margin-top: 15px;
+}
+@media only screen and (max-width: 600px) {
+    .hero-image {
+        display: none;
+    }
+    .calendar-container {
+        margin-right: 0;
+    }
+}

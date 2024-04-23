@@ -1,10 +1,9 @@
 <?php
 include_once 'conn/dbconnect.php';
 session_start();
-
-// Check if already logged in
+define('BASE_URL', '/TPAS/pages/patient/');
 if (isset($_SESSION['patientSession']) && $_SESSION['patientSession'] != "") {
-    header("Location: ../patient/userpage.php");
+    header("Location: " . BASE_URL . "userpage.php");
     exit();
 }
 
@@ -14,8 +13,8 @@ if (isset($_POST['login'])) {
     $identifier = mysqli_real_escape_string($con, $_POST['identifier']);
     $password = $_POST['password'];
     $sql = strpos($identifier, '@') !== false ?
-        "SELECT * FROM patient WHERE patientEmail = ?" :
-        "SELECT * FROM patient WHERE philhealthId = ?";
+        "SELECT * FROM tb_patients WHERE email = ?" :
+        "SELECT * FROM tb_patients WHERE philhealthId = ?";
 
     $query = $con->prepare($sql);
     if ($query === false) {
@@ -29,8 +28,8 @@ if (isset($_POST['login'])) {
 
     if ($row) {
         if (password_verify($password, $row['password'])) {
-            $_SESSION['patientSession'] = $row['philhealthId'];
-            header("Location: ../patient/userpage.php");
+            $_SESSION['patientSession'] = $row['patientId'];
+            header("Location: " . BASE_URL . "userpage.php");
             exit();
         } else {
             $login_error = 'Incorrect details!';
@@ -46,14 +45,15 @@ $errors = [];
 
 if (isset($_POST['register'])) {
     // Retrieve and sanitize user inputs
-    $name = mysqli_real_escape_string($con, trim($_POST['name']));
+    $firstname = mysqli_real_escape_string($con, trim($_POST['firstname']));
+    $lastname = mysqli_real_escape_string($con, trim($_POST['lastname']));
     $philhealthId = mysqli_real_escape_string($con, trim($_POST['philhealthId']));
     $email = mysqli_real_escape_string($con, trim($_POST['email']));
     $password = $_POST['password'];
     $confirm_password = $_POST['confirm_password'];
 
     // Basic validation
-    if (empty($name) || empty($email) || empty($password)) {
+    if (empty($firstname) || empty($lastname) || empty($email) || empty($password)) {
         $errors[] = "Please fill all required fields.";
     }
     if ($password !== $confirm_password) {
@@ -63,25 +63,20 @@ if (isset($_POST['register'])) {
         $errors[] = "Invalid email format.";
     }
 
-    // Check if user already exists
-    $checkEmail = $con->prepare("SELECT patientEmail FROM patient WHERE patientEmail = ?");
+
+    $checkEmail = $con->prepare("SELECT email FROM tb_patients WHERE email = ?");
     $checkEmail->bind_param("s", $email);
     $checkEmail->execute();
     $result = $checkEmail->get_result();
     if ($result->num_rows > 0) {
         $errors[] = "Email already in use.";
     }
-
-    // Proceed if no errors
     if (count($errors) === 0) {
-        // Hash password
         $hashed_password = password_hash($password, PASSWORD_DEFAULT);
 
-        // Insert into database
-        $insertQuery = $con->prepare("INSERT INTO patient (patientName, philhealthId, patientEmail, password) VALUES (?, ?, ?, ?)");
-        $insertQuery->bind_param("ssss", $name, $philhealthId, $email, $hashed_password);
+        $insertQuery = $con->prepare("INSERT INTO tb_patients (firstname, lastname, philhealthId, email, password) VALUES (?, ?, ?, ?, ?)");
+        $insertQuery->bind_param("sssss", $firstname, $lastname, $philhealthId, $email, $hashed_password);
         if ($insertQuery->execute()) {
-            // Redirect or handle successful registration
             echo "<script>alert('Registration successful!'); window.location.href='index.php';</script>";
         } else {
             $errors[] = "Error in registration: " . $con->error;
@@ -105,7 +100,7 @@ if (!empty($errors)) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
-    <link rel="stylesheet" href="assets/css/index.css">
+    <link rel="stylesheet" href="assets/css/auth.css">
     <link rel="shortcut icon" href="assets/favicon/tpasss.ico" type="image/x-icon">
     <title>Make an Appointment!</title>
 </head>
@@ -115,8 +110,9 @@ if (!empty($errors)) {
         font-weight: 600;
     }
 </style>
-<body>  
-   
+
+<body>
+
 
     <div class="container" id="container">
         <div class="form-container sign-up">
@@ -127,7 +123,8 @@ if (!empty($errors)) {
                     <a href="#" class="icon"><i class="fa-brands fa-facebook-f"></i></a>
                 </div>
                 <span>or use your email or Philhealth ID registration</span>
-                <input type="text" name="name" placeholder="Name" required>
+                <input type="text" name="firstname" placeholder="Firstname" required>
+                <input type="text" name="lastname" placeholder="Lastname" required>
                 <input type="text" name="philhealthId" placeholder="PhilHealth ID (optional)">
                 <input type="email" name="email" placeholder="Email" required>
                 <input type="password" name="password" placeholder="Password" required>

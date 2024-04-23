@@ -23,7 +23,7 @@ if (isset($_POST['login'])) {
         $res = mysqli_stmt_get_result($stmt);
         $row = mysqli_fetch_array($res, MYSQLI_ASSOC);
         if ($row && $row['password'] == $password) {
-            $_SESSION['doctorSession'] = $row['doctorId'];
+            $_SESSION['doctorSession'] = $row['id'];
             header("Location: " . BASE_URL . "doctor-dashboard.php");
             exit();
         } else {

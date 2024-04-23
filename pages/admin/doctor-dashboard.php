@@ -1,9 +1,9 @@
 <?php
 session_start();
 include_once 'assets/conn/dbconnect.php';
-
+define('BASE_URL', '/TPAS/auth/admin/');
 if (!isset($_SESSION['doctorSession'])) {
-    header("Location: ../index.php");
+    header("Location:" . BASE_URL . "index.php");
     exit();
 }
 $doctorId = $_SESSION['doctorSession'];

@@ -8,7 +8,7 @@ if (!isset($_SESSION['doctorSession'])) {
 }
 $doctorId = $_SESSION['doctorSession'];
 
-$sqlDoctor = "SELECT doctorFirstname, doctorLastName, doctorRole FROM doctor WHERE doctorId=?";
+$sqlDoctor = "SELECT doctorFirstname, doctorLastName, doctorRole FROM doctor WHERE id=?";
 $stmt = $con->prepare($sqlDoctor);
 $stmt->bind_param("i", $doctorId);
 $stmt->execute();
@@ -36,14 +36,13 @@ if ($result) {
 
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['submitSched'])) {
     $startDate = $con->real_escape_string($_POST['startDate']);
-    $endDate = $con->real_escape_string($_POST['endDate']);
     $startTime = $con->real_escape_string($_POST['startTime']);
     $endTime = $con->real_escape_string($_POST['endTime']);
 
-    $sql = "INSERT INTO schedule (doctorId, startDate, endDate, startTime, endTime, status) VALUES (?, ?, ?, ?, ?, 'available')";
+    $sql = "INSERT INTO schedule (doctorId, startDate, startTime, endTime, status) VALUES (?, ?, ?, ?, 'available')";
     $stmt = $con->prepare($sql);
     if ($stmt) {
-        $stmt->bind_param("issss", $doctorId, $startDate, $endDate, $startTime, $endTime);
+        $stmt->bind_param("isss", $doctorId, $startDate, $startTime, $endTime);
         if ($stmt->execute()) {
             echo "<p>New schedule created successfully</p>";
         } else {
@@ -54,7 +53,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['submitSched'])) {
         echo "<p>Error preparing statement: " . $con->error . "</p>";
     }
 }
-$query = "SELECT s.scheduleId, s.startDate, s.endDate, s.startTime, s.endTime, s.status, s.createdAt, 
+
+$query = "SELECT s.scheduleId, s.startDate, s.startTime, s.endTime, s.status, s.createdAt, 
                  d.doctorFirstName, d.doctorLastName
           FROM schedule s
           JOIN doctor d ON s.doctorId = d.doctorId
@@ -77,10 +77,21 @@ $con->close();
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
     <title>Modern Admin Dashboard</title>
-    <link rel="stylesheet" href="assets/css/create-schedule.css">
+    <link rel="stylesheet" href="assets/css/create-appointment.css">
     <link rel="stylesheet" href="https://maxst.icons8.com/vue-static/landings/line-awesome/line-awesome/1.3.0/css/line-awesome.min.css">
-    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link href="assets/css/date/bootstrap-datepicker.css" rel="stylesheet">
+    <link href="assets/css/date/bootstrap-datepicker3.css" rel="stylesheet">
+    <link href="assets/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://formden.com/static/cdn/font-awesome/4.4.0/css/font-awesome.min.css" />
+    <link rel="shortcut icon" href="assets/favicon/tpasss.ico" type="image/x-icon">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/bootstrap-icons.css">
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
+<style>
+
+</style>
 
 <body>
     <input type="checkbox" id="menu-toggle">
@@ -158,9 +169,11 @@ $con->close();
                     </div>
 
                     <div class="user">
-                        <div class="bg-img" style="background-image: url(img/1.jpeg)"></div>
-                        <span class="las la-power-off"></span>
-                        <span>Logout</span>
+                        <a href="logout.php?logout" class="logout-link">
+                            <div class="bg-img logout-img"></div>
+                            <span class="las la-power-off logout-icon"></span>
+                            <span class="logout-text">Logout</span>
+                        </a>
                     </div>
                 </div>
             </div>
@@ -171,31 +184,34 @@ $con->close();
                 <h1>Create your Schedule</h1>
                 <small>Appointment / Create your Schedule</small>
             </div>
+
             <div class="page-content">
-                <form method="post" class="appointment-form">
-                    <div class="form-row">
-                        <div class="form-group">
-                            <input type="hidden" name="doctorId" value="<?php echo htmlspecialchars($doctorId); ?>">
-                            <label for="startDate">Start Date</label>
-                            <input type="date" id="startDate" name="startDate" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="endDate">End Date</label>
-                            <input type="date" id="endDate" name="endDate" required>
+                <div class="container">
+                    <div class="row">
+                        <div class="col-md-8 offset-md-2 p-2">
+                            <form method="post" class="appointment-form">
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <label for="startTime">Start Time</label>
+                                        <input type="time" id="startTime" name="startTime" required>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="endTime">End Time</label>
+                                        <input type="time" id="endTime" name="endTime" required>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <input type="hidden" name="doctorId" value="<?php echo htmlspecialchars($doctorId); ?>">
+                                        <label for="startDate">Date</label>
+                                        <input type="date" id="startDate" name="startDate" required>
+                                    </div>
+                                    <br>
+                                    <button type="submit" name="submitSched" class="submit-btn">Save Schedule</button>
+                                </div>
+                            </form>
                         </div>
                     </div>
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="startTime">Start Time</label>
-                            <input type="time" id="startTime" name="startTime" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="endTime">End Time</label>
-                            <input type="time" id="endTime" name="endTime" required>
-                        </div>
-                    </div>
-                    <button type="submit" name="submitSched" class="submit-btn">Save Schedule</button>
-                </form>
+                </div>
+
             </div>
         </main>
 
@@ -217,8 +233,7 @@ $con->close();
                     <thead>
                         <tr>
                             <th><span class="las la-sort"></span> NAME</th>
-                            <th><span class="las la-sort"></span> START DATE</th>
-                            <th><span class="las la-sort"></span> END DATE</th>
+                            <th><span class="las la-sort"></span> DATE</th>
                             <th><span class="las la-sort"></span> START TIME</th>
                             <th><span class="las la-sort"></span> END TIME</th>
                             <th><span class="las la-sort"></span> STATUS</th>
@@ -239,12 +254,8 @@ $con->close();
                                     <div class="modal-body">
                                         <input type="hidden" name="scheduleId" id="modalScheduleId">
                                         <div class="form-group">
-                                            <label for="modalStartDate">Start Date</label>
+                                            <label for="modalStartDate">Date</label>
                                             <input type="date" class="form-control" id="modalStartDate" name="startDate" required>
-                                        </div>
-                                        <div class="form-group">
-                                            <label for="modalEndDate">End Date</label>
-                                            <input type="date" class="form-control" id="modalEndDate" name="endDate" required>
                                         </div>
                                         <div class="form-group">
                                             <label for="modalStartTime">Start Time</label>
@@ -273,13 +284,12 @@ $con->close();
                                 <tr>
                                     <td><?= htmlspecialchars($schedule['doctorFirstName'] . " " . $schedule['doctorLastName']) ?></td>
                                     <td><?= htmlspecialchars($schedule['startDate']) ?></td>
-                                    <td><?= htmlspecialchars($schedule['endDate']) ?></td>
-                                    <td><?= htmlspecialchars($schedule['startTime']) ?></td>
-                                    <td><?= htmlspecialchars($schedule['endTime']) ?></td>
+                                    <td><?= htmlspecialchars(date("g:i A", strtotime($schedule['startTime']))) ?></td>
+                                    <td><?= htmlspecialchars(date("g:i A", strtotime($schedule['endTime']))) ?></td>
                                     <td><?= htmlspecialchars($schedule['status']) ?></td>
-                                    <td><?= htmlspecialchars($schedule['createdAt']) ?></td>
+                                    <td><?= htmlspecialchars(date("F j, Y, g:i A", strtotime($schedule['createdAt']))) ?></td>
                                     <td>
-                                        <a href="#" onclick="editScheduleModal('<?= $schedule['scheduleId'] ?>', '<?= $schedule['startDate'] ?>', '<?= $schedule['endDate'] ?>', '<?= $schedule['startTime'] ?>', '<?= $schedule['endTime'] ?>')">Edit</a>
+                                        <a href="#" onclick="editScheduleModal('<?= $schedule['scheduleId'] ?>', '<?= $schedule['startDate'] ?>', '<?= $schedule['startTime'] ?>', '<?= $schedule['endTime'] ?>')">Edit</a>
                                         |
                                         <a href="delete_schedule.php?id=<?= $schedule['scheduleId'] ?>" onclick="return confirm('Are you sure you want to delete this schedule?');">Delete</a>
                                     </td>
@@ -306,7 +316,7 @@ $con->close();
             $('#modalEndDate').val(endDate);
             $('#modalStartTime').val(startTime);
             $('#modalEndTime').val(endTime);
-             $('#modalStatus').val(status);
+            $('#modalStatus').val(status);
             $('#editScheduleModal').modal('show');
         }
         $(document).ready(function() {

@@ -1,10 +1,10 @@
 <?php
 session_start();
-require_once '../assets/conn/dbconnect.php'; // Use require_once to ensure the script fails if the file is not found.
+require_once 'assets/conn/dbconnect.php'; // Ensures the script fails if the file is not found.
 
-// Redirect the user if they are not logged in.
+define('BASE_URL', '/TPAS/auth/patient/');
 if (!isset($_SESSION['patientSession'])) {
-    header("Location: ../index.php");
+    header("Location: " . BASE_URL . "index.php");
     exit;
 }
 
@@ -12,10 +12,10 @@ if (!isset($_SESSION['patientSession'])) {
 $usersession = $_SESSION['patientSession'];
 $userRow = getUserData($con, $usersession);
 
-function getUserData($con, $philhealthId)
+function getUserData($con, $patientId)
 {
-    $stmt = $con->prepare("SELECT * FROM patient WHERE philhealthId = ?");
-    $stmt->bind_param("s", $philhealthId);
+    $stmt = $con->prepare("SELECT * FROM tb_patients WHERE patientId = ?");
+    $stmt->bind_param("s", $patientId);
     $stmt->execute();
     $result = $stmt->get_result();
     if ($result->num_rows === 0) {
@@ -24,23 +24,11 @@ function getUserData($con, $philhealthId)
     }
     return $result->fetch_assoc();
 }
-
-function getAppointmentLink($appointmentType, $patientId)
-{
-    switch ($appointmentType) {
-        case 'tb':
-            return "tbpatientapplist.php?patientId=$patientId";
-        case 'prenatal':
-            return "patientapplist.php?patientId=$patientId";
-        default:
-            return "#";
-    }
-}
-
 if (!$userRow) {
     echo "Failed to fetch user data.";
 }
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -123,6 +111,7 @@ if (!$userRow) {
         visibility: visible;
         opacity: 1;
     }
+
     .right-links a:hover {
         color: #fff;
         background-color: #3e81ec;
@@ -152,15 +141,14 @@ if (!$userRow) {
                 </div>
                 <div class="card">
                     <div class="card-header" style="background-color:  #3e81ec;">
-                        <h1>Welcome, <?php echo $userRow['patientName']; ?></h1>
+                        <h1>Welcome, <?php echo htmlspecialchars($userRow['firstname'] . ' ' . $userRow['lastname']); ?></h1>
+
                     </div>
                     <div class="set">
                         <span>Set an appointment by selecting the available days</span>
                     </div>
                     <div class="card-body">
-
                         <div id="calendar">
-
                         </div>
                     </div>
                 </div>
@@ -185,16 +173,16 @@ if (!$userRow) {
                 .then(data => {
                     $('#calendar').fullCalendar({
                         header: {
-                            left: 'prev', // Places prev and next buttons flanking the title
+                            left: 'prev',
                             center: 'title',
                             right: 'next'
                         },
                         dayRender: function(date, cell) {
                             if (data.availableDays.includes(date.format('YYYY-MM-DD'))) {
-                                cell.addClass('available-appointment');
+                                cell.addClass('available-appointment'); 
                             }
                         },
-                        events: 'fetch-appointment.php',
+                        events: 'fetch-schedule.php',
                         eventLimit: true,
                         displayEventTime: false,
                         dayClick: function(date, jsEvent, view) {

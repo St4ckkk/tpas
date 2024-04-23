@@ -1,25 +1,18 @@
 <?php
 include_once 'assets/conn/dbconnect.php';
 
-
+// Retrieve startDate from the query parameters, default to an empty string if not set
 $q = $_GET['q'] ?? '';
-$dates = explode(',', $q);
-$startDate = trim($dates[0] ?? '');
-$endDate = trim($dates[1] ?? '');
+$startDate = trim($q);
 
-$sql = "SELECT * FROM schedule WHERE startDate >= ?";
-$params = [$startDate];
-
-if (!empty($endDate)) {
-    $sql .= " AND endDate <= ?";
-    $params[] = $endDate;
-}
-
+// Prepare the SQL query to select schedules starting from the given startDate
+$sql = "SELECT * FROM schedule WHERE startDate = ?";
 $stmt = mysqli_prepare($con, $sql);
-mysqli_stmt_bind_param($stmt, str_repeat("s", count($params)), ...$params);
+mysqli_stmt_bind_param($stmt, "s", $startDate);
 mysqli_stmt_execute($stmt);
 $res = mysqli_stmt_get_result($stmt);
 
+// Handle errors in SQL execution
 if (!$res) {
     die("Error running query: " . mysqli_error($con));
 }
@@ -35,11 +28,9 @@ if (!$res) {
         .table-hover tbody tr {
             color: #000;
         }
-
         .table-hover thead {
             color: #000;
         }
-
         .table-hover tbody tr:hover {
             background-color: #fff;
         }
@@ -55,20 +46,18 @@ if (!$res) {
         <table class='table table-hover'>
             <thead>
                 <tr>
-                    <th>Start Date</th>
-                    <th>End Date</th>
+                    <th>Date</th>
                     <th>Time Start</th>
                     <th>Time End</th>
-                    <th>Availability</th>
+                    <th>Status</th>
                 </tr>
             </thead>
             <tbody>
                 <?php while ($row = mysqli_fetch_array($res)) : ?>
                     <tr>
                         <td><?= htmlspecialchars($row['startDate']) ?></td>
-                        <td><?= htmlspecialchars($row['endDate']) ?></td>
-                        <td><?= htmlspecialchars($row['startTime']) ?></td>
-                        <td><?= htmlspecialchars($row['endTime']) ?></td>
+                        <td><?= date('h:i A', strtotime($row['startTime'])) ?></td> <!-- Format time to AM/PM -->
+                        <td><?= date('h:i A', strtotime($row['endTime'])) ?></td> <!-- Format time to AM/PM -->
                         <td>
                             <span class='label label-<?= $row['status'] !== 'available' ? 'danger' : 'primary' ?>'>
                                 <?= htmlspecialchars($row['status']) ?>
@@ -80,6 +69,5 @@ if (!$res) {
         </table>
     <?php endif; ?>
 </body>
-
 
 </html>
