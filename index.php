@@ -1,35 +1,3 @@
-<?php
-if (isset($_POST['signup'])) {
-    $patientFirstName = mysqli_real_escape_string($con, $_POST['patientFirstName']);
-    $patientLastName = mysqli_real_escape_string($con, $_POST['patientLastName']);
-    $patientEmail = mysqli_real_escape_string($con, $_POST['patientEmail']);
-    $philhealthId = mysqli_real_escape_string($con, $_POST['philhealthId']);
-    $password = mysqli_real_escape_string($con, $_POST['password']);
-    $month = mysqli_real_escape_string($con, $_POST['month']);
-    $day = mysqli_real_escape_string($con, $_POST['day']);
-    $year = mysqli_real_escape_string($con, $_POST['year']);
-    $patientDOB = $year . "-" . $month . "-" . $day;
-    $patientGender = mysqli_real_escape_string($con, $_POST['patientGender']);
-    $appointmentType = mysqli_real_escape_string($con, $_POST['appointmentType']);
-
-    $query = "INSERT INTO patient (philhealthId, password, patientFirstName, patientLastName, patientDOB, patientGender, patientEmail, appointmentType)
-              VALUES ('$philhealthId', '$password', '$patientFirstName', '$patientLastName', '$patientDOB', '$patientGender', '$patientEmail', '$appointmentType')";
-    $result = mysqli_query($con, $query);
-    if ($result) {
-?>
-        <script type="text/javascript">
-            alert('Register success. Please Login to make an appointment.');
-        </script>
-    <?php
-    } else {
-    ?>
-        <script type="text/javascript">
-            alert('User already registered. Please try again');
-        </script>
-<?php
-    }
-}
-?>
 <!DOCTYPE html>
 <html lang="en">
 

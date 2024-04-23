@@ -2,18 +2,18 @@
 include_once 'conn/dbconnect.php';
 
 session_start();
+define('BASE_URL', '/TPAS/pages/admin/');
 if (isset($_SESSION['doctorSession'])) {
-    header("Location: ../admin/dashboard.php");
+    header("Location: " . BASE_URL . "doctor-dashboard.php");
     exit();
 }
 
 $error = '';
 
 if (isset($_POST['login'])) {
+
     $loginID = mysqli_real_escape_string($con, trim($_POST['doctorIdOrdoctorEmail']));
     $password = mysqli_real_escape_string($con, $_POST['password']);
-
-    // SQL statement to check both doctorId and email
     $query = "SELECT * FROM doctor WHERE doctorId = ? OR doctorEmail = ?";
     $stmt = mysqli_prepare($con, $query);
 
@@ -22,10 +22,9 @@ if (isset($_POST['login'])) {
         mysqli_stmt_execute($stmt);
         $res = mysqli_stmt_get_result($stmt);
         $row = mysqli_fetch_array($res, MYSQLI_ASSOC);
-
         if ($row && $row['password'] == $password) {
             $_SESSION['doctorSession'] = $row['doctorId'];
-            header("Location: ../admin/dashboard.php");
+            header("Location: " . BASE_URL . "doctor-dashboard.php");
             exit();
         } else {
             $error = "Incorrect ID, email, or password.";
@@ -43,10 +42,10 @@ if (isset($_POST['login'])) {
     <title>appointment.one</title>
     <link href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet">
     <link href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="adminlogin.css">
+    <link rel="stylesheet" href="assets/css/index.css">
     <link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=Aguafina+Script" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <link rel="shortcut icon" href="assets/favicon/tpasss.ico" type="image/x-icon">
+    <link rel="shortcut icon" href="assets/favicon/tpas.ico" type="image/x-icon">
 </head>
 
 <body>

@@ -115,6 +115,10 @@ side-head span {
   display: block;
   padding: 1.2rem 0rem;
 }
+.side-menu a:hover {
+  text-decoration: none;
+  background: #2b384e;
+}
 
 .side-menu a.active {
   background: #2b384e;
@@ -167,7 +171,6 @@ side-head span {
   width: calc(100% - 165px);
   transition: margin-left 300ms;
 }
-
 header {
   position: fixed;
   right: 0;
@@ -532,12 +535,7 @@ table tbody tr {
     width: 900px;
   }
 }
-.appointment-form {
-  padding: 20px;
-  border-radius: 8px;
-  max-width: 1200px; /* Adjust width as necessary */
-  margin: auto;
-}
+
 
 .form-row {
   display: flex;
@@ -578,5 +576,5 @@ table tbody tr {
 }
 
 .submit-btn:hover {
-  background-color: #45a049; /* Darker shade on hover */
+  background-color: #45a049; 
 }

@@ -532,3 +532,31 @@ table tbody tr {
     width: 900px;
   }
 }
+.logout-link {
+  display: flex;
+  align-items: center;
+  color: inherit;
+  text-decoration: none;
+}
+.side-menu a:hover {
+  text-decoration: none;
+  background: #2b384e;
+}
+.logout-img {
+  width: 50px; /* Adjust size as needed */
+  height: 50px; /* Adjust size as needed */
+  border-radius: 50%; /* Circular image */
+  background-image: url(img/1.jpeg);
+  background-size: cover;
+  background-position: center;
+}
+
+.logout-icon {
+  margin-right: 10px; /* Space between icon and text */
+  font-size: 24px; /* Adjust icon size as needed */
+}
+
+.logout-text {
+  font-size: 16px; /* Text size */
+  font-weight: bold; /* Make text bold */
+}

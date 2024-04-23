@@ -119,11 +119,12 @@ if ($result) {
                         <span class="las la-bell"></span>
                         <span class="notify">3</span>
                     </div>
-
                     <div class="user">
-                        <div class="bg-img" style="background-image: url(img/1.jpeg)"></div>
-                        <span class="las la-power-off"></span>
-                        <span>Logout</span>
+                        <a href="logout.php?logout" class="logout-link">
+                            <div class="bg-img logout-img"></div>
+                            <span class="las la-power-off logout-icon"></span>
+                            <span class="logout-text">Logout</span>
+                        </a>
                     </div>
                 </div>
             </div>

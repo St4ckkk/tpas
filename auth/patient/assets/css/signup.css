@@ -1,0 +1,137 @@
+/* General reset and base styles */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+
+body,
+html {
+  width: 100%;
+  height: 100%;
+  font-family: "Arial", sans-serif;
+  background-color: #f4f4f4;
+}
+
+.container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  padding: 20px;
+}
+
+.signup__content {
+  background: white;
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  overflow: hidden;
+  display: flex;
+  max-width: 900px;
+  width: 100%;
+}
+
+.signup__img {
+  width: 50%;
+  height: auto;
+  object-fit: cover;
+}
+
+.signup__form {
+  padding: 20px;
+  width: 50%;
+  display: flex;
+  flex-direction: column;
+}
+
+.signup__title {
+  margin-bottom: 20px;
+  color: #333;
+}
+
+.signup__label {
+  flex: 0 0 30%; /* Label takes up 30% of the form group */
+  text-align: right;
+  padding-right: 10px; /* Spacing between label and input */
+}
+
+.signup__input,
+select {
+  flex: 1; /* Input takes the remaining space */
+  padding: 10px;
+  margin-left: 10px; /* Ensure spacing between label and input */
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.signup__input,
+.signup__button,
+select {
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.button-container {
+  display: flex;
+  justify-content: space-between; /* Ensure elements are spread across the container */
+  align-items: center; /* Vertically align elements in the middle */
+  margin-top: 10px; /* Additional space above the button area */
+}
+
+.signup__button,
+.signin__link {
+  flex-grow: 1; /* Allows the button and link to grow and fill the container */
+  padding: 10px 20px; /* Uniform padding for consistency */
+  text-align: center; /* Center text alignment */
+  border-radius: 4px; /* Rounded corners */
+  text-decoration: none; /* Remove underline from link */
+  cursor: pointer; /* Pointer cursor on hover */
+  font-size: 16px; /* Ensures text size is identical */
+  border: none; /* No border for a cleaner look */
+}
+
+.signup__button {
+  background-color: #5cb85c;
+  color: white;
+  margin-right: 10px; /* Adds a gap between the register button and the link */
+}
+
+.signup__button:hover {
+  background-color: #4cae4c; /* Darker shade on hover */
+}
+
+.signin__link {
+  background-color: #007bff; /* Blue color to differentiate from the green button */
+  color: white;
+  display: inline-block; /* Ensures it behaves like a button */
+  text-align: center; /* Center text within the link */
+}
+
+.signin__link:hover {
+  background-color: #65a5e9; /* Darker blue on hover */
+}
+
+/* Additional styling for visual coherence */
+.signup__button,
+.signup__input,
+select {
+  cursor: pointer;
+}
+
+.signup__button:hover {
+  background-color: #4cae4c;
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-group div {
+  padding: 10px 0;
+}
+
+input[type="radio"] {
+  margin-right: 5px;
+}

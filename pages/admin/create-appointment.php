@@ -77,8 +77,9 @@ $con->close();
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
     <title>Modern Admin Dashboard</title>
-    <link rel="stylesheet" href="assets/css/create-appointment.css">
+    <link rel="stylesheet" href="assets/css/create-schedule.css">
     <link rel="stylesheet" href="https://maxst.icons8.com/vue-static/landings/line-awesome/line-awesome/1.3.0/css/line-awesome.min.css">
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
 </head>
 
 <body>
@@ -100,7 +101,7 @@ $con->close();
             <div class="side-menu">
                 <ul>
                     <li>
-                        <a href="dashboard.php">
+                        <a href="doctor-dashboard.php">
                             <span class="las la-home"></span>
                             <small>Dashboard</small>
                         </a>
@@ -120,7 +121,7 @@ $con->close();
                     <li>
                         <a href="" class="active">
                             <span class="las la-clipboard-list"></span>
-                            <small>Appointment</small>
+                            <small>Schedule</small>
                         </a>
                     </li>
                     <li>
@@ -225,6 +226,47 @@ $con->close();
                             <th><span class="las la-sort"></span> ACTION</th>
                         </tr>
                     </thead>
+                    <div class="modal fade" id="editScheduleModal" tabindex="-1" role="dialog" aria-labelledby="editScheduleModalLabel" aria-hidden="true">
+                        <div class="modal-dialog" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="editScheduleModalLabel">Edit Schedule</h5>
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </div>
+                                <form id="editScheduleForm">
+                                    <div class="modal-body">
+                                        <input type="hidden" name="scheduleId" id="modalScheduleId">
+                                        <div class="form-group">
+                                            <label for="modalStartDate">Start Date</label>
+                                            <input type="date" class="form-control" id="modalStartDate" name="startDate" required>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="modalEndDate">End Date</label>
+                                            <input type="date" class="form-control" id="modalEndDate" name="endDate" required>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="modalStartTime">Start Time</label>
+                                            <input type="time" class="form-control" id="modalStartTime" name="startTime" required>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="modalEndTime">End Time</label>
+                                            <input type="time" class="form-control" id="modalEndTime" name="endTime" required>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="modalStatus">Status</label>
+                                            <input type="text" class="form-control" id="modalStatus" name="status" required>
+                                        </div>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                        <button type="submit" class="btn btn-primary">Save Changes</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
                     <tbody>
                         <?php if (!empty($schedules)) : ?>
                             <?php foreach ($schedules as $schedule) : ?>
@@ -236,7 +278,11 @@ $con->close();
                                     <td><?= htmlspecialchars($schedule['endTime']) ?></td>
                                     <td><?= htmlspecialchars($schedule['status']) ?></td>
                                     <td><?= htmlspecialchars($schedule['createdAt']) ?></td>
-                                    <td><a href="edit_schedule.php?id=<?= $schedule['scheduleId'] ?>">Edit</a></td> <!-- Placeholder for action -->
+                                    <td>
+                                        <a href="#" onclick="editScheduleModal('<?= $schedule['scheduleId'] ?>', '<?= $schedule['startDate'] ?>', '<?= $schedule['endDate'] ?>', '<?= $schedule['startTime'] ?>', '<?= $schedule['endTime'] ?>')">Edit</a>
+                                        |
+                                        <a href="delete_schedule.php?id=<?= $schedule['scheduleId'] ?>" onclick="return confirm('Are you sure you want to delete this schedule?');">Delete</a>
+                                    </td>
                                 </tr>
                             <?php endforeach; ?>
                         <?php else : ?>
@@ -250,6 +296,45 @@ $con->close();
 
         </div>
     </div>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function editScheduleModal(scheduleId, startDate, endDate, startTime, endTime, status) {
+            $('#modalScheduleId').val(scheduleId);
+            $('#modalStartDate').val(startDate);
+            $('#modalEndDate').val(endDate);
+            $('#modalStartTime').val(startTime);
+            $('#modalEndTime').val(endTime);
+             $('#modalStatus').val(status);
+            $('#editScheduleModal').modal('show');
+        }
+        $(document).ready(function() {
+            $('#editScheduleForm').submit(function(event) {
+                event.preventDefault();
+                var formData = $(this).serialize();
+
+                $.ajax({
+                    url: 'data/update-schedule.php',
+                    type: 'POST',
+                    data: formData,
+                    dataType: 'json',
+                    success: function(response) {
+                        if (response.success) {
+                            alert('Success: ' + response.success);
+                            $('#editScheduleModal').modal('hide');
+                            location.reload();
+                        } else if (response.error) {
+                            alert('Error: ' + response.error);
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        alert('An error occurred: ' + error);
+                    }
+                });
+            });
+        });
+    </script>
 </body>
 
 </html>
