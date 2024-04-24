@@ -16,7 +16,7 @@ $query = "SELECT
           FROM
             schedule ds
           JOIN
-            doctor d ON ds.doctorId = d.doctorId";
+            doctor d ON ds.doctorId = d.id";
 
 $result = $con->query($query);
 
