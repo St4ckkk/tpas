@@ -21,9 +21,9 @@ if ($result->num_rows > 0) {
     $doctor = null;
 }
 
-$query = "SELECT p.patientName, p.patientEmail, a.createdAt, a.status, a.scheduleId, a.appointmentDate 
+$query = "SELECT p.patientFirstname, p.patientEmail, a.createdAt, a.status, a.scheduleId, a.appointmentDate 
           FROM patient p
-          JOIN tbappointment a ON p.patientId = a.patientId
+          JOIN appointment a ON p.patientId = a.patientId
           ORDER BY a.createdAt DESC";
 
 $result = mysqli_query($con, $query);
@@ -81,13 +81,11 @@ $con->close();
     <link rel="stylesheet" href="https://maxst.icons8.com/vue-static/landings/line-awesome/line-awesome/1.3.0/css/line-awesome.min.css">
     <link href="assets/css/date/bootstrap-datepicker.css" rel="stylesheet">
     <link href="assets/css/date/bootstrap-datepicker3.css" rel="stylesheet">
-    <link href="assets/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://formden.com/static/cdn/font-awesome/4.4.0/css/font-awesome.min.css" />
     <link rel="shortcut icon" href="assets/favicon/tpasss.ico" type="image/x-icon">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/bootstrap-icons.css">
-    <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  
 </head>
 <style>
 
@@ -186,32 +184,26 @@ $con->close();
             </div>
 
             <div class="page-content">
-                <div class="container">
-                    <div class="row">
-                        <div class="col-md-8 offset-md-2 p-2">
-                            <form method="post" class="appointment-form">
-                                <div class="row g-3">
-                                    <div class="col-md-6">
-                                        <label for="startTime">Start Time</label>
-                                        <input type="time" id="startTime" name="startTime" required>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <label for="endTime">End Time</label>
-                                        <input type="time" id="endTime" name="endTime" required>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <input type="hidden" name="doctorId" value="<?php echo htmlspecialchars($doctorId); ?>">
-                                        <label for="startDate">Date</label>
-                                        <input type="date" id="startDate" name="startDate" required>
-                                    </div>
-                                    <br>
-                                    <button type="submit" name="submitSched" class="submit-btn">Save Schedule</button>
-                                </div>
-                            </form>
+                <div class="col-md-8 offset-md-2 p-2">
+                    <form method="post" class="appointment-form">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label for="startTime">Start Time</label>
+                                <input type="time" id="startTime" name="startTime" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="endTime">End Time</label>
+                                <input type="time" id="endTime" name="endTime" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <input type="hidden" name="doctorId" value="<?php echo htmlspecialchars($doctorId); ?>">
+                                <label for="startDate">Date</label>
+                                <input type="date" id="startDate" name="startDate" required>
+                            </div>
+                            <button type="submit" name="submitSched" class="submit-btn">Save Schedule</button>
                         </div>
-                    </div>
+                    </form>
                 </div>
-
             </div>
         </main>
 

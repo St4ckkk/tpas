@@ -4,7 +4,7 @@ include_once 'conn/dbconnect.php';
 session_start();
 define('BASE_URL', '/TPAS/pages/admin/');
 if (isset($_SESSION['doctorSession'])) {
-    header("Location: " . BASE_URL . "doctor-dashboard.php");
+    header("Location: " . BASE_URL . "dashboard.php");
     exit();
 }
 
@@ -24,7 +24,7 @@ if (isset($_POST['login'])) {
         $row = mysqli_fetch_array($res, MYSQLI_ASSOC);
         if ($row && $row['password'] == $password) {
             $_SESSION['doctorSession'] = $row['id'];
-            header("Location: " . BASE_URL . "doctor-dashboard.php");
+            header("Location: " . BASE_URL . "dashboard.php");
             exit();
         } else {
             $error = "Incorrect ID, email, or password.";
