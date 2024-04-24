@@ -9,7 +9,7 @@ if (isset($_SESSION['patientSession']) && $_SESSION['patientSession'] != "") {
 
 $login_error = '';
 
-if (isset($_POST['login'])) {
+if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['login'])) {
     $identifier = mysqli_real_escape_string($con, $_POST['identifier']);
     $password = $_POST['password'];
     $sql = strpos($identifier, '@') !== false ?
@@ -27,17 +27,24 @@ if (isset($_POST['login'])) {
     $row = $result->fetch_assoc();
 
     if ($row) {
-        if (password_verify($password, $row['password'])) {
-            $_SESSION['patientSession'] = $row['patientId'];
-            header("Location: " . BASE_URL . "userpage.php");
-            exit();
+        // Check if account is approved
+        if ($row['accountStatus'] != 'Approved') {
+            $login_error = 'Your account is not approved yet. Please <a href="contact.html">contact support</a> for more information.';
         } else {
-            $login_error = 'Incorrect details!';
+            // Check password
+            if (password_verify($password, $row['password'])) {
+                $_SESSION['patientSession'] = $row['patientId'];
+                header("Location: " . BASE_URL . "userpage.php");
+                exit();
+            } else {
+                $login_error = 'Incorrect password. Please try again.';
+            }
         }
     } else {
-        $login_error = 'Incorrect details';
+        $login_error = 'No account found with those details.';
     }
 }
+
 
 
 

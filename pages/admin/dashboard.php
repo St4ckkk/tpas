@@ -11,7 +11,7 @@ if (!isset($_SESSION['doctorSession'])) {
 $doctorId = $_SESSION['doctorSession'];
 
 // Fetch total appointments
-$query = $con->prepare("SELECT COUNT(*) AS total FROM schedule");
+$query = $con->prepare("SELECT COUNT(*) AS total FROM appointments WHERE status='Approved'");
 $query->execute();
 $totalAppointments = $query->get_result()->fetch_assoc();
 
@@ -21,7 +21,7 @@ $query->execute();
 $totalUsers = $query->get_result()->fetch_assoc();
 
 // Fetch recent appointments
-$query = $con->prepare("SELECT philhealthID, last_name, date, status FROM appointments ORDER BY date DESC LIMIT 5");
+$query = $con->prepare("SELECT philhealthID, last_name, date, status FROM appointments WHERE status ='Approved' ORDER BY date DESC LIMIT 5");
 $query->execute();
 $recentAppointments = $query->get_result();
 
@@ -161,34 +161,40 @@ $profile = $query->get_result()->fetch_assoc();
                             <th>Name</th>
                             <th>Date</th>
                             <th>Status</th>
-
+                            <th>Details</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <?php while ($row = $recentAppointments->fetch_assoc()) : ?>
-                            <tr>
-                                <td><?= htmlspecialchars($row['philhealthID']) ?></td>
-                                <td><?= htmlspecialchars($row['last_name']) ?></td>
-                                <td><?= htmlspecialchars($row['date']) ?></td>
-                                <td class="status-column <?= $row['status'] === 'Pending' ? 'status-pending' : ($row['status'] === 'Approved' ? 'status-approved' : 'status-denied') ?>">
-                                    <?= $row['status'] ?>
-                                    <?php if ($row['status'] === 'Approved') : ?>
-                                        <i class="bx bx-check-circle"></i>
-                                    <?php endif; ?>
-                                    <?php if ($row['status'] === 'Denied') : ?>
-                                        <i class="bx bx-block"></i>
-                                    <?php endif; ?>
-                                    <?php if ($row['status'] === 'Pending') : ?>
-                                        <i class="bx bx-time-five"></i>
-                                    <?php endif; ?>
+                        <?php if ($recentAppointments->num_rows > 0) : ?>
+                            <?php while ($row = $recentAppointments->fetch_assoc()) : ?>
+                                <tr>
+                                    <td><?= htmlspecialchars($row['philhealthID']) ?></td>
+                                    <td><?= htmlspecialchars($row['last_name']) ?></td>
+                                    <td><?= htmlspecialchars($row['date']) ?></td>
+                                    <td class="status-column <?= $row['status'] === 'Pending' ? 'status-pending' : ($row['status'] === 'Approved' ? 'status-approved' : 'status-denied') ?>">
+                                        <?= htmlspecialchars($row['status']) ?>
+                                        <?php if ($row['status'] === 'Approved') : ?>
+                                            <i class="bx bx-check-circle"></i>
+                                        <?php elseif ($row['status'] === 'Denied') : ?>
+                                            <i class="bx bx-block"></i>
+                                        <?php elseif ($row['status'] === 'Pending') : ?>
+                                            <i class="bx bx-time-five"></i>
+                                        <?php endif; ?>
+                                    </td>
+                                    <td>Details</td>
+                                </tr>
+                            <?php endwhile; ?>
+                        <?php else : ?>
+                            <tr class="no-data">
+                                <td colspan="5">
+                                    <div class="no-data-content">
+                                        <i class="bx bx-info-circle"></i> No recent appointments.
+                                    </div>
                                 </td>
-                                <td>Details</td>
                             </tr>
-                        <?php endwhile; ?>
+                        <?php endif; ?>
                     </tbody>
-
                 </table>
-                <a href="#">Show All</a>
             </div>
         </main>
 

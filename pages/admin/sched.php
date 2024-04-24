@@ -85,7 +85,7 @@ $profile = $query->get_result()->fetch_assoc();
                     <span class="material-icons-sharp"> settings </span>
                     <h3>Settings</h3>
                 </a>
-                <a href="add-sched.php" class="active">
+                <a href="sched.php" class="active">
                     <span class="material-icons-sharp"> add </span>
                     <h3>Add Schedule</h3>
                 </a>
