@@ -116,6 +116,7 @@
       background: none;
       padding: 0.6rem 1.2rem;
       color: #fff;
+      background-color: #3d81ea;
       font-weight: 500;
       font-size: 0.95rem;
       letter-spacing: 0.5px;
@@ -398,9 +399,10 @@
       .btn {
         padding: 0.45rem 1.2rem;
       }
-      .input option {
-        color: black; /* Ensures text is black */
-        background-color: white; /* Optional: ensures background is white */
+      div.contact-form .input-container .input,
+      div.contact-form .input-container .input option {
+        color: black !important; /* Using !important to override other styles if necessary */
+        background-color: white; /* Ensures background is white for better readability */
       }
     }
   </style>
@@ -460,6 +462,11 @@
               <input type="text" name="name" class="input" required />
               <label>Full Name</label>
               <span>Full Name</span>
+            </div>
+            <div class="input-container">
+              <input type="text" name="accountNumber" class="input" />
+              <label>Account Number</label>
+              <span>Account Number (if existing)</span>
             </div>
 
             <div class="input-container">

@@ -1,103 +1,129 @@
 <?php
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
+use PHPMailer\PHPMailer\SMTP;
+
+require './PHPMailer/src/Exception.php';
+require './PHPMailer/src/PHPMailer.php';
+require './PHPMailer/src/SMTP.php';
+
 include_once 'conn/dbconnect.php';
+
 session_start();
 define('BASE_URL', '/TPAS/pages/patient/');
 if (isset($_SESSION['patientSession']) && $_SESSION['patientSession'] != "") {
     header("Location: " . BASE_URL . "userpage.php");
-    exit();
+    exit;
 }
 
 $login_error = '';
-
-if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['login'])) {
-    $identifier = mysqli_real_escape_string($con, $_POST['identifier']);
-    $password = $_POST['password'];
-    $sql = strpos($identifier, '@') !== false ?
-        "SELECT * FROM tb_patients WHERE email = ?" :
-        "SELECT * FROM tb_patients WHERE philhealthId = ?";
-
-    $query = $con->prepare($sql);
-    if ($query === false) {
-        die('MySQL prepare error: ' . $con->error);
-    }
-
-    $query->bind_param("s", $identifier);
-    $query->execute();
-    $result = $query->get_result();
-    $row = $result->fetch_assoc();
-
-    if ($row) {
-        // Check if account is approved
-        if ($row['accountStatus'] != 'Approved') {
-            $login_error = 'Your account is not approved yet. Please <a href="contact.html">contact support</a> for more information.';
-        } else {
-            // Check password
-            if (password_verify($password, $row['password'])) {
-                $_SESSION['patientSession'] = $row['patientId'];
-                header("Location: " . BASE_URL . "userpage.php");
-                exit();
-            } else {
-                $login_error = 'Incorrect password. Please try again.';
-            }
-        }
-    } else {
-        $login_error = 'No account found with those details.';
-    }
-}
-
-
-
-
 $errors = [];
 
-if (isset($_POST['register'])) {
-    // Retrieve and sanitize user inputs
-    $firstname = mysqli_real_escape_string($con, trim($_POST['firstname']));
-    $lastname = mysqli_real_escape_string($con, trim($_POST['lastname']));
-    $philhealthId = mysqli_real_escape_string($con, trim($_POST['philhealthId']));
-    $email = mysqli_real_escape_string($con, trim($_POST['email']));
-    $password = $_POST['password'];
-    $confirm_password = $_POST['confirm_password'];
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    if (isset($_POST['login'])) {
+        // Handle login
+        $identifier = mysqli_real_escape_string($con, $_POST['identifier']);
+        $password = $_POST['password'];
+        $sql = strpos($identifier, '@') !== false ?
+            "SELECT * FROM tb_patients WHERE email = ?" :
+            "SELECT * FROM tb_patients WHERE philhealthId = ?";
 
-    // Basic validation
-    if (empty($firstname) || empty($lastname) || empty($email) || empty($password)) {
-        $errors[] = "Please fill all required fields.";
-    }
-    if ($password !== $confirm_password) {
-        $errors[] = "Passwords do not match.";
-    }
-    if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-        $errors[] = "Invalid email format.";
-    }
+        $query = $con->prepare($sql);
+        if ($query === false) {
+            die('MySQL prepare error: ' . $con->error);
+        }
 
+        $query->bind_param("s", $identifier);
+        $query->execute();
+        $result = $query->get_result();
+        $row = $result->fetch_assoc();
 
-    $checkEmail = $con->prepare("SELECT email FROM tb_patients WHERE email = ?");
-    $checkEmail->bind_param("s", $email);
-    $checkEmail->execute();
-    $result = $checkEmail->get_result();
-    if ($result->num_rows > 0) {
-        $errors[] = "Email already in use.";
-    }
-    if (count($errors) === 0) {
-        $hashed_password = password_hash($password, PASSWORD_DEFAULT);
-
-        $insertQuery = $con->prepare("INSERT INTO tb_patients (firstname, lastname, philhealthId, email, password) VALUES (?, ?, ?, ?, ?)");
-        $insertQuery->bind_param("sssss", $firstname, $lastname, $philhealthId, $email, $hashed_password);
-        if ($insertQuery->execute()) {
-            echo "<script>alert('Registration successful!'); window.location.href='index.php';</script>";
+        if ($row) {
+            if ($row['accountStatus'] != 'Approved') {
+                $login_error = 'Your account is not approved yet. Please <a href="contact.html">contact support</a> for more information.';
+            } else {
+                if (password_verify($password, $row['password'])) {
+                    $_SESSION['patientSession'] = $row['patientId'];
+                    header("Location: " . BASE_URL . "userpage.php");
+                    exit();
+                } else {
+                    $login_error = 'Incorrect password. Please try again.';
+                }
+            }
         } else {
-            $errors[] = "Error in registration: " . $con->error;
+            $login_error = 'No account found with those details.';
+        }
+    } elseif (isset($_POST['register'])) {
+        $firstname = mysqli_real_escape_string($con, trim($_POST['firstname']));
+        $lastname = mysqli_real_escape_string($con, trim($_POST['lastname']));
+        $philhealthId = mysqli_real_escape_string($con, trim($_POST['philhealthId']));
+        $email = mysqli_real_escape_string($con, trim($_POST['email']));
+        $password = $_POST['password'];
+        $confirm_password = $_POST['confirm_password'];
+
+        if (empty($firstname) || empty($lastname) || empty($email) || empty($password)) {
+            $errors[] = "Please fill all required fields.";
+        }
+        if ($password !== $confirm_password) {
+            $errors[] = "Passwords do not match.";
+        }
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            $errors[] = "Invalid email format.";
+        }
+
+        $checkEmail = $con->prepare("SELECT email FROM tb_patients WHERE email = ?");
+        $checkEmail->bind_param("s", $email);
+        $checkEmail->execute();
+        $result = $checkEmail->get_result();
+        if ($result->num_rows > 0) {
+            $errors[] = "Email already in use.";
+        }
+
+        if (count($errors) === 0) {
+            $accountNumber = sprintf("%06d", mt_rand(1, 999999));
+            $hashed_password = password_hash($password, PASSWORD_DEFAULT);
+            $insertQuery = $con->prepare("INSERT INTO tb_patients (firstname, lastname, philhealthId, email, password, account_num) VALUES (?, ?, ?, ?, ?, ?)");
+            $insertQuery->bind_param("ssssss", $firstname, $lastname, $philhealthId, $email, $hashed_password, $accountNumber);
+            if ($insertQuery->execute()) {
+                // Prepare and send email using PHPMailer
+                $mail = new PHPMailer(true);
+                try {
+                    $mail->isSMTP();
+                    $mail->Host       = 'smtp.gmail.com';
+                    $mail->SMTPAuth   = true;
+                    $mail->Username   = 'tpas052202@gmail.com';
+                    $mail->Password   = 'ailamnlsomhhtglb';
+                    $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+                    $mail->Port       = 587;
+
+                    $mail->setFrom($email, $firstname . ' ' . $lastname);
+                    $mail->addAddress('tpas052202@gmail.com');
+
+                    $mail->isHTML(true);
+                    $mail->Subject = 'Your Account Registration';
+                    $mail->Body    = "Hello <b>$firstname, $lastname</b>,<br><br>Thank you for registering with us. Your account number is: <b>$accountNumber</b><br><br>Best regards,<br>TPAS";
+                    $mail->AltBody = "Hello $firstname, $lastname\n\nThank you for registering with us. Your account number is: $accountNumber\n\nBest regards,\nTPAS";
+
+                    $mail->send();
+                    echo "<script>alert('Registration successful! An email with your account number has been sent.'); window.location.href='index.php';</script>";
+                } catch (Exception $e) {
+                    echo "<script>alert('Message could not be sent. Mailer Error: {$mail->ErrorInfo}'); window.location.href='index.php';</script>";
+                }
+            } else {
+                $errors[] = "Error in registration: " . $con->error;
+            }
         }
     }
 }
 
-// Show errors
+// Error display
 if (!empty($errors)) {
     foreach ($errors as $error) {
         echo "<div class='error'>$error</div>";
     }
 }
 ?>
+
 
 
 <!DOCTYPE html>
