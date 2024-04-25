@@ -25,20 +25,21 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $message = isset($_POST['message']) ? $_POST['message'] : '';
 
     try {
-        $mail->isSMTP();  
-        $mail->Host = 'smtp.gmail.com';  
-        $mail->SMTPAuth = true;  
-        $mail->Username = 'tpas052202@gmail.com';  
-        $mail->Password = 'ailamnlsomhhtglb';  
-        $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;  
-        $mail->Port = 465; 
+        $mail->isSMTP();
+        $mail->Host = 'smtp.gmail.com';
+        $mail->SMTPAuth = true;
+        $mail->Username = 'tpas052202@gmail.com';
+        $mail->Password = 'ailamnlsomhhtglb';
+        $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;
+        $mail->Port = 465;
 
         // Recipients
-        $mail->setFrom('tpas052202@gmail.com', $name); 
-        $mail->addAddress('tpas052202@gmail.com');
-
+        $mail->setFrom('tpas052202@gmail.com', 'TPAS Administrator');
+        $mail->addAddress($email);
+        $mail->addReplyTo('tpas052202@gmail.com', 'TPAS Administrator');
         // Content
-        $mail->isHTML(true);  
+        $mail->isHTML(true);
+        $mail->Subject = '';
         $fullMessage = "Name: $name<br>Email: $email<br>Phone: $phone<br>Account Number: $account_num<br>Message: $message";
         $mail->Body = $fullMessage;
         $mail->AltBody = "Name: $name\nEmail: $email\nPhone: $phone\nAccount Number: $account_num\nMessage: $message";

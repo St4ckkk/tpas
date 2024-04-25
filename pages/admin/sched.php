@@ -64,7 +64,7 @@ $profile = $query->get_result()->fetch_assoc();
                     <span class="material-icons-sharp"> dashboard </span>
                     <h3>Dashboard</h3>
                 </a>
-                <a href="#">
+                <a href="users.php">
                     <span class="material-icons-sharp"> person_outline </span>
                     <h3>Users</h3>
                 </a>

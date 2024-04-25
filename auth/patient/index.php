@@ -1,4 +1,5 @@
 <?php
+
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 use PHPMailer\PHPMailer\SMTP;
@@ -57,11 +58,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $firstname = mysqli_real_escape_string($con, trim($_POST['firstname']));
         $lastname = mysqli_real_escape_string($con, trim($_POST['lastname']));
         $philhealthId = mysqli_real_escape_string($con, trim($_POST['philhealthId']));
+        $phoneno = mysqli_real_escape_string($con, trim($_POST['phoneno']));
         $email = mysqli_real_escape_string($con, trim($_POST['email']));
         $password = $_POST['password'];
         $confirm_password = $_POST['confirm_password'];
 
-        if (empty($firstname) || empty($lastname) || empty($email) || empty($password)) {
+        if (empty($firstname) || empty($lastname) || empty($email) || empty($phoneno) || empty($password)) {
             $errors[] = "Please fill all required fields.";
         }
         if ($password !== $confirm_password) {
@@ -82,8 +84,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         if (count($errors) === 0) {
             $accountNumber = sprintf("%06d", mt_rand(1, 999999));
             $hashed_password = password_hash($password, PASSWORD_DEFAULT);
-            $insertQuery = $con->prepare("INSERT INTO tb_patients (firstname, lastname, philhealthId, email, password, account_num) VALUES (?, ?, ?, ?, ?, ?)");
-            $insertQuery->bind_param("ssssss", $firstname, $lastname, $philhealthId, $email, $hashed_password, $accountNumber);
+            $insertQuery = $con->prepare("INSERT INTO tb_patients (firstname, lastname, philhealthId, email, phoneno, password, account_num) VALUES (?, ?, ?, ?, ?, ?, ?)");
+            $insertQuery->bind_param("sssssss", $firstname, $lastname, $philhealthId, $email, $phoneno, $hashed_password, $accountNumber);
             if ($insertQuery->execute()) {
                 // Prepare and send email using PHPMailer
                 $mail = new PHPMailer(true);
@@ -95,14 +97,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     $mail->Password   = 'ailamnlsomhhtglb';
                     $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
                     $mail->Port       = 587;
-
-                    $mail->setFrom($email, $firstname . ' ' . $lastname);
-                    $mail->addAddress('tpas052202@gmail.com');
+                    $mail->setFrom('tpas052202@gmail.com', 'TPAS Administrator');
+                    $mail->addAddress($email);
+                    $mail->addReplyTo('tpas052202@gmail.com', 'TPAS Administrator');
 
                     $mail->isHTML(true);
                     $mail->Subject = 'Your Account Registration';
-                    $mail->Body    = "Hello <b>$firstname, $lastname</b>,<br><br>Thank you for registering with us. Your account number is: <b>$accountNumber</b><br><br>Best regards,<br>TPAS";
-                    $mail->AltBody = "Hello $firstname, $lastname\n\nThank you for registering with us. Your account number is: $accountNumber\n\nBest regards,\nTPAS";
+                    $mail->Body    = "Hello <b>$firstname $lastname</b>,<br><br>Thank you for registering with us. Your account number is: <b>$accountNumber</b>.<br><br>We will send you another email once your account has been approved.<br><br>Best regards,<br>TPAS";
+                    $mail->AltBody = "Hello $firstname $lastname,\n\nThank you for registering with us. Your account number is: $accountNumber.\n\nWe will send you another email once your account has been approved.\n\nBest regards,\nTPAS";
 
                     $mail->send();
                     echo "<script>alert('Registration successful! An email with your account number has been sent.'); window.location.href='index.php';</script>";
@@ -134,13 +136,68 @@ if (!empty($errors)) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <link rel="stylesheet" href="assets/css/auth.css">
+    <link rel="stylesheet" href="node_modules/boxicons/css/boxicons.css">
     <link rel="shortcut icon" href="assets/favicon/tpasss.ico" type="image/x-icon">
-    <title>Make an Appointment!</title>
+    <title>Make an appointment!</title>
 </head>
 <style>
+    #password-criteria {
+        font-size: 0.5rem;
+        color: coral;
+        display: none;
+        opacity: 0;
+        transition: opacity 0.5s ease-in-out;
+        margin-right: 70px;
+    }
+
+    #password-criteria p {
+        margin: 0;
+    }
+
+    .password-container {
+        position: relative;
+        display: inline-block;
+        width: 100%;
+    }
+
+    .password-container input {
+        width: 100%;
+        padding-right: 30px;
+    }
+
+    .password-container i {
+        position: absolute;
+        right: 10px;
+        top: 50%;
+        transform: translateY(-50%);
+        cursor: pointer;
+        color: #707070;
+    }
+
+    .bx-show,
+    .bx-hide {
+        cursor: pointer;
+        position: absolute;
+        right: 10px;
+    }
+
+    .visible {
+        display: block;
+        opacity: 1;
+    }
+
+    .met {
+        color: limegreen;
+    }
+
     .error {
-        color: red;
+        color: coral;
         font-weight: 600;
+    }
+
+    .container {
+        height: 85%;
+        border: none;
     }
 </style>
 
@@ -159,9 +216,24 @@ if (!empty($errors)) {
                 <input type="text" name="firstname" placeholder="Firstname" required>
                 <input type="text" name="lastname" placeholder="Lastname" required>
                 <input type="text" name="philhealthId" placeholder="PhilHealth ID (optional)">
+                <input type="text" name="phoneno" placeholder="Phone Number" required>
                 <input type="email" name="email" placeholder="Email" required>
-                <input type="password" name="password" placeholder="Password" required>
-                <input type="password" name="confirm_password" placeholder="Confirm Password" required>
+                <div class="password-container">
+                    <input type="password" name="password" id="password" placeholder="Password" required onkeyup="checkPasswordStrength()">
+                    <i class="bx bx-show" id="togglePassword" onclick="togglePasswordVisibility('password', 'togglePassword')"></i>
+                </div>
+                <div class="password-container">
+                    <input type="password" name="confirm_password" id="confirm_password" placeholder="Confirm Password" required>
+                    <i class="bx bx-show" id="toggleConfirmPassword" onclick="togglePasswordVisibility('confirm_password', 'toggleConfirmPassword')"></i>
+                </div>
+                <div id="password-criteria">
+                    <p id="length-check"><i class="bx bx-x"></i> Minimum 8 characters</p>
+                    <p id="lower-check"><i class="bx bx-x"></i> Contains a lowercase letter</p>
+                    <p id="upper-check"><i class="bx bx-x"></i> Contains an uppercase letter</p>
+                    <p id="number-check"><i class="bx bx-x"></i> Contains a number</p>
+                    <p id="special-check"><i class="bx bx-x"></i> Contains a special character</p>
+                </div>
+
                 <button type="submit" name="register">Sign Up</button>
             </form>
 
@@ -202,6 +274,42 @@ if (!empty($errors)) {
     </div>
 
     <script src="assets/js/script.js"></script>
+    <script>
+        function checkPasswordStrength() {
+            var password = document.getElementById("password").value;
+            var passwordCriteria = document.getElementById("password-criteria");
+
+            passwordCriteria.style.display = password.length > 0 ? 'block' : 'none';
+            setTimeout(function() {
+                passwordCriteria.style.opacity = password.length > 0 ? '1' : '0';
+            }, 10);
+            updateCriteria("length-check", password.length >= 8);
+            updateCriteria("lower-check", /[a-z]/.test(password));
+            updateCriteria("upper-check", /[A-Z]/.test(password));
+            updateCriteria("number-check", /[0-9]/.test(password));
+            updateCriteria("special-check", /[\W_]/.test(password));
+        }
+
+        function updateCriteria(id, isMet) {
+            var element = document.getElementById(id);
+            element.className = isMet ? "met" : "";
+            element.children[0].className = isMet ? "bx bx-check" : "bx bx-x";
+        }
+
+        function togglePasswordVisibility(passwordInputId, toggleIconId) {
+            var passwordInput = document.getElementById(passwordInputId);
+            var toggleIcon = document.getElementById(toggleIconId);
+            if (passwordInput.type === "password") {
+                passwordInput.type = "text";
+                toggleIcon.className = 'bx bx-hide';
+            } else {
+                passwordInput.type = "password";
+                toggleIcon.className = 'bx bx-show';
+            }
+        }
+    </script>
+
+
 </body>
 
 </html>
