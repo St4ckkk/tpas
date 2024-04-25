@@ -13,6 +13,7 @@ $query = $con->prepare("SELECT doctorLastName, doctorRole FROM doctor WHERE id =
 $query->bind_param("i", $doctorId);
 $query->execute();
 $profile = $query->get_result()->fetch_assoc();
+
 ?>
 
 
@@ -44,6 +45,12 @@ $profile = $query->get_result()->fetch_assoc();
     .status-column.status-denied {
         color: #dc3545;
     }
+
+    .schedule-container form {
+        margin-left: 16rem;
+        margin-top: 0;
+    }
+
 </style>
 
 <body>
@@ -68,7 +75,7 @@ $profile = $query->get_result()->fetch_assoc();
                     <span class="material-icons-sharp"> person_outline </span>
                     <h3>Users</h3>
                 </a>
-                <a href="#">
+                <a href="assistant.php">
                     <span class="material-icons-sharp"> person </span>
                     <h3>Staffs</h3>
                 </a>
@@ -136,11 +143,12 @@ $profile = $query->get_result()->fetch_assoc();
                                 <td><?= htmlspecialchars($row['startDate']) ?></td>
                                 <td><?= htmlspecialchars($row['startTime']) ?></td>
                                 <td><?= htmlspecialchars($row['endTime']) ?></td>
-                                <td><?= htmlspecialchars($row['createdAt']) ?></td>
+                                <td><?= htmlspecialchars(date("m-d-Y  g:i A", strtotime($row['createdAt']))) ?></td>
                             </tr>
                         <?php endwhile; ?>
                     </tbody>
                     </tbody>
+
                 </table>
             </div>
         </main>
@@ -185,7 +193,7 @@ $profile = $query->get_result()->fetch_assoc();
                 <td>" . htmlspecialchars($row['startDate']) . "</td>
                 <td>" . htmlspecialchars($row['startTime']) . "</td>
                 <td>" . htmlspecialchars($row['endTime']) . "</td>
-                <td>" . htmlspecialchars($row['createdAt']) . "</td>
+                <td>" . htmlspecialchars(date("m-d-Y  g:i A", strtotime($row['createdAt']))) . "</td>
             </tr>";
                         }
                         echo "</tbody>";
@@ -202,6 +210,7 @@ $profile = $query->get_result()->fetch_assoc();
                     ?>
 
                 </table>
+
             </div>
 
         </div>

@@ -14,7 +14,7 @@ if (isset($_POST['login'])) {
 
     $loginID = mysqli_real_escape_string($con, trim($_POST['doctorIdOrdoctorEmail']));
     $password = mysqli_real_escape_string($con, $_POST['password']);
-    $query = "SELECT * FROM doctor WHERE doctorId = ? OR doctorEmail = ?";
+    $query = "SELECT * FROM doctor WHERE doctorId = ? OR email = ?";
     $stmt = mysqli_prepare($con, $query);
 
     if ($stmt) {

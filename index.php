@@ -144,7 +144,7 @@
                 var formattedDate = selectedDate.getFullYear() + '-' +
                     ('0' + (selectedDate.getMonth() + 1)).slice(-2) + '-' +
                     ('0' + selectedDate.getDate()).slice(-2);
-                $.get('checkScheduleStatus.php', {
+                $.get('calendar.php', {
                         date: formattedDate
                     })
                     .done(function(response) {
@@ -172,7 +172,7 @@
                         document.getElementById("txtHint").innerHTML = xmlhttp.responseText;
                     }
                 };
-                xmlhttp.open("GET", "getuser.php?q=" + str, true);
+                xmlhttp.open("GET", "get-schedule.php?q=" + str, true);
                 console.log(str);
                 xmlhttp.send();
             }

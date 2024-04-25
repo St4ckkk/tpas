@@ -1,4 +1,7 @@
 <?php
+include_once 'conn/dbconnect.php';
+
+session_start();
 
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
@@ -8,9 +11,7 @@ require './PHPMailer/src/Exception.php';
 require './PHPMailer/src/PHPMailer.php';
 require './PHPMailer/src/SMTP.php';
 
-include_once 'conn/dbconnect.php';
 
-session_start();
 define('BASE_URL', '/TPAS/pages/patient/');
 if (isset($_SESSION['patientSession']) && $_SESSION['patientSession'] != "") {
     header("Location: " . BASE_URL . "userpage.php");
@@ -73,14 +74,22 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $errors[] = "Invalid email format.";
         }
 
-        $checkEmail = $con->prepare("SELECT email FROM tb_patients WHERE email = ?");
-        $checkEmail->bind_param("s", $email);
-        $checkEmail->execute();
-        $result = $checkEmail->get_result();
-        if ($result->num_rows > 0) {
-            $errors[] = "Email already in use.";
-        }
+        $tables = ['assistants', 'tb_patients', 'doctor'];
+        $emailExists = false;
 
+        foreach ($tables as $table) {
+            $column = ($table === 'doctor') ? 'email' : 'email'; 
+            $query = $con->prepare("SELECT * FROM $table WHERE $column = ?");
+            $query->bind_param("s", $email);
+            $query->execute();
+            if ($query->get_result()->num_rows > 0) {
+                $emailExists = true;
+                break;
+            }
+        }
+        if ($emailExists) {
+            $errors[] = "The email address is already in use. Please use a different email.";
+        }
         if (count($errors) === 0) {
             $accountNumber = sprintf("%06d", mt_rand(1, 999999));
             $hashed_password = password_hash($password, PASSWORD_DEFAULT);
@@ -103,8 +112,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
                     $mail->isHTML(true);
                     $mail->Subject = 'Your Account Registration';
-                    $mail->Body    = "Hello <b>$firstname $lastname</b>,<br><br>Thank you for registering with us. Your account number is: <b>$accountNumber</b>.<br><br>We will send you another email once your account has been approved.<br><br>Best regards,<br>TPAS";
-                    $mail->AltBody = "Hello $firstname $lastname,\n\nThank you for registering with us. Your account number is: $accountNumber.\n\nWe will send you another email once your account has been approved.\n\nBest regards,\nTPAS";
+                    $mail->Body    = "Hello <b>$firstname $lastname</b>,<br><br>Thank you for registering with us.<br><br>We will send you another email once your account has been approved.<br><br>Best regards,<br>TPAS";
+                    $mail->AltBody = "Hello $firstname $lastname,\n\nThank you for registering with us.\nWe will send you another email once your account has been approved.\n\nBest regards,\nTPAS";
 
                     $mail->send();
                     echo "<script>alert('Registration successful! An email with your account number has been sent.'); window.location.href='index.php';</script>";

@@ -540,10 +540,10 @@ main .recent-orders a {
 
 /* SCHEDULE PAGE */
 #recent-sched--table tr td {
-  text-align: center; 
+  text-align: center;
   padding: 10px;
   color: var(--color-info-dark);
-  font-style: italic; 
+  font-style: italic;
 }
 
 .no-data td {
@@ -601,7 +601,8 @@ main .recent-orders a {
 }
 
 .schedule-container input[type="date"],
-.schedule-container input[type="time"] {
+.schedule-container input[type="time"],
+.schedule-container input[type="text"] {
   width: 500px;
   padding: 0.8rem;
   border-radius: var(--border-radius-1);
@@ -611,7 +612,8 @@ main .recent-orders a {
 }
 
 .schedule-container input[type="date"]:focus,
-.schedule-container input[type="time"]:focus {
+.schedule-container input[type="time"]:focus,
+.schedule-container input[type="text"]:focus {
   outline: none;
   border-color: var(--color-primary);
   background-color: var(--color-white);

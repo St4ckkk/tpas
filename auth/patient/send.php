@@ -14,7 +14,7 @@ require './PHPMailer/src/Exception.php';
 require './PHPMailer/src/PHPMailer.php';
 require './PHPMailer/src/SMTP.php';
 
-$mail = new PHPMailer(true);
+
 
 // Ensure that data is only processed on POST
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
