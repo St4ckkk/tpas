@@ -50,7 +50,6 @@ $profile = $query->get_result()->fetch_assoc();
         margin-left: 16rem;
         margin-top: 0;
     }
-
 </style>
 
 <body>
@@ -141,8 +140,8 @@ $profile = $query->get_result()->fetch_assoc();
                         ?>
                             <tr>
                                 <td><?= htmlspecialchars($row['startDate']) ?></td>
-                                <td><?= htmlspecialchars($row['startTime']) ?></td>
-                                <td><?= htmlspecialchars($row['endTime']) ?></td>
+                                <td><?= htmlspecialchars(date("g:i A", strtotime($row['startTime']))) ?></td>
+                                <td><?= htmlspecialchars(date("g:i A", strtotime($row['endTime']))) ?></td>
                                 <td><?= htmlspecialchars(date("m-d-Y  g:i A", strtotime($row['createdAt']))) ?></td>
                             </tr>
                         <?php endwhile; ?>

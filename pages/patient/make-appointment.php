@@ -9,6 +9,10 @@ if (!isset($_SESSION['patientSession'])) {
 }
 $userId = $_SESSION['patientSession'];
 $firstName = $lastName = $phoneNumber = $email = "";
+$selectedDate = isset($_GET['date']) ? $_GET['date'] : null;
+if (empty($selectedDate)) {
+    die("<script>alert('Error: No date provided. Please select a valid date.'); window.location.href='userpage.php';</script>");
+}
 
 $query = "SELECT firstname, lastname, phoneno, email FROM tb_patients WHERE patientId = ?";
 $stmt = $con->prepare($query);
@@ -50,7 +54,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['submit'])) {
     $date = trim(htmlspecialchars($_POST['date']));
     $appointmentTime = trim(htmlspecialchars($_POST['appointmentTime']));
     $appointmentType = trim(htmlspecialchars($_POST['appointmentType']));
-    $reasonForVisit = trim(htmlspecialchars($_POST['reason']));
     $message = trim(htmlspecialchars($_POST['message']));
     $checkSql = "SELECT COUNT(*) as count FROM appointments WHERE patientId = ? AND date = ?";
     $checkStmt = $con->prepare($checkSql);
@@ -65,11 +68,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['submit'])) {
     }
 
     $sql = "INSERT INTO appointments (patientId, first_name, last_name, phone_number, email, date, appointment_time, appointment_type, reason_for_visit, message) 
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+
     if ($stmt = $con->prepare($sql)) {
         $stmt->bind_param("isssssssss", $userId, $firstName, $lastName, $phoneNumber, $email, $date, $appointmentTime, $appointmentType, $reasonForVisit, $message);
         if ($stmt->execute()) {
-            echo "<script>alert('Appointment booked successfully.'); window.location.href='userpage.php';</script>";
+            echo "<script>alert('Appointment booked successfully. {$emailMessage} Please check your email for confirmation and further details. You can also view your appointment details on the Appointment page in our system.'); window.location.href='userpage.php';</script>";
         } else {
             echo "<script>alert('Error: Could not execute the query: {$stmt->error}');</script>";
         }
@@ -111,6 +115,22 @@ $con->close();
 
     small {
         font-size: 1rem;
+    }
+
+    input,
+    select,
+    textarea {
+        padding: 20px;
+        margin: 8px 0;
+        display: inline-block;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        box-sizing: border-box;
+    }
+
+    .form-control:focus {
+        border-color: #4A90E2;
+        box-shadow: 0 0 8px 0 rgba(74, 144, 226, 0.5);
     }
 </style>
 
@@ -156,7 +176,7 @@ $con->close();
                         </div>
                         <div class="col-md-6">
                             <label for="startDate" class="form-label">Date</label>
-                            <input type="text" class="form-control" name="startDate" value="<?php echo htmlspecialchars($scheduleData['startDate']); ?>" readonly>
+                            <input type="text" class="form-control" name="date" value="<?php echo htmlspecialchars($scheduleData['startDate']); ?>" readonly>
                         </div>
                         <div class="col-md-6">
                             <label for="availTime">Available Time: </label>
@@ -165,7 +185,7 @@ $con->close();
                             <input type="time" class="form-control" id="appointmentTime" name="appointmentTime">
                         </div>
                         <div class="col-md-6">
-                            <label for="appointmentType">Type of Appointment</label>
+                            <label for="appointmentType">Reason For Visit</label>
                             <select class="form-control" name="appointmentType" required>
                                 <option value="">Select Type</option>
                                 <option value="consultation">Consultation</option>
@@ -173,10 +193,6 @@ $con->close();
                                 <option value="routine-check">Routine Check</option>
                                 <option value="emergency">Emergency</option>
                             </select>
-                        </div>
-                        <div class="col-md-6">
-                            <label for="reason">Reason for Visit</label>
-                            <input type="text" class="form-control" placeholder="Reason for Visit" name="reason">
                         </div>
                         <div class="col-12">
                             <label for="msg">Message</label>
