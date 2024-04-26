@@ -30,6 +30,10 @@ $query = $con->prepare("SELECT doctorFirstName, doctorLastName FROM doctor WHERE
 $query->bind_param("i", $doctorId);
 $query->execute();
 $profile = $query->get_result()->fetch_assoc();
+$notificationQuery = $con->prepare("SELECT title, description, createdAt FROM notifications ORDER BY createdAt DESC LIMIT 5");
+$notificationQuery->execute();
+$notifications = $notificationQuery->get_result();
+
 ?>
 
 
@@ -60,6 +64,40 @@ $profile = $query->get_result()->fetch_assoc();
 
     .status-column.status-denied {
         color: #dc3545;
+    }
+
+    /* Notifications Styles */
+    .recent-updates {
+        padding: var(--padding-1);
+        margin-top: 20px;
+    }
+
+    .recent-updates h2 {
+        color: var(--color-dark);
+        margin-bottom: 10px;
+    }
+
+    .update {
+        background: var(--color-white);
+        padding: 10px;
+        margin-bottom: 10px;
+        border-radius: var(--border-radius-2);
+    }
+
+    .update .detail h4 {
+        font-size: 1rem;
+        color: var(--color-primary);
+    }
+
+    .update .detail p {
+        font-size: 0.875rem;
+        color: var(--color-info-dark);
+        margin: 5px 0;
+    }
+
+    .update .detail small {
+        font-size: 0.75rem;
+        color: var(--color-info-light);
     }
 </style>
 
@@ -117,7 +155,7 @@ $profile = $query->get_result()->fetch_assoc();
             <h1>Dashboard</h1>
             <div class="insights">
                 <div class="appointments">
-                    <span class="material-icons-sharp"> receipt_long </span>
+                    <span class="material-icons-sharp"> event_available </span>
                     <div class="middle">
                         <div class="left">
                             <h3>Total Appointments</h3>
@@ -129,7 +167,7 @@ $profile = $query->get_result()->fetch_assoc();
 
                 <!--USERS -->
                 <div class="expenses">
-                    <span class="material-icons-sharp"> person_outline </span>
+                    <span class="material-icons-sharp"> group </span>
                     <div class="middle">
                         <div class="left">
                             <h3>Total Users</h3>
@@ -141,10 +179,10 @@ $profile = $query->get_result()->fetch_assoc();
 
                 <!-- MESSAGES -->
                 <div class="income">
-                    <span class="material-icons-sharp"> mail_outline </span>
+                    <span class="material-icons-sharp"> notifications </span>
                     <div class="middle">
                         <div class="left">
-                            <h3>Total Messages</h3>
+                            <h3>Reminders</h3>
                             <h1 class="message-count"></h1>
                         </div>
                     </div>
@@ -209,7 +247,7 @@ $profile = $query->get_result()->fetch_assoc();
                 </div>
                 <div class="profile">
                     <div class="info">
-                        <p>Hey, <b name="admin-name"><?= $profile['doctorFirstName'] . " " . $profile['doctorLastName']?></b></p>
+                        <p>Hey, <b name="admin-name"><?= $profile['doctorFirstName'] . " " . $profile['doctorLastName'] ?></b></p>
                         <small class="text-muted user-role">Admin</small>
                     </div>
                     <div class="profile-photo">
@@ -218,8 +256,24 @@ $profile = $query->get_result()->fetch_assoc();
             </div>
 
             <div class="recent-updates">
-                <h2>Recent Updates</h2>
+                <h2>Updates</h2>
+                <div class="updates">
+                    <?php if ($notifications->num_rows > 0) : ?>
+                        <?php while ($notification = $notifications->fetch_assoc()) : ?>
+                            <div class="update">
+                                <div class="detail">
+                                    <h4><?= htmlspecialchars($notification['title']) ?></h4>
+                                    <p><?= htmlspecialchars($notification['description']) ?></p>
+                                    <small>Posted on: <?= date('d M Y, H:i', strtotime($notification['createdAt'])) ?></small>
+                                </div>
+                            </div>
+                        <?php endwhile; ?>
+                    <?php else : ?>
+                        <p>No new updates.</p>
+                    <?php endif; ?>
+                </div>
             </div>
+
         </div>
     </div>
 

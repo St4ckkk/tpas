@@ -510,7 +510,7 @@ body {
 .content main .bottom-data .orders table tr td .status.approved {
   background: var(--light-primary);
 }
-.content main .bottom-data .orders table tr td .status.completed {
+.content main .bottom-data .orders table tr td .status.verified {
   background: var(--success);
 }
 .content main .bottom-data .orders table tr td .status.processing {
@@ -567,6 +567,7 @@ body {
 .content main .bottom-data .reminders .task-list li:last-child {
   margin-bottom: 0;
 }
+
 
 .profile p {
   font-size: 1rem;
@@ -693,7 +694,6 @@ body {
 .btn {
   padding: 12px 20px;
   background-color: var(--primary);
-  /* Using primary color variable */
   color: white;
   border: none;
   border-radius: 5px;
