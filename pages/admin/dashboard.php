@@ -26,7 +26,7 @@ $query->execute();
 $recentAppointments = $query->get_result();
 
 // Fetch admin profile using prepared statement
-$query = $con->prepare("SELECT doctorLastName, doctorRole FROM doctor WHERE id = ?");
+$query = $con->prepare("SELECT doctorFirstName, doctorLastName FROM doctor WHERE id = ?");
 $query->bind_param("i", $doctorId);
 $query->execute();
 $profile = $query->get_result()->fetch_assoc();
@@ -209,8 +209,8 @@ $profile = $query->get_result()->fetch_assoc();
                 </div>
                 <div class="profile">
                     <div class="info">
-                        <p>Hey, <b name="admin-name"><?= $profile['doctorLastName'] ?></b></p>
-                        <small class="text-muted user-role"><?= $profile['doctorRole'] ?></small>
+                        <p>Hey, <b name="admin-name"><?= $profile['doctorFirstName'] . " " . $profile['doctorLastName']?></b></p>
+                        <small class="text-muted user-role">Admin</small>
                     </div>
                     <div class="profile-photo">
                     </div>

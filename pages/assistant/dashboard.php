@@ -2,10 +2,29 @@
 session_start();
 include_once 'assets/conn/dbconnect.php';
 // Initialize counts
+define('BASE_URL', '/TPAS/auth/assistant/');
+if (!isset($_SESSION['assistantSession'])) {
+    header("Location: " . BASE_URL . "index.php");
+    exit();
+}
+
+$assistantId = $_SESSION['assistantSession'];
 $appointmentCount = 0;
 $userCount = 0;
 $reminderCount = 0;
 
+
+// Fetch assistant details
+$query = $con->prepare("SELECT firstName, lastName FROM assistants WHERE assistantId = ?");
+$query->bind_param("i", $assistantId);
+$query->execute();
+$result = $query->get_result();
+$assistant = $result->fetch_assoc();
+
+if (!$assistant) {
+    echo 'Error fetching assistant details.';
+    exit;
+}
 // Function to get counts from database
 function getCount($con, $tableName, $columnName = 'id')
 {
@@ -37,11 +56,11 @@ function getUpcomingAppointments($con)
 }
 
 $upcomingAppointments = getUpcomingAppointments($con);
-function getReminders($con)
+function getAssistantReminders($con, $assistantId)
 {
     $reminders = [];
-    // Adjust the query to join with user or doctor tables if necessary
-    $query = $con->prepare("SELECT description, isAcknowledged FROM reminders ORDER BY createdAt DESC");
+    $query = $con->prepare("SELECT reminderId, description, isAcknowledged FROM reminders WHERE assistantId = ? ORDER BY createdAt DESC");
+    $query->bind_param("i", $assistantId);
     $query->execute();
     $result = $query->get_result();
     while ($row = $result->fetch_assoc()) {
@@ -50,7 +69,8 @@ function getReminders($con)
     return $reminders;
 }
 
-$reminders = getReminders($con);
+// Fetch reminders specifically for the logged-in assistant
+$reminders = getAssistantReminders($con, $assistantId);
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -59,10 +79,14 @@ $reminders = getReminders($con);
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="node_modules/boxicons/css/boxicons.css">
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="dashboard.css">
     <link rel="shortcut icon" href="assets/favicon/tpasss.ico" type="image/x-icon">
+
     <title>Dashboard</title>
 </head>
+<style>
+
+</style>
 
 <body>
 
@@ -102,9 +126,9 @@ $reminders = getReminders($con);
             <input type="checkbox" id="theme-toggle" hidden>
             <label for="theme-toggle" class="theme-toggle"></label>
             <div class="profile">
-                <p>Hey, <b name="admin-name">TEST ASSISTANT</b></p>
+                <p>Hey, <b name="admin-name"><?= htmlspecialchars($assistant['firstName'] . " " . $assistant['lastName']) ?></b></p>
                 <small class="text-muted user-role">Assistant</small>
-</div>
+            </div>
         </nav>
 
         <!-- End of Navbar -->
@@ -191,56 +215,111 @@ $reminders = getReminders($con);
                         </div>
                     <?php endif; ?>
                 </div>
-                <div id="reminderModal" class="modal">
+                <!-- Reminder Modal -->
+                <dialog id="reminderModal" class="modal">
                     <div class="modal-content">
                         <span class="close" onclick="closeModal()">&times;</span>
-                        <form action="addReminder.php" method="POST">
-                            <label for="description">Description:</label>
-                            <input type="text" id="description" name="description" required>
-
-                            <label for="reminderFor">Reminder For:</label>
-                            <select id="reminderFor" name="reminderFor" onchange="updateRecipients(this.value)">
-                                <option value="">Select Target</option>
-                                <option value="doctor">Doctor</option>
-                                <option value="patient">Patient</option>
-                            </select>
-
-                            <label for="recipient">Recipient:</label>
-                            <select id="recipient" name="recipient">
-                                <option value="">Select Recipient</option>
-                                <!-- Options will be filled by JavaScript -->
-                            </select>
-
-                            <button onclick="openModal()">Add Reminder</button>
+                        <form action="add-reminder.php" method="POST">
+                            <div class="form-group">
+                                <label for="description">Description:</label>
+                                <input type="text" id="description" name="description" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="reminderFor">Reminder For:</label>
+                                <select id="reminderFor" name="reminderFor">
+                                    <option value="">Select Target</option>
+                                    <option value="doctor">Doctor</option>
+                                    <option value="patient">Patient</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="recipient">Recipient:</label>
+                                <select id="recipient" name="recipient">
+                                    <option value="">Select Recipient</option>
+                                </select>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Add Reminder</button>
                         </form>
                     </div>
-                </div>
+                </dialog>
 
 
                 <!-- Reminders -->
                 <div class="reminders">
                     <div class="header">
                         <i class='bx bx-note'></i>
-                        <h3>Reminders</h3>
-                        <i class='bx bx-filter'></i>
-                        <button onclick="openModal()" class='bx bx-plus'></i>
+                        <h3>Your Reminders</h3>
+                        <button onclick="openModal()" class='bx bx-plus'></button>
                     </div>
                     <ul class="task-list">
                         <?php foreach ($reminders as $reminder) : ?>
-                            <li class="<?= $reminder['isAcknowledged'] ? 'completed' : 'not-completed'; ?>">
+                            <li id="reminder-<?= $reminder['reminderId'] ?>" class="<?= $reminder['isAcknowledged'] === 'acknowledged' ? 'completed' : 'not-completed'; ?>">
                                 <div class="task-title">
-                                    <i class='bx <?= $reminder['isAcknowledged'] ? 'bx-check-circle' : 'bx-x-circle'; ?>'></i>
+                                    <i class='bx <?= $reminder['isAcknowledged'] == 'acknowledged' ? 'bx-check-circle' : 'bx-x-circle'; ?>'></i>
                                     <p><?= htmlspecialchars($reminder['description']) ?></p>
                                 </div>
-                                <i class='bx bx-dots-vertical-rounded'></i>
+                                <div class="dropdown">
+                                    <i class='bx bx-dots-vertical-rounded' id="trigger-<?= $reminder['reminderId'] ?>" onclick="toggleDropdown(this.id)"></i>
+                                    <div class="dropdown-content" style="display:none;">
+                                        <i class="bx bx-check-circle" onclick="updateReminderStatus('<?= $reminder['reminderId'] ?>', 'acknowledged')"></i>
+                                        <i class="bx bx-x" onclick="updateReminderStatus('<?= $reminder['reminderId'] ?>', 'not-acknowledged')"></i>
+                                        <i class="bx bx-trash" onclick="deleteReminder('<?= $reminder['reminderId'] ?>')"></i>
+                                    </div>
+                                </div>
                             </li>
                         <?php endforeach; ?>
                         <?php if (empty($reminders)) : ?>
                             <li class="no-data">No reminders to show</li>
                         <?php endif; ?>
                     </ul>
+
                 </div>
+
                 <!-- End of Reminders-->
+
+                <script>
+                    function toggleDropdown(triggerId) {
+                        var trigger = document.getElementById(triggerId);
+                        var dropdown = trigger.nextElementSibling;
+
+                        // Close all other dropdowns
+                        var dropdowns = document.getElementsByClassName("dropdown-content");
+                        for (var i = 0; i < dropdowns.length; i++) {
+                            if (dropdowns[i] !== dropdown) {
+                                dropdowns[i].style.display = 'none';
+                                dropdowns[i].style.opacity = '0';
+                                dropdowns[i].style.visibility = 'hidden';
+                            }
+                        }
+
+                        // Toggle the current dropdown
+                        if (dropdown.style.display === 'block') {
+                            dropdown.style.display = 'none';
+                            dropdown.style.opacity = '0';
+                            dropdown.style.visibility = 'hidden';
+                        } else {
+                            const rect = trigger.getBoundingClientRect();
+                            dropdown.style.display = 'block';
+                            dropdown.style.opacity = '1';
+                            dropdown.style.visibility = 'visible';
+                            dropdown.style.top = `${rect.top}px`;
+                            dropdown.style.left = `${rect.left - dropdown.offsetWidth}px`;
+                        }
+                    }
+
+
+                    window.onclick = function(event) {
+                        if (!event.target.matches('.bx-dots-vertical-rounded')) {
+                            var dropdowns = document.getElementsByClassName("dropdown-content");
+                            for (var i = 0; i < dropdowns.length; i++) {
+                                var openDropdown = dropdowns[i];
+                                if (openDropdown.style.display === 'block') {
+                                    openDropdown.style.display = 'none';
+                                }
+                            }
+                        }
+                    };
+                </script>
 
             </div>
 
@@ -251,17 +330,24 @@ $reminders = getReminders($con);
     <script src="script.js"></script>
     <script>
         function openModal() {
-            document.getElementById('reminderModal').style.display = 'block';
+            const modal = document.getElementById('reminderModal');
+            modal.style.display = 'block';
+            setTimeout(() => modal.classList.add('show'), 10);
         }
 
         function closeModal() {
-            document.getElementById('reminderModal').style.display = 'none';
+            const modal = document.getElementById('reminderModal');
+            modal.classList.remove('show');
+            setTimeout(() => modal.style.display = 'none', 500);
         }
+
         window.onclick = function(event) {
-            if (event.target == document.getElementById('reminderModal')) {
+            const modal = document.getElementById('reminderModal');
+            if (event.target === modal) {
                 closeModal();
             }
         }
+
 
         function updateRecipients(type) {
             const recipientsDropdown = document.getElementById('recipient');
@@ -280,6 +366,64 @@ $reminders = getReminders($con);
                     recipientsDropdown.innerHTML = '<option value="">Error loading data</option>';
                     console.error('Error fetching recipients:', error);
                 });
+        }
+
+        function updateReminderStatus(reminderId, newStatus) {
+            const data = JSON.stringify({
+                reminderId: reminderId,
+                newStatus: newStatus
+            });
+
+            console.log("Sending Data:", data); // Debugging: Log the data being sent.
+
+            fetch('update-reminder.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json', // Ensures that PHP treats the request body as JSON
+                    },
+                    body: data
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert(`Reminder status updated successfully.`);
+                        location.reload(); // Optionally reload the page or update UI
+                    } else {
+                        alert('Failed to update reminder status.');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error updating reminder status:', error);
+                    alert('Error updating reminder status.');
+                });
+        }
+
+
+        function deleteReminder(reminderId) {
+            if (confirm("Are you sure you want to delete this reminder?")) {
+                fetch('delete-reminder.php', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            reminderId: reminderId // Ensure this is correctly capturing the ID
+                        })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            alert('Reminder deleted successfully.');
+                            document.getElementById(`reminder-${reminderId}`).remove();
+                        } else {
+                            alert('Failed to delete reminder.');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error deleting reminder:', error);
+                        alert('Error deleting reminder.');
+                    });
+            }
         }
     </script>
 </body>
