@@ -22,7 +22,7 @@ if (!$assistant) {
 function getVerifiedUsers($con)
 {
     $verifiedUsers = [];
-    $query = $con->prepare("SELECT account_num, firstname, lastname, accountStatus FROM tb_patients WHERE accountStatus = 'Verified' ORDER BY createdAt DESC");
+    $query = $con->prepare("SELECT account_num,email, firstname, lastname, accountStatus FROM tb_patients WHERE accountStatus = 'Verified' ORDER BY createdAt DESC");
     $query->execute();
     $result = $query->get_result();
     while ($row = $result->fetch_assoc()) {
@@ -34,7 +34,7 @@ function getVerifiedUsers($con)
 function getNonVerifiedUsers($con)
 {
     $nonVerifiedUsers = [];
-    $query = $con->prepare("SELECT account_num, firstname, lastname, accountStatus FROM tb_patients WHERE accountStatus IN ('Pending', 'Processing') ORDER BY createdAt DESC");
+    $query = $con->prepare("SELECT account_num,email, firstname, lastname, accountStatus FROM tb_patients WHERE accountStatus IN ('Pending', 'Processing') ORDER BY createdAt DESC");
     $query->execute();
     $result = $query->get_result();
     while ($row = $result->fetch_assoc()) {
@@ -55,6 +55,7 @@ $nonVerifiedUsers = getNonVerifiedUsers($con);
     <link rel="stylesheet" href="node_modules/boxicons/css/boxicons.css">
     <link rel="stylesheet" href="dashboard.css">
     <link rel="shortcut icon" href="assets/favicon/tpasss.ico" type="image/x-icon">
+
     <title>Dashboard</title>
 </head>
 <style>
@@ -180,6 +181,113 @@ $nonVerifiedUsers = getNonVerifiedUsers($con);
         font-size: 0.8rem;
         color: #333;
     }
+
+    .action-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 6px;
+        color: white;
+        background-color: #4CAF50;
+        border: none;
+        cursor: pointer;
+        border-radius: 5px;
+        font-size: 1rem;
+        text-decoration: none;
+    }
+
+    .action-btn:hover,
+    .action-btn.denied:hover {
+        opacity: 0.8;
+    }
+
+    .action-btn.denied {
+        background-color: #f44336;
+    }
+
+    .action-btn i {
+        font-size: 1rem;
+    }
+
+    td,
+    th {
+        font-size: 0.7rem;
+    }
+
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 10;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        overflow: auto;
+        background-color: rgb(0, 0, 0);
+        background-color: rgba(0, 0, 0, 0.4);
+    }
+
+    .modal-content {
+        background-color: #fefefe;
+        margin: 15% auto;
+        padding: 20px;
+        width: 15%;
+        border: 1px solid #888;
+    }
+
+    .close-btn {
+        color: #aaa;
+        float: right;
+        position: relative;
+        font-size: 28px;
+        font-weight: bold;
+    }
+
+    .close-btn:hover,
+    .close-btn:focus {
+        color: black;
+        text-decoration: none;
+        cursor: pointer;
+    }
+
+    .modal button {
+        padding: 5px;
+        text-align: center;
+        margin-left: 5px;
+        margin-top: 0;
+        background-color: #f44336;
+        color: white;
+        display: inline-block;
+        border-radius: 5px;
+        border: none;
+        cursor: pointer;
+    }
+
+    .modal button:hover,
+    .modal button:focus {
+        opacity: 0.8;
+    }
+
+    #confirmBtn {
+        padding: 5px;
+        text-align: center;
+        margin-left: 5px;
+        margin-top: 0;
+        background-color: #4CAF50;
+        color: white;
+        display: inline-block;
+        border-radius: 5px;
+    }
+
+    .m-content {
+        margin-top: 30px;
+    }
+
+    .button-container {
+        display: flex;
+        justify-content: center;
+        margin-top: 20px;
+    }
 </style>
 
 <body>
@@ -256,7 +364,8 @@ $nonVerifiedUsers = getNonVerifiedUsers($con);
                                 <tr>
                                     <th>Account Number</th>
                                     <th>Name</th>
-                                    <th>Status</th>
+                                    <th>Email</th>
+                                    <th></th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -264,6 +373,7 @@ $nonVerifiedUsers = getNonVerifiedUsers($con);
                                     <tr>
                                         <td><?= htmlspecialchars($user['account_num']) ?></td>
                                         <td><?= htmlspecialchars($user['firstname']) . ' ' . htmlspecialchars($user['lastname']) ?></td>
+                                        <td><?= htmlspecialchars($user['email']) ?></td>
                                         <td><span class="status verified"><?= htmlspecialchars($user['accountStatus']) ?></span></td>
                                     </tr>
                                 <?php endforeach; ?>
@@ -276,7 +386,6 @@ $nonVerifiedUsers = getNonVerifiedUsers($con);
                         </div>
                     <?php endif; ?>
                 </div>
-
                 <div class="orders">
                     <div class="header">
                         <i class='bx bx-block'></i>
@@ -288,7 +397,10 @@ $nonVerifiedUsers = getNonVerifiedUsers($con);
                                 <tr>
                                     <th>Account Number</th>
                                     <th>Name</th>
-                                    <th>Status</th>
+                                    <th>Email</th>
+                                    <td></td>
+                                    <th>Action</th>
+
                                 </tr>
                             </thead>
                             <tbody>
@@ -296,7 +408,17 @@ $nonVerifiedUsers = getNonVerifiedUsers($con);
                                     <tr>
                                         <td><?= htmlspecialchars($user['account_num']) ?></td>
                                         <td><?= htmlspecialchars($user['firstname']) . ' ' . htmlspecialchars($user['lastname']) ?></td>
+                                        <td><?= htmlspecialchars($user['email']) ?></td>
                                         <td><span class="status <?= htmlspecialchars(strtolower($user['accountStatus'])) ?>"><?= htmlspecialchars($user['accountStatus']) ?></span></td>
+                                        <td>
+                                            <button onclick="confirmUpdate('<?= $user['account_num'] ?>', 'Processing')" class="action-btn">
+                                                <i class='bx bx-time-five'></i>
+                                            </button>
+                                            <button onclick="confirmUpdate('<?= $user['account_num'] ?>', 'Denied')" class="action-btn denied">
+                                                <i class='bx bx-block'></i>
+                                            </button>
+
+                                        </td>
                                     </tr>
                                 <?php endforeach; ?>
                             </tbody>
@@ -308,9 +430,21 @@ $nonVerifiedUsers = getNonVerifiedUsers($con);
                         </div>
                     <?php endif; ?>
                 </div>
+            </div>
+            <!-- Custom Confirmation Modal -->
+            <div id="confirmationModal" class="modal">
 
+                <div class="modal-content">
+                    <span class="close-btn">&times;</span>
 
-
+                    <div class="m-content">
+                        <p>Are you sure you want to update this status?</p>
+                    </div>
+                    <div class="button-container">
+                        <button id="confirmBtn">Confirm</button>
+                        <button onclick="closeModal()">Cancel</button>
+                    </div>
+                </div>
             </div>
 
         </main>
@@ -318,6 +452,76 @@ $nonVerifiedUsers = getNonVerifiedUsers($con);
     </div>
 
     <script src="script.js"></script>
+    <script>
+        var currentAccountNum = null;
+        var currentStatus = null;
+
+        document.addEventListener('DOMContentLoaded', function() {
+            var confirmBtn = document.getElementById('confirmBtn');
+            if (confirmBtn) {
+                confirmBtn.addEventListener('click', function() {
+                    if (currentAccountNum && currentStatus) {
+                        updateUserStatus(currentAccountNum, currentStatus);
+                    } else {
+                        console.error('No account number or status set');
+                    }
+                });
+            } else {
+                console.error('Confirm button not found');
+            }
+
+            var closeModalButtons = document.querySelectorAll('.close-btn, [onclick="closeModal()"]');
+            closeModalButtons.forEach(button => {
+                button.addEventListener('click', closeModal);
+            });
+
+            window.onclick = function(event) {
+                var modal = document.getElementById('confirmationModal');
+                if (event.target === modal) {
+                    closeModal();
+                }
+            };
+        });
+
+        function confirmUpdate(accountNum, status) {
+            currentAccountNum = accountNum;
+            currentStatus = status;
+            document.getElementById('confirmationModal').style.display = "block";
+        }
+
+        function closeModal() {
+            document.getElementById('confirmationModal').style.display = "none";
+        }
+
+
+        function updateUserStatus(accountNum, newStatus) {
+            const data = JSON.stringify({
+                account_num: accountNum, // ensure the key name matches the expected PHP key
+                accountStatus: newStatus // ensure the key name matches the expected PHP key
+            });
+
+            fetch('update-status.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json', // correct header to indicate JSON body
+                    },
+                    body: data
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert("Status updated successfully.");
+                        window.location.reload(); // Refresh or redirect as necessary
+                    } else {
+                        alert("Failed to update status: " + data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error updating status:', error);
+                    alert('Error updating status: ' + error.message);
+                });
+        }
+    </script>
 </body>
 
 </htm>

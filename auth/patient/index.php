@@ -41,7 +41,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $row = $result->fetch_assoc();
 
         if ($row) {
-            if ($row['accountStatus'] != 'Approved') {
+            if ($row['accountStatus'] != 'Verified') {
                 $login_error = 'Your account is not approved yet. Please <a href="contact.html">contact support</a> for more information.';
             } else {
                 if (password_verify($password, $row['password'])) {

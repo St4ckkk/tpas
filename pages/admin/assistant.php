@@ -9,7 +9,7 @@ if (!isset($_SESSION['doctorSession'])) {
 }
 
 $doctorId = $_SESSION['doctorSession'];
-$query = $con->prepare("SELECT doctorLastName, doctorRole FROM doctor WHERE id = ?");
+$query = $con->prepare("SELECT doctorLastName FROM doctor WHERE id = ?");
 $query->bind_param("i", $doctorId);
 $query->execute();
 $profile = $query->get_result()->fetch_assoc();
@@ -227,7 +227,7 @@ $result = $query->get_result();
                 <div class="profile">
                     <div class="info">
                         <p>Hey, <b name="admin-name"><?= $profile['doctorLastName'] ?></b></p>
-                        <small class="text-muted user-role"><?= $profile['doctorRole'] ?></small>
+                        <small class="text-muted user-role">Admin</small>
                     </div>
                     <div class="profile-photo">
                     </div>
