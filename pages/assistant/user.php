@@ -209,10 +209,11 @@ $nonVerifiedUsers = getNonVerifiedUsers($con);
         font-size: 1rem;
     }
 
-    td,
-    th {
+    td {
         font-size: 0.7rem;
+        padding: 20px;
     }
+
 
     .modal {
         display: none;
@@ -299,8 +300,8 @@ $nonVerifiedUsers = getNonVerifiedUsers($con);
             <div class="logo-name"><span>TPA</span>S</div>
         </a>
         <ul class="side-menu">
-            <li class="active"><a href="dashboard.php"><i class='bx bxs-dashboard'></i>Dashboard</a></li>
-            <li><a href="user.php"><i class='bx bx-group'></i>Users</a></li>
+            <li><a href="dashboard.php"><i class='bx bxs-dashboard'></i>Dashboard</a></li>
+            <li class="active"><a href="user.php"><i class='bx bx-group'></i>Users</a></li>
             <li><a href="appointment.php"><i class='bx bx-calendar-check'></i>Appointments</a></li>
         </ul>
         <ul class="side-menu">

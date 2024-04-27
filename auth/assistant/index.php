@@ -12,21 +12,26 @@ $error = '';
 
 if (isset($_POST['login'])) {
     $accountNum = mysqli_real_escape_string($con, trim($_POST['accountnum']));
+    $email = mysqli_real_escape_string($con, trim($_POST['email']));
 
-    // Prepare the SQL query to check if the account number exists
-    $query = "SELECT assistantId FROM assistants WHERE accountNumber = ?";
+    // Prepare the SQL query to check if the account number and email exists
+    $query = "SELECT assistantId FROM assistants WHERE accountNumber = ? AND email = ?";
     $stmt = mysqli_prepare($con, $query);
 
     if ($stmt) {
-        mysqli_stmt_bind_param($stmt, "s", $accountNum);
+        mysqli_stmt_bind_param($stmt, "ss", $accountNum, $email);
         mysqli_stmt_execute($stmt);
-        $res = mysqli_stmt_get_result($stmt);
-        if ($row = mysqli_fetch_array($res, MYSQLI_ASSOC)) {
-            $_SESSION['assistantSession'] = $row['assistantId'];
+        mysqli_stmt_store_result($stmt);
+
+        if (mysqli_stmt_num_rows($stmt) == 1) {
+            // Account and email are correct
+            mysqli_stmt_bind_result($stmt, $assistantId);
+            mysqli_stmt_fetch($stmt);
+            $_SESSION['assistantSession'] = $assistantId;
             header("Location: " . BASE_URL . "dashboard.php");
             exit();
         } else {
-            $error = "No account found with that number. Please try again.";
+            $error = "No account found with that number and email. Please try again.";
         }
     } else {
         $error = "An error occurred. Please try again.";
@@ -34,6 +39,7 @@ if (isset($_POST['login'])) {
     mysqli_stmt_close($stmt);
 }
 ?>
+
 
 <!DOCTYPE html>
 <html lang="en">

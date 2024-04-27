@@ -52,7 +52,7 @@ if (!$userRow) {
     #calendar {
         max-width: 1000px;
         margin: 0 auto;
-        margin-top: 20px;
+        margin-top: 10px;
     }
 
 
@@ -121,7 +121,10 @@ if (!$userRow) {
         color: #fff;
         background-color: #3e81ec;
         border-radius: 50%;
-        transition: background-color 0.3s, color 0.3s;
+        transition: background-color 0.3s, color 0.3s;  
+    }
+    .container {
+        margin-top: 50px;
     }
 </style>
 
@@ -134,7 +137,7 @@ if (!$userRow) {
                 <div class="top-bar d-flex justify-content-between align-items-center">
                     <div class="header-area d-flex align-items-center">
                         <img src="assets/img/cd-logoo.png" alt="appointment.one logo" class="logo-small">
-                        <span class="company-name ml-2">appointment.one</span>
+                        <span class="company-name ml-2">TPAS</span>
                     </div>
                     <ul class="right-links d-flex list-unstyled">
                         <li class="mx-2"><a href="profile"><i class="fas fa-user"></i><span class="icon-label">Profile</span></a></li>

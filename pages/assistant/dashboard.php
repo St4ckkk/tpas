@@ -158,6 +158,9 @@ $reminders = getAssistantReminders($con, $assistantId);
     .task-title i {
         margin-right: 10px;
     }
+    td {
+        font-size: 0.7rem;
+    }
 
     .reminder-details {
         display: flex;
@@ -193,7 +196,7 @@ $reminders = getAssistantReminders($con, $assistantId);
     .reminder-date small {
         display: block;
         text-align: right;
-        margin-left: 340px;
+        margin-left: 250px;
     }
 
     .task-title {
@@ -602,4 +605,4 @@ $reminders = getAssistantReminders($con, $assistantId);
     </script>
 </body>
 
-</html>
+</htm>

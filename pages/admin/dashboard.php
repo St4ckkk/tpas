@@ -21,7 +21,7 @@ $query->execute();
 $totalUsers = $query->get_result()->fetch_assoc();
 
 // Fetch recent appointments
-$query = $con->prepare("SELECT philhealthID, last_name, date, status FROM appointments WHERE status ='Approved' ORDER BY date DESC LIMIT 5");
+$query = $con->prepare("SELECT philhealthID, first_name, last_name, date, appointment_time, status FROM appointments WHERE status ='Pending' OR status='Processing' ORDER BY date DESC LIMIT 5");
 $query->execute();
 $recentAppointments = $query->get_result();
 
@@ -58,12 +58,20 @@ $notifications = $notificationQuery->get_result();
         color: orange;
     }
 
-    .status-column.status-approved {
+    .status-column.status-confirmed {
         color: limegreen;
     }
 
     .status-column.status-denied {
         color: #dc3545;
+    }
+
+    .status-column.status-cancelled {
+        color: #6c757d;
+    }
+
+    .status-column.status-processing {
+        color: #007bff;
     }
 
     /* Notifications Styles */
@@ -98,6 +106,16 @@ $notifications = $notificationQuery->get_result();
     .update .detail small {
         font-size: 0.75rem;
         color: var(--color-info-light);
+    }
+
+    #appDetails {
+        cursor: pointer;
+        color: var(--color-primary-dark);
+    }
+
+    #appDetails:hover {
+
+        color: var(--color-primary);
     }
 </style>
 
@@ -191,25 +209,24 @@ $notifications = $notificationQuery->get_result();
             </div>
 
             <div class="recent-orders">
-                <h2>Recent Appointments</h2>
+                <h2>Upcoming Appointments</h2>
                 <table id="recent-orders--table">
                     <thead>
                         <tr>
-                            <th>Philhealth ID</th>
                             <th>Name</th>
                             <th>Date</th>
+                            <th>Time</th>
                             <th>Status</th>
-                            <th>Details</th>
                         </tr>
                     </thead>
                     <tbody>
                         <?php if ($recentAppointments->num_rows > 0) : ?>
                             <?php while ($row = $recentAppointments->fetch_assoc()) : ?>
                                 <tr>
-                                    <td><?= htmlspecialchars($row['philhealthID']) ?></td>
-                                    <td><?= htmlspecialchars($row['last_name']) ?></td>
+                                    <td><?= htmlspecialchars($row['first_name'] . ' ' . $row['last_name']) ?></td>
                                     <td><?= htmlspecialchars($row['date']) ?></td>
-                                    <td class="status-column <?= $row['status'] === 'Pending' ? 'status-pending' : ($row['status'] === 'Approved' ? 'status-approved' : 'status-denied') ?>">
+                                    <td><?= date("g:i A", strtotime($row['appointment_time'])); ?></td>
+                                    <td class="status-column <?= $row['status'] === 'Pending' ? 'status-pending' : ($row['status'] === 'Processing' ? 'status-processing' : 'status-cancelled') ?>">
                                         <?= htmlspecialchars($row['status']) ?>
                                         <?php if ($row['status'] === 'Approved') : ?>
                                             <i class="bx bx-check-circle"></i>
@@ -219,14 +236,14 @@ $notifications = $notificationQuery->get_result();
                                             <i class="bx bx-time-five"></i>
                                         <?php endif; ?>
                                     </td>
-                                    <td>Details</td>
+                                    <td id="appDetails">Details</td>
                                 </tr>
                             <?php endwhile; ?>
                         <?php else : ?>
                             <tr class="no-data">
                                 <td colspan="5">
                                     <div class="no-data-content">
-                                        <i class="bx bx-info-circle"></i> No recent appointments.
+                                        <i class="bx bx-info-circle"></i> No upcoming appointments.
                                     </div>
                                 </td>
                             </tr>
