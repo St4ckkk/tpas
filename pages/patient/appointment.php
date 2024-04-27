@@ -8,28 +8,20 @@ if (!isset($_SESSION['patientSession'])) {
 }
 
 $userId = $_SESSION['patientSession'];
-
 $stmt = $con->prepare("
     SELECT 
-        a.appointment_id, 
         a.date, 
-        s.startTime, 
-        s.endTime, 
+        a.appointment_time, 
+        a.endTime, 
         a.appointment_type, 
         a.status,
-        d.doctorLastName 
+       d.doctorLastName AS doctorName
     FROM appointments AS a
     JOIN schedule AS s ON a.scheduleId = s.scheduleId
     JOIN doctor AS d ON s.doctorId = d.id
-    WHERE a.patientId = ? 
+    WHERE a.patientId = ?
     ORDER BY a.date DESC
 ");
-
-
-// Check if the preparation was successful
-if (!$stmt) {
-    die('MySQL prepare error: ' . $con->error);
-}
 
 $stmt->bind_param("i", $userId);
 $stmt->execute();
@@ -103,16 +95,19 @@ $stmt->close();
     }
 
     .status-cancelled {
-        background-color: lightred;
+        background-color: red;
         /* Note: lightred is not a valid color, you might want to use a hex code or 'lightcoral' */
     }
+
     .status-denied {
         background-color: red;
     }
+
     td {
         font-size: 1.3rem;
         text-align: center;
     }
+
     th {
         font-size: 1.5rem;
         text-align: center;
@@ -139,47 +134,32 @@ $stmt->close();
         <table class="table">
             <thead>
                 <tr>
-                    <th>Type</th>
                     <th>Date</th>
                     <th>Start Time</th>
                     <th>End Time</th>
+                    <th>Reason</th>
                     <th>Doctor</th>
                     <th>Status</th>
                 </tr>
             </thead>
             <tbody>
-                <?php foreach ($appointments as $appointment) : ?>
-                    <?php
-                    $statusClass = '';
-                    switch ($appointment['status']) {
-                        case 'Pending':
-                            $statusClass = 'status-pending';
-                            break;
-                        case 'Rrocessing':
-                            $statusClass = 'status-processing';
-                            break;
-                        case 'Confirmed':
-                            $statusClass = 'status-confirmed';
-                            break;
-                        case 'Cancelled':
-                            $statusClass = 'status-cancelled';
-                            break;
-                        case 'Denied':
-                            $statusClass = 'status-denied';
-                            break;
-                    }
-                    ?>
-                    <tr class="<?= $statusClass ?>">
-                        <td><?= htmlspecialchars($appointment['appointment_type']); ?></td>
-                        <td><?= date("F j, Y", strtotime($appointment['date'])); ?></td>
-                        <td><?= date("g:i A", strtotime($appointment['startTime'])); ?></td>
-                        <td><?= date("g:i A", strtotime($appointment['endTime'])); ?></td>
-                        <td>Dr. <?= htmlspecialchars($appointment['doctorLastName']); ?></td>
-                        <td><?= ucfirst($appointment['status']); ?></td>
+                <?php if (!empty($appointments)) : ?>
+                    <?php foreach ($appointments as $appointment) : ?>
+                        <tr class="status-<?= strtolower($appointment['status']) ?>">
+                            <td><?= date("F j, Y", strtotime($appointment['date'])); ?></td>
+                            <td><?= date("g:i A", strtotime($appointment['appointment_time'])); ?></td>
+                            <td><?= date("g:i A", strtotime($appointment['endTime'])); ?></td>
+                            <td><?= htmlspecialchars($appointment['appointment_type']); ?></td>
+                            <td><?= htmlspecialchars($appointment['doctorName']); ?></td>
+                            <td><?= ucfirst($appointment['status']); ?></td>
+                        </tr>
+                    <?php endforeach; ?>
+                <?php else : ?>
+                    <tr>
+                        <td colspan="6">No appointments found.</td>
                     </tr>
-                <?php endforeach; ?>
+                <?php endif; ?>
             </tbody>
-
         </table>
     </div>
 

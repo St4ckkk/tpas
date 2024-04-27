@@ -14,14 +14,16 @@ if (empty($selectedDate)) {
     die("<script>alert('Error: No date provided. Please select a valid date.'); window.location.href='userpage.php';</script>");
 }
 
-$stmt = $con->prepare("SELECT startDate, startTime, endTime FROM schedule WHERE startDate = ?");
+$stmt = $con->prepare("SELECT scheduleId, startDate, startTime, endTime FROM schedule WHERE startDate = ?");
 $stmt->bind_param("s", $selectedDate);
 $stmt->execute();
 $result = $stmt->get_result();
+
 if ($result->num_rows > 0) {
     $scheduleData = $result->fetch_assoc();
     $displayStartTime = date("g:i A", strtotime($scheduleData['startTime']));
     $displayEndTime = date("g:i A", strtotime($scheduleData['endTime']));
+    $scheduleId = $scheduleData['scheduleId'];  // Store schedule ID
 } else {
     echo "<script>alert('No schedule available for this date.'); window.location.href='userpage.php';</script>";
     exit;
@@ -77,11 +79,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['submit'])) {
     }
 
     // Insert the new appointment
-    $sql = "INSERT INTO appointments (patientId, first_name, last_name, phone_number, email, date, appointment_time, endTime, appointment_type, message) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-    $stmt = $con->prepare($sql);
-    $stmt->bind_param("isssssssss", $userId, $firstName, $lastName, $phoneNumber, $email, $date, $appointmentTime, $endTime, $appointmentType, $message);
+    $stmt = $con->prepare("INSERT INTO appointments (scheduleId, patientId, first_name, last_name, phone_number, email, date, appointment_time, endTime, appointment_type, message) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+    $stmt->bind_param("iisssssssss", $scheduleId, $userId, $firstName, $lastName, $phoneNumber, $email, $date, $appointmentTime, $endTime, $appointmentType, $message);
+
     if ($stmt->execute()) {
-        echo "<script>alert('Appointment booked successfully. Please check your email for confirmation and further details. You can also view your appointment details on the Appointment page in our system.'); window.location.href='userpage.php';</script>";
+        echo "<script>alert('Appointment booked successfully. Please check your email for confirmation and further details.'); window.location.href='userpage.php';</script>";
     } else {
         echo "<script>alert('Error: Could not execute the query: {$stmt->error}');</script>";
     }
