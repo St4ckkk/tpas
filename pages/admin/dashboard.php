@@ -10,27 +10,42 @@
 
     $doctorId = $_SESSION['doctorSession'];
 
-    // Fetch total appointments
-    $query = $con->prepare("SELECT COUNT(*) AS total FROM appointments");
+    // Fetch total appointments and last update time
+    $query = $con->prepare("SELECT COUNT(*) AS total, MAX(updatedAt) as lastUpdated FROM appointments");
     $query->execute();
-    $totalAppointments = $query->get_result()->fetch_assoc();
-
+    $result = $query->get_result()->fetch_assoc();
+    $totalAppointments = $result['total'];
+    $lastUpdatedAppointments = $result['lastUpdated'];
+    $displayLastUpdatedAppointments = date("F j, Y g:i A", strtotime($lastUpdatedAppointments));
+    if ($lastUpdatedAppointments) {
+        $displayLastUpdatedAppointments = date("F j, Y g:i A", strtotime($lastUpdatedAppointments));
+    } else {
+        $displayLastUpdatedAppointments = "None";
+    }
     // Fetch total users
-    $query = $con->prepare("SELECT COUNT(*) AS total FROM tb_patients");
+    $query = $con->prepare("SELECT COUNT(*) AS total, MAX(updatedAt) as lastUpdated FROM tb_patients");
     $query->execute();
-    $totalUsers = $query->get_result()->fetch_assoc();
-
+    $result = $query->get_result()->fetch_assoc();
+    $totalUsers = $result['total'];
+    $lastUpdatedUsers = $result['lastUpdated'];
+    $displayLastUpdatedUsers = $lastUpdatedUsers ? date("F j, Y g:i A", strtotime($lastUpdatedUsers)) : "No updates";
     // Fetch recent appointments
-    $query = $con->prepare("SELECT appointment_id, first_name, last_name, date, appointment_time, status FROM appointments WHERE status ='Pending' OR status='Processing' ORDER BY date DESC LIMIT 5");
+    $query = $con->prepare("SELECT COUNT(*) AS total, MAX(updatedAt) as lastUpdated FROM reminders");
     $query->execute();
-    $recentAppointments = $query->get_result();
+    $result = $query->get_result()->fetch_assoc();
+    $totalReminders = $result['total'];
+    $lastUpdatedReminders = $result['lastUpdated'];
+    $displayLastUpdatedReminders = $lastUpdatedReminders ? date("F j, Y g:i A", strtotime($lastUpdatedReminders)) : "No updates";
 
     // Fetch admin profile using prepared statement
     $query = $con->prepare("SELECT doctorFirstName, doctorLastName FROM doctor WHERE id = ?");
     $query->bind_param("i", $doctorId);
     $query->execute();
     $profile = $query->get_result()->fetch_assoc();
-
+    // Fetch recent appointments
+    $query = $con->prepare("SELECT appointment_id, first_name, last_name, date, appointment_time, status FROM appointments WHERE status ='Pending' OR status='Processing' ORDER BY date DESC LIMIT 5");
+    $query->execute();
+    $recentAppointments = $query->get_result();
     $updatesQuery = $con->prepare("
     SELECT 
         a.appointment_id, 
@@ -364,6 +379,16 @@
         .reminder-title {
             color: orange;
         }
+
+        main .insights>div.appointments span {
+            background-color: #0056b3;
+        }
+        main .insights>div.users span {
+            background-color: limegreen;
+        }
+        main .insights>div.reminders span {
+            background-color: orange;
+        }
     </style>
 
     <body>
@@ -417,43 +442,45 @@
             </aside>
 
             <main>
+
                 <h1>Dashboard</h1>
                 <div class="insights">
                     <div class="appointments">
-                        <span class="material-icons-sharp"> event_available </span>
+                        <span class="material-icons-sharp">event_available</span>
                         <div class="middle">
                             <div class="left">
-                                <h3>Total Appointments</h3>
-                                <h1 class="appointment-count"><?= $totalAppointments['total'] ?></h1>
+                                <h3>Confirmed Appointments</h3>
+                                <h1><?= $totalAppointments ?></h1>
                             </div>
+
                         </div>
-                        <small class="text-muted created-at">Last</small>
+                        <small class="text-muted updated-at">Last updated at: <?= $displayLastUpdatedAppointments ?></small>
                     </div>
 
-                    <!--USERS -->
-                    <div class="expenses">
-                        <span class="material-icons-sharp"> group </span>
+                    <div class="users">
+                        <span class="material-icons-sharp">group</span>
                         <div class="middle">
                             <div class="left">
-                                <h3>Total Users</h3>
-                                <h1 class="user-count"><?= $totalUsers['total'] ?></h1>
+                                <h3>Verified Users</h3>
+                                <h1><?= $totalUsers ?></h1>
+
                             </div>
                         </div>
-                        <small class="text-muted update-created at">Last</small>
+                        <small class="text-muted">Last updated at: <?= $displayLastUpdatedUsers ?></small>
                     </div>
 
-                    <!-- MESSAGES -->
-                    <div class="income">
-                        <span class="material-icons-sharp"> notifications </span>
+                    <div class="reminders">
+                        <span class="material-icons-sharp">notifications</span>
                         <div class="middle">
                             <div class="left">
                                 <h3>Reminders</h3>
-                                <h1 class="message-count"></h1>
+                                <h1><?= $totalReminders ?></h1>
                             </div>
                         </div>
-                        <small class="text-muted updated-created-at"> Last </small>
+                        <small class="text-muted">Last updated at: <?= $displayLastUpdatedReminders ?></small>
                     </div>
                 </div>
+
 
                 <div class="recent-orders">
                     <h2>Upcoming Appointments</h2>
