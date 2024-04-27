@@ -21,7 +21,7 @@ $query->execute();
 $totalUsers = $query->get_result()->fetch_assoc();
 
 // Fetch recent appointments
-$query = $con->prepare("SELECT philhealthID, first_name, last_name, date, appointment_time, status FROM appointments WHERE status ='Pending' OR status='Processing' ORDER BY date DESC LIMIT 5");
+$query = $con->prepare("SELECT appointment_id, philhealthID, first_name, last_name, date, appointment_time, status FROM appointments WHERE status ='Pending' OR status='Processing' ORDER BY date DESC LIMIT 5");
 $query->execute();
 $recentAppointments = $query->get_result();
 
@@ -114,7 +114,6 @@ $notifications = $notificationQuery->get_result();
     }
 
     #appDetails:hover {
-
         color: var(--color-primary);
     }
 </style>
@@ -236,7 +235,7 @@ $notifications = $notificationQuery->get_result();
                                             <i class="bx bx-time-five"></i>
                                         <?php endif; ?>
                                     </td>
-                                    <td id="appDetails">Details</td>
+                                    <td><a href="appDetails.php?id=<?= $row['appointment_id'] ?>">View Details</a></td>
                                 </tr>
                             <?php endwhile; ?>
                         <?php else : ?>

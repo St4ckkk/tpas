@@ -206,9 +206,9 @@ $profile = $query->get_result()->fetch_assoc();
                                 <td><?= htmlspecialchars($row['email']) ?></td>
                                 <td><?= htmlspecialchars($row['phoneno']) ?></td>
                                 <td><?= htmlspecialchars(date("m/d/Y  g:i A", strtotime($row['createdAt']))) ?></td>
-                                <td class="status-column  <?= $row['accountStatus'] === 'Pending' ? 'status-pending' : ($row['accountStatus'] === 'Approved' ? 'status-approved' : 'status-denied') ?> " data-patient-id="<?= $row['account_num'] ?>">
+                                <td class="status-column  <?= $row['accountStatus'] === 'Pending' ? 'status-pending' : ($row['accountStatus'] === 'Verified' ? 'status-approved' : 'status-denied') ?> " data-patient-id="<?= $row['account_num'] ?>">
                                     <?= htmlspecialchars($row['accountStatus']) ?>
-                                    <?php if ($row['accountStatus'] === 'Approved') : ?>
+                                    <?php if ($row['accountStatus'] === 'Verified') : ?>
                                         <i class="bx bx-check-circle"></i>
                                     <?php elseif ($row['accountStatus'] === 'Denied') : ?>
                                         <i class="bx bx-block"></i>

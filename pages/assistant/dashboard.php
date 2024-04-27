@@ -258,7 +258,7 @@ $reminders = getAssistantReminders($con, $assistantId);
         </ul>
         <ul class="side-menu">
             <li>
-                <a href="#" class="logout">
+                <a href="logout.php?logout" class="logout">
                     <i class='bx bx-log-out-circle'></i>
                     Logout
                 </a>
