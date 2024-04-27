@@ -1,25 +1,16 @@
 <?php
-include 'assets/conn/dbconnect.php'; // Ensure you have a file that connects to the database
+include 'assets/conn/dbconnect.php';
 
-$date = $_GET['date'] ?? null; // Use the null coalescing operator to handle if date is not set
+$startDate = $_GET['start_date'];
+$endDate = $_GET['end_date'];
 
-if ($date) {
-    $query = "SELECT `endTime`, `status` FROM `schedule` WHERE `startDate` = '$date'";
-    $result = mysqli_query($con, $query);
-    $isFinished = true; // Assume it's finished unless found otherwise
+$query = "SELECT `startDate`, `status` FROM `schedule` WHERE `startDate` BETWEEN '$startDate' AND '$endDate'";
+$result = mysqli_query($con, $query);
+$availability = [];
 
-    while ($row = mysqli_fetch_assoc($result)) {
-        if ($row['status'] === 'available' && new DateTime($row['endTime']) > new DateTime()) {
-            $isFinished = false;
-            break;
-        }
-    }
-
-    if (mysqli_num_rows($result) > 0) {
-        echo $isFinished ? 'red' : 'green';
-    } else {
-        echo 'none';
-    }
-} else {
-    echo 'none';
+while ($row = mysqli_fetch_assoc($result)) {
+    $availability[$row['startDate']] = $row['status'] === 'available' ? 'limegreen' : 'red';
 }
+
+header('Content-Type: application/json');
+echo json_encode($availability);

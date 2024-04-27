@@ -147,7 +147,7 @@ if (!empty($errors)) {
     <link rel="stylesheet" href="assets/css/auth.css">
     <link rel="stylesheet" href="node_modules/boxicons/css/boxicons.css">
     <link rel="shortcut icon" href="assets/favicon/tpasss.ico" type="image/x-icon">
-    <title>Make an appointment!</title>
+    <title>Login & Register!</title>
 </head>
 <style>
     #password-criteria {

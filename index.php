@@ -47,7 +47,7 @@
 
     .right-links button {
         background-color: #f5f6f8;
-        color: #000;    
+        color: #000;
         padding: 10px 40px;
         border: none;
         border-radius: 50px;
@@ -70,8 +70,19 @@
         height: auto;
 
     }
+
     .middle-links a {
         font-size: 16px;
+    }
+
+    .available-day {
+        background-color: limegreen;
+        color: #fff;
+        cursor: pointer;
+    }
+
+    .datepicker-dropdown .datepicker-days .table-condensed tbody tr>td.day.available-day:hover {
+        background-color: limegreen;
     }
 </style>
 
@@ -89,8 +100,8 @@
             <li class="tags"><a href="#contact">Contact Us</a></li>
         </ul>
         <ul class="right-links">
-            <button onclick="window.open('auth/index.php', '_blank')">
-                Book Now <img src="assets/img/up-right-arrow.png" alt="">
+            <button onclick="window.open('auth/patient/index.php', '_blank')">
+                Get Started <img src="assets/img/up-right-arrow.png" alt="">
             </button>
         </ul>
     </div>
@@ -135,27 +146,49 @@
         })
         $(document).ready(function() {
             var date_input = $('#date');
+            var currentMonthData = {};
+
+            function fetchMonthData(date) {
+                var startOfMonth = date.startOf('month').format('YYYY-MM-DD');
+                var endOfMonth = date.endOf('month').format('YYYY-MM-DD');
+                $.ajax({
+                    url: 'calendar.php',
+                    data: {
+                        start_date: startOfMonth,
+                        end_date: endOfMonth
+                    },
+                    success: function(data) {
+                        currentMonthData = data;
+                        date_input.datepicker('update');
+                    }
+                });
+            }
+
             date_input.datepicker({
                 format: 'yyyy-mm-dd',
                 autoclose: true,
-                todayHighlight: true
+                todayHighlight: true,
+                beforeShowDay: function(date) {
+                    var formattedDate = moment(date).format('YYYY-MM-DD');
+                    var status = currentMonthData[formattedDate];
+                    if (status === 'limegreen') {
+                        return {
+                            classes: 'available-day',
+                            tooltip: 'Available'
+                        };
+                    }
+                    return {};
+                }
+            }).on('changeMonth', function(e) {
+                fetchMonthData(moment(e.date));
             }).on('changeDate', function(e) {
-                var selectedDate = e.date;
-                var formattedDate = selectedDate.getFullYear() + '-' +
-                    ('0' + (selectedDate.getMonth() + 1)).slice(-2) + '-' +
-                    ('0' + selectedDate.getDate()).slice(-2);
-                $.get('calendar.php', {
-                        date: formattedDate
-                    })
-                    .done(function(response) {
-                        console.log("Success:", response);
-                        date_input[0].style.backgroundColor = response === "green" ? '#008000' : (response === "red" ? '#FF0000' : '');
-                    })
-                    .fail(function(jqXHR, textStatus) {
-                        console.log("Request failed:", textStatus);
-                    });
+                // Your existing code to handle date changes
             });
+
+            // Initially load the current month's data
+            fetchMonthData(moment());
         });
+
 
         function showUser(str) {
             if (str == "") {
