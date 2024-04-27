@@ -78,8 +78,8 @@ $profile = $query->get_result()->fetch_assoc();
                     <span class="material-icons-sharp"> person </span>
                     <h3>Staffs</h3>
                 </a>
-                <a href="#">
-                    <span class="material-icons-sharp"> receipt_long </span>
+                <a href="appointments.php">
+                    <span class="material-icons-sharp"> event_available </span>
                     <h3>Appointments</h3>
                 </a>
                 <a href="#">

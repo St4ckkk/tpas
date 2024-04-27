@@ -30,8 +30,7 @@ $query = $con->prepare("UPDATE appointments SET status = ? WHERE appointment_id 
 $query->bind_param("si", $newStatus, $appointmentId);
 
 if ($query->execute()) {
-    // Only send an email if the status is Confirmed, Cancelled, or Denied
-    if (in_array($newStatus, ['Confirmed', 'Cancelled', 'Denied'])) {
+    if (in_array($newStatus, ['Confirmed', 'Cancelled'])) {
         $query = $con->prepare("SELECT email, first_name, last_name, date, appointment_time FROM appointments WHERE appointment_id = ?");
         $query->bind_param("i", $appointmentId);
         $query->execute();
