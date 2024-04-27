@@ -7,7 +7,8 @@ if (isset($_SESSION['assistantSession'])) {
     header("Location: " . BASE_URL . "dashboard.php");
     exit();
 }
-
+// Set the default timezone to Philippine Time
+date_default_timezone_set('Asia/Manila');
 $error = '';
 
 if (isset($_POST['login'])) {
@@ -24,10 +25,22 @@ if (isset($_POST['login'])) {
         mysqli_stmt_store_result($stmt);
 
         if (mysqli_stmt_num_rows($stmt) == 1) {
-            // Account and email are correct
             mysqli_stmt_bind_result($stmt, $assistantId);
             mysqli_stmt_fetch($stmt);
             $_SESSION['assistantSession'] = $assistantId;
+            $_SESSION['assistantAccountNumber'] = $accountNum;
+            $currentDateTime = date('Y-m-d g:i: A');
+
+
+            $actionDescription = "user logged in on $currentDateTime";
+            $userType = 'assistant';
+            $logQuery = "INSERT INTO logs (accountNumber, actionDescription, userType) VALUES (?, ?, ?)";
+            $logStmt = mysqli_prepare($con, $logQuery);
+            if ($logStmt) {
+                mysqli_stmt_bind_param($logStmt, "sss", $accountNum, $actionDescription, $userType);
+                mysqli_stmt_execute($logStmt);
+                mysqli_stmt_close($logStmt);
+            }
             header("Location: " . BASE_URL . "dashboard.php");
             exit();
         } else {
@@ -45,9 +58,7 @@ if (isset($_POST['login'])) {
 <html lang="en">
 
 <head>
-    <title>appointment.one</title>
-    <link href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet">
-    <link href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.min.css" rel="stylesheet">
+    <title>TPAS</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=Aguafina+Script" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">

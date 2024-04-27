@@ -14,20 +14,22 @@
     $query->execute();
     $profile = $query->get_result()->fetch_assoc();
 
-    if (!isset($_GET['id'])) {
-        die('Appointment ID is required.');
-    }
-
-    $appointmentId = $_GET['id'];
-    $query = $con->prepare("SELECT * FROM appointments WHERE appointment_id = ?");
-    $query->bind_param("i", $appointmentId);
+    $query = $con->prepare("SELECT * FROM appointments ORDER BY date DESC");
     $query->execute();
     $result = $query->get_result();
-    $appointmentDetails = $result->fetch_assoc();
-
-    if (!$appointmentDetails) {
-        die('No details found for the specified appointment.');
+    $appointments = [];
+    while ($row = $result->fetch_assoc()) {
+        $appointments[] = $row;
     }
+    // Fetch logs
+    $query = $con->prepare("SELECT accountNumber, actionDescription, userType, dateTime FROM logs ORDER BY dateTime DESC");
+    $query->execute();
+    $logsResult = $query->get_result();
+    $logs = [];
+    while ($log = $logsResult->fetch_assoc()) {
+        $logs[] = $log;
+    }
+
     ?>
 
 
@@ -169,6 +171,16 @@
             text-decoration: none;
             cursor: pointer;
         }
+
+        .bx-trash {
+            color: red;
+            cursor: pointer;
+        }
+
+        .bx-trash:hover {
+            font-size: 1.5rem;
+            transition: 0.3s ease-in-out;
+        }
     </style>
 
 
@@ -190,7 +202,7 @@
                         <span class="material-icons-sharp"> dashboard </span>
                         <h3>Dashboard</h3>
                     </a>
-                    <a href="users.php" >
+                    <a href="users.php">
                         <span class="material-icons-sharp"> person_outline </span>
                         <h3>Users</h3>
                     </a>
@@ -199,7 +211,7 @@
                         <h3>Staffs</h3>
                     </a>
                     <a href="appointments.php" class="active">
-                        <span class="material-icons-sharp"> event_available </span>
+                        <span class="material-icons-sharp"> event_available</span>
                         <h3>Appointments</h3>
                     </a>
                     <a href="#">
@@ -219,50 +231,29 @@
             </aside>
             <main>
                 <div class="recent-orders">
-                    <h2>Appointment Details</h2>
-                    <table class="sched--table">
-                        <thead>
-                            <tr>
-                                <th>Name</th>
-                                <th>Phone No.</th>
-                                <th>Email</th>
-                                <th>Date</th>
-                                <th>Time</th>
-                                <th>Reason</th>
-                                <th>Message</th>
-                                <th></th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td><?= $appointmentDetails['first_name'] . ' ' . $appointmentDetails['last_name'] ?></td>
-                                <td><?= $appointmentDetails['phone_number'] ?></td>
-                                <td><?= $appointmentDetails['email'] ?></td>
-                                <td><?= date("F j, Y", strtotime($appointmentDetails['date'])) ?></td>
-                                <td><?= date("g:i A", strtotime($appointmentDetails['appointment_time'])) ?></td>
-                                <td><?= $appointmentDetails['appointment_type'] ?></td>
-                                <td><?= $appointmentDetails['message'] ?></td>
-                                <td class="status-column <?= $appointmentDetails['status'] === 'Pending' ? 'status-pending' : ($appointmentDetails['status'] === 'Processing' ? 'status-processing' : ($appointmentDetails['status'] === 'Confirmed' ? 'status-confirmed' : ($appointmentDetails['status'] === 'Denied' ? 'status-denied' : ($appointmentDetails['status'] === 'Cancelled' ? 'status-cancelled' : ($appointmentDetails['status'] === 'Completed' ? 'status-completed' : ''))))) ?>">
-                                    <?= htmlspecialchars($appointmentDetails['status']) ?>
-                                    <?php if ($appointmentDetails['status'] === 'Confirmed') : ?>
-                                        <i class="bx bx-check-circle"></i>
-                                    <?php elseif ($appointmentDetails['status'] === 'Denied') : ?>
-                                        <i class="bx bx-block"></i>
-                                    <?php elseif ($appointmentDetails['status'] === 'Pending') : ?>
-                                        <i class="bx bx-time-five"></i>
-                                    <?php elseif ($appointmentDetails['status'] === 'Processing') : ?>
-                                        <i class="bx bx-cog"></i>
-                                    <?php elseif ($appointmentDetails['status'] === 'Cancelled') : ?>
-                                        <i class="bx bx-x-circle"></i>
-                                    <?php elseif ($appointmentDetails['status'] === 'Completed') : ?>
-                                        <i class="bx bx-badge-check"></i> <!-- Example icon for 'Completed' -->
-                                    <?php endif; ?>
-                                </td>
-
-                                <td></td>
-                            </tr>
-                        </tbody>
-                    </table>
+                    <h1>System Logs</h1>
+                    <div class="logs-container">
+                        <table class="logs-table">
+                            <thead>
+                                <tr>
+                                    <th>Account Number</th>
+                                    <th>Action</th>
+                                    <th>User Type</th>
+                                    <th>Date and Time</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php foreach ($logs as $log) : ?>
+                                    <tr>
+                                        <td><?= htmlspecialchars($log['accountNumber']); ?></td>
+                                        <td><?= htmlspecialchars($log['actionDescription']); ?></td>
+                                        <td><?= htmlspecialchars($log['userType']); ?></td>
+                                        <td><?= date("F j, Y, g:i a", strtotime($log['dateTime'])); ?></td>
+                                    </tr>
+                                <?php endforeach; ?>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </main>
             <div id="statusModal" class="modal">
@@ -352,6 +343,28 @@
                         });
                 }
             };
+
+            function confirmDelete(appointmentId) {
+                if (confirm("Are you sure you want to delete this appointment?")) {
+                    // AJAX call to delete the appointment
+                    fetch('delete-appointment.php', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/x-www-form-urlencoded',
+                            },
+                            body: 'appointment_id=' + appointmentId
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            alert('Appointment deleted successfully!');
+                            location.reload(); // Reload the page to update the data displayed
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                            alert('Failed to delete the appointment.');
+                        });
+                }
+            }
         </script>
 
     </body>

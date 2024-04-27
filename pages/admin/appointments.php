@@ -208,10 +208,6 @@
                         <h3>Messages</h3>
                         <span class="message-count"></span>
                     </a>
-                    <a href="#">
-                        <span class="material-icons-sharp"> settings </span>
-                        <h3>Settings</h3>
-                    </a>
                     <a href="sched.php">
                         <span class="material-icons-sharp"> add </span>
                         <h3>Add Schedule</h3>
@@ -281,6 +277,7 @@
                         <select name="new_status">
                             <option value="Confirmed">Confirmed</option>
                             <option value="Processing">Cancelled</option>
+                            <option value="Completed">Completed</option>
                         </select>
                         <button type="submit">Update</button>
                     </form>

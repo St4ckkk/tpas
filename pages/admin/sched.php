@@ -87,10 +87,6 @@ $profile = $query->get_result()->fetch_assoc();
                     <h3>Messages</h3>
                     <span class="message-count"></span>
                 </a>
-                <a href="#">
-                    <span class="material-icons-sharp"> settings </span>
-                    <h3>Settings</h3>
-                </a>
                 <a href="sched.php" class="active">
                     <span class="material-icons-sharp"> add </span>
                     <h3>Add Schedule</h3>
