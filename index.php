@@ -82,7 +82,8 @@
     }
 
     .datepicker-dropdown .datepicker-days .table-condensed tbody tr>td.day.available-day:hover {
-        background-color: limegreen;
+        background-color: lime;
+        color: #fff;
     }
 </style>
 
@@ -174,7 +175,7 @@
                     if (status === 'limegreen') {
                         return {
                             classes: 'available-day',
-                            tooltip: 'Available'
+                            tooltip: 'Doctor is Available'
                         };
                     }
                     return {};

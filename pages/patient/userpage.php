@@ -63,13 +63,18 @@ if (!$userRow) {
         font-weight: bold;
     }
 
+    .fc-day:hover {
+        background-color: #f0f0f0;
+    }
+
     .fc-day-grid-event {
         height: 100%;
         border: 2px solid black;
     }
 
     .available-appointment {
-        background-color: #90EE90 !important;
+        background-color: limegreen !important;
+        cursor: pointer;
     }
 
     .set {
@@ -133,7 +138,7 @@ if (!$userRow) {
                     </div>
                     <ul class="right-links d-flex list-unstyled">
                         <li class="mx-2"><a href="profile"><i class="fas fa-user"></i><span class="icon-label">Profile</span></a></li>
-                        <li class="mx-2"><a href="appointment.php"><i class="fas fa-calendar-alt"></i><span class="icon-label">Appointment History</span></a></li>
+                        <li class="mx-2"><a href="appointment.php"><i class="fas fa-calendar-alt"></i><span class="icon-label">History</span></a></li>
                         <li class="mx-2"><a href="inbox.php"><i class="fas fa-inbox"></i><span class="icon-label">Inbox</span></a></li>
                         <li class="mx-2"><a href="patientlogout.php?logout"><i class="fas fa-sign-out-alt"></i><span class="icon-label">Logout</span></a></li>
                     </ul>
@@ -179,7 +184,7 @@ if (!$userRow) {
                         },
                         dayRender: function(date, cell) {
                             if (data.availableDays.includes(date.format('YYYY-MM-DD'))) {
-                                cell.addClass('available-appointment'); 
+                                cell.addClass('available-appointment');
                             }
                         },
                         events: 'fetch-schedule.php',

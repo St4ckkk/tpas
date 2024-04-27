@@ -35,7 +35,7 @@ while ($row = $result->fetch_assoc()) {
     'title' => $row['doctorName'],
     'start' => $fullStart,
     'allDay' => false, 
-    'color' => '#90EE90'
+    'color' => 'limegreen'
   ];
 }
 
