@@ -62,7 +62,7 @@ try {
 function getUpcomingAppointments($con)
 {
     $appointments = [];
-    $query = $con->prepare("SELECT first_name, last_name, date, status FROM appointments WHERE date >= CURDATE() AND (status = 'Pending') ORDER BY date ASC LIMIT 5");
+    $query = $con->prepare("SELECT first_name, last_name, date, status FROM appointments WHERE status='Confirmed'");
     $query->execute();
     $result = $query->get_result();
     while ($row = $result->fetch_assoc()) {
@@ -158,6 +158,7 @@ $reminders = getAssistantReminders($con, $assistantId);
     .task-title i {
         margin-right: 10px;
     }
+
     td {
         font-size: 0.7rem;
     }
@@ -231,15 +232,60 @@ $reminders = getAssistantReminders($con, $assistantId);
     .content main .bottom-data .reminders .task-list li.reminders .bx-bell {
         color: yellow;
     }
+
     .reminder-info-top h1 {
         color: #333;
     }
+
     .reminder-details p {
         font-size: 0.9rem;
     }
+
     .reminder-date small {
         font-size: 0.8rem;
         color: #333;
+    }
+
+    input[type="date"] {
+        padding: 8px;
+        margin: 10px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+    }
+
+    .status-confirmed {
+        color: green;
+    }
+
+    .status-cancelled {
+        color: red;
+    }
+
+    .status-pending {
+        color: orange;
+    }
+
+    .status-denied {
+        color: darkred;
+    }
+
+    .status-processing {
+        color: blue;
+    }
+
+    .status-unknown {
+        color: grey;
+    }
+
+    /* General style for status columns */
+    .status-column {
+        display: flex;
+        align-items: center;
+        font-size: 0.7rem;
+    }
+    .status-column i {
+        font-size: 0.7rem;
+        margin-left: 5px;
     }
 </style>
 
@@ -337,9 +383,11 @@ $reminders = getAssistantReminders($con, $assistantId);
                     <div class="header">
                         <i class='bx bx-calendar-check'></i>
                         <h3>Upcoming Appointments</h3>
+                        <input type="date" id="appointmentDate" name="date" value="<?= date('Y-m-d') ?>">
                         <i class='bx bx-filter'></i>
                         <i class='bx bx-search'></i>
                     </div>
+
                     <?php if (count($upcomingAppointments) > 0) : ?>
                         <table>
                             <thead>
@@ -351,16 +399,6 @@ $reminders = getAssistantReminders($con, $assistantId);
                                 </tr>
                             </thead>
                             <tbody>
-                                <?php foreach ($upcomingAppointments as $appointment) : ?>
-                                    <tr>
-                                        <td>
-                                            <p><?= htmlspecialchars($appointment['first_name']) . ' ' . htmlspecialchars($appointment['last_name']) ?></p>
-                                        </td>
-                                        <td><?= htmlspecialchars(date("d-m-Y", strtotime($appointment['date']))) ?></td>
-                                        <td><?= htmlspecialchars(date("g:i A", strtotime($appointment['date']))) ?></td>
-                                        <td><span class="status <?= htmlspecialchars(strtolower($appointment['status'])) ?>"><?= htmlspecialchars($appointment['status']) ?></span></td>
-                                    </tr>
-                                <?php endforeach; ?>
                             </tbody>
                         </table>
                     <?php else : ?>
@@ -370,7 +408,81 @@ $reminders = getAssistantReminders($con, $assistantId);
                         </div>
                     <?php endif; ?>
                 </div>
+                <script>
+                    document.addEventListener('DOMContentLoaded', function() {
+                        const savedDate = localStorage.getItem('selectedDate') || new Date().toISOString().split('T')[0];
+                        document.getElementById('appointmentDate').value = savedDate;
+                        loadAppointments(savedDate);
+                        document.getElementById('appointmentDate').addEventListener('change', function() {
+                            const selectedDate = this.value;
+                            localStorage.setItem('selectedDate', selectedDate);
+                            loadAppointments(selectedDate);
+                        });
+                    });
 
+                    function loadAppointments(date) {
+                        const tbody = document.querySelector('.orders table tbody');
+                        fetch(`fetch-appointments.php?date=${date}`)
+                            .then(response => response.json())
+                            .then(appointments => {
+                                tbody.innerHTML = ''; // Clear current appointments
+                                if (appointments.length > 0) {
+                                    appointments.forEach(appointment => {
+                                        const row = tbody.insertRow();
+                                        const formattedTime = new Date('1970-01-01T' + appointment.appointment_time + 'Z').toLocaleTimeString('en-US', {
+                                            hour: 'numeric',
+                                            minute: 'numeric',
+                                            hour12: true
+                                        });
+                                        const statusInfo = getStatusDetails(appointment.status);
+                                        row.innerHTML = `
+                        <td>${appointment.first_name} ${appointment.last_name}</td>
+                        <td>${appointment.date}</td>
+                        <td>${formattedTime}</td>
+                        <td class="${statusInfo.class} status-column">${appointment.status}<i class='${statusInfo.icon}'></i> </td>
+                    `;
+                                    });
+                                } else {
+                                    tbody.innerHTML = '<tr><td colspan="4" class="text-center">No appointments found for this date.</td></tr>';
+                                }
+                            })
+                            .catch(error => {
+                                console.error('Error loading appointments:', error);
+                                tbody.innerHTML = '<tr><td colspan="4" class="text-center">Error loading data.</td></tr>';
+                            });
+                    }
+
+                    function getStatusDetails(status) {
+                        const statuses = {
+                            'Confirmed': {
+                                class: 'status-confirmed',
+                                icon: 'bx bx-check-circle'
+                            },
+                            'Cancelled': {
+
+                                icon: 'bx bx-x-circle',
+                                class: 'status-cancelled'
+                            },
+                            'Pending': {
+                                class: 'status-pending',
+                                icon: 'bx bx-time-five'
+                            },
+                            'Denied': {
+                                class: 'status-denied',
+                                icon: 'bx bx-block'
+                            },
+                            'Processing': {
+                                class: 'status-processing',
+                                icon: 'bx bx-loader'
+                            },
+                            // Add more statuses if necessary
+                        };
+                        return statuses[status] || {
+                            class: 'status-unknown',
+                            icon: 'bx bx-help-circle'
+                        };
+                    }
+                </script>
                 <!-- Reminder Modal -->
                 <dialog id="reminderModal" class="modal">
                     <div class="modal-content">
@@ -503,7 +615,7 @@ $reminders = getAssistantReminders($con, $assistantId);
 
     </div>
 
-    <script src="script.js"></script>
+    <script src="scripts.js"></script>
     <script>
         function openModal() {
             const modal = document.getElementById('reminderModal');

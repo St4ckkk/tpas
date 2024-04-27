@@ -452,7 +452,7 @@ $nonVerifiedUsers = getNonVerifiedUsers($con);
 
     </div>
 
-    <script src="script.js"></script>
+    <script src="scripts.js"></script>
     <script>
         var currentAccountNum = null;
         var currentStatus = null;

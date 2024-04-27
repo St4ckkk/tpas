@@ -8,34 +8,16 @@ if (!isset($_SESSION['patientSession'])) {
     exit;
 }
 $userId = $_SESSION['patientSession'];
-$firstName = $lastName = $phoneNumber = $email = "";
+
 $selectedDate = isset($_GET['date']) ? $_GET['date'] : null;
 if (empty($selectedDate)) {
     die("<script>alert('Error: No date provided. Please select a valid date.'); window.location.href='userpage.php';</script>");
 }
 
-$query = "SELECT firstname, lastname, phoneno, email FROM tb_patients WHERE patientId = ?";
-$stmt = $con->prepare($query);
-if ($stmt) {
-    $stmt->bind_param("i", $userId);
-    $stmt->execute();
-    $stmt->bind_result($firstName, $lastName, $phoneNumber, $email);
-    if (!$stmt->fetch()) {
-        echo "No user details found. Please check the database or user ID.";
-    }
-    $stmt->close();
-} else {
-    echo "Database error: " . $con->error;
-}
-$selectedDate = $_GET['date'] ?? null;
-if (empty($selectedDate)) {
-    die("<script>alert('Error: No date provided. Please select a valid date.'); window.location.href='userpage.php';</script>");
-}
 $stmt = $con->prepare("SELECT startDate, startTime, endTime FROM schedule WHERE startDate = ?");
 $stmt->bind_param("s", $selectedDate);
 $stmt->execute();
 $result = $stmt->get_result();
-
 if ($result->num_rows > 0) {
     $scheduleData = $result->fetch_assoc();
     $displayStartTime = date("g:i A", strtotime($scheduleData['startTime']));
@@ -46,45 +28,69 @@ if ($result->num_rows > 0) {
 }
 $stmt->close();
 
+$query = "SELECT firstname, lastname, phoneno, email FROM tb_patients WHERE patientId = ?";
+$stmt = $con->prepare($query);
+$stmt->bind_param("i", $userId);
+$stmt->execute();
+$stmt->bind_result($firstName, $lastName, $phoneNumber, $email);
+if (!$stmt->fetch()) {
+    echo "No user details found. Please check the database or user ID.";
+}
+$stmt->close();
+
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['submit'])) {
+    $date = trim(htmlspecialchars($_POST['date']));
+    $appointmentTime = trim(htmlspecialchars($_POST['appointmentTime']));
+    $endTime = date('H:i:s', strtotime($appointmentTime) + 60 * 60); // assuming 30-minute appointments
     $firstName = trim(htmlspecialchars($_POST['firstName']));
     $lastName = trim(htmlspecialchars($_POST['lastName']));
     $phoneNumber = trim(htmlspecialchars($_POST['phoneNumber']));
-    $email = filter_var($_POST['email'], FILTER_VALIDATE_EMAIL);
-    $date = trim(htmlspecialchars($_POST['date']));
-    $appointmentTime = trim(htmlspecialchars($_POST['appointmentTime']));
+    $email = trim(htmlspecialchars($_POST['email']));
     $appointmentType = trim(htmlspecialchars($_POST['appointmentType']));
     $message = trim(htmlspecialchars($_POST['message']));
-    $checkSql = "SELECT COUNT(*) as count FROM appointments WHERE patientId = ? AND date = ?";
-    $checkStmt = $con->prepare($checkSql);
-    $checkStmt->bind_param("is", $userId, $date);
-    $checkStmt->execute();
-    $checkResult = $checkStmt->get_result();
-    $row = $checkResult->fetch_assoc();
 
-    if ($row['count'] > 0) {
-        echo "<script>alert('You already have an appointment on this date. Please choose another date.'); window.location.href='make-appointment.php';</script>";
+
+    // Check if this user already has an appointment on this date
+    $userCheckQuery = "SELECT COUNT(*) AS count FROM appointments WHERE patientId = ? AND date = ?";
+    $userCheckStmt = $con->prepare($userCheckQuery);
+    $userCheckStmt->bind_param("is", $userId, $date);
+    $userCheckStmt->execute();
+    $userCheckResult = $userCheckStmt->get_result();
+    $userCheckRow = $userCheckResult->fetch_assoc();
+
+    if ($userCheckRow['count'] > 0) {
+        echo "<script>alert('You have already booked an appointment on this date. Please choose another date.'); window.history.back();</script>";
         exit;
     }
 
-    $sql = "INSERT INTO appointments (patientId, first_name, last_name, phone_number, email, date, appointment_time, appointment_type, reason_for_visit, message) 
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+    // Check if this time slot or overlapping slot is already booked
+    $timeCheckQuery = "SELECT COUNT(*) AS count FROM appointments WHERE date = ? AND NOT (endTime <= ? OR appointment_time >= ?)";
+    $timeCheckStmt = $con->prepare($timeCheckQuery);
+    $timeCheckStmt->bind_param("sss", $date, $appointmentTime, $endTime);
+    $timeCheckStmt->execute();
+    $timeCheckResult = $timeCheckStmt->get_result();
+    $timeCheckRow = $timeCheckResult->fetch_assoc();
 
-    if ($stmt = $con->prepare($sql)) {
-        $stmt->bind_param("isssssssss", $userId, $firstName, $lastName, $phoneNumber, $email, $date, $appointmentTime, $appointmentType, $reasonForVisit, $message);
-        if ($stmt->execute()) {
-            echo "<script>alert('Appointment booked successfully. {$emailMessage} Please check your email for confirmation and further details. You can also view your appointment details on the Appointment page in our system.'); window.location.href='userpage.php';</script>";
-        } else {
-            echo "<script>alert('Error: Could not execute the query: {$stmt->error}');</script>";
-        }
-        $stmt->close();
-    } else {
-        echo "<script>alert('Error: Could not prepare the query: {$con->error}');</script>";
+    if ($timeCheckRow['count'] > 0) {
+        echo "<script>alert('This time slot is already taken or overlaps with another booking. Please choose another hour.'); window.history.back();</script>";
+        exit;
     }
+
+    // Insert the new appointment
+    $sql = "INSERT INTO appointments (patientId, first_name, last_name, phone_number, email, date, appointment_time, endTime, appointment_type, message) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+    $stmt = $con->prepare($sql);
+    $stmt->bind_param("isssssssss", $userId, $firstName, $lastName, $phoneNumber, $email, $date, $appointmentTime, $endTime, $appointmentType, $message);
+    if ($stmt->execute()) {
+        echo "<script>alert('Appointment booked successfully. Please check your email for confirmation and further details. You can also view your appointment details on the Appointment page in our system.'); window.location.href='userpage.php';</script>";
+    } else {
+        echo "<script>alert('Error: Could not execute the query: {$stmt->error}');</script>";
+    }
+    $stmt->close();
 }
 
 $con->close();
 ?>
+
 
 
 <!DOCTYPE html>
@@ -182,7 +188,8 @@ $con->close();
                             <label for="availTime">Available Time: </label>
                             <small id="startTime" data-time="<?php echo htmlspecialchars($scheduleData['startTime']); ?>"><?php echo htmlspecialchars($displayStartTime); ?></small> :
                             <small id="endTime" data-time="<?php echo htmlspecialchars($scheduleData['endTime']); ?>"><?php echo htmlspecialchars($displayEndTime); ?></small>
-                            <input type="time" class="form-control" id="appointmentTime" name="appointmentTime">
+                            <input type="time" class="form-control" id="appointmentTime" name="appointmentTime" min="<?php echo htmlspecialchars($scheduleData['startTime']); ?>" max="<?php echo htmlspecialchars($scheduleData['endTime']); ?>">
+
                         </div>
                         <div class="col-md-6">
                             <label for="appointmentType">Reason For Visit</label>
