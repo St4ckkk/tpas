@@ -214,7 +214,7 @@ $profile = $query->get_result()->fetch_assoc();
 
         </div>
     </div>
-    <script src="assets/js/index.js"></script>
+    <script src="assets/js/script.js"></script>
 </body>
 
 </html>

@@ -11,7 +11,7 @@ if (!isset($_SESSION['doctorSession'])) {
 $doctorId = $_SESSION['doctorSession'];
 
 // Fetch total appointments
-$query = $con->prepare("SELECT COUNT(*) AS total FROM appointments WHERE status='Approved'");
+$query = $con->prepare("SELECT COUNT(*) AS total FROM appointments");
 $query->execute();
 $totalAppointments = $query->get_result()->fetch_assoc();
 
@@ -296,7 +296,7 @@ $notifications = $notificationQuery->get_result();
     <script src="./constants/recent-order-data.js"></script>
     <script src="assets/js/update-data.js"></script>
     <script src="./constants/sales-analytics-data.js"></script>
-    <script src="assets/js/index.js"></script>
+    <script src="assets/js/script.js"></script>
 </body>
 
 </html>

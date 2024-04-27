@@ -307,7 +307,7 @@
                 </div>
             </div>
         </div>
-        <script src="assets/js/index.js"></script>
+        <script src="assets/js/script.js"></script>
         <script>
             var modal = document.getElementById('statusModal');
             var btn = document.querySelectorAll('.status-column');

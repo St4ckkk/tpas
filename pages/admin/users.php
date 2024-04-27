@@ -245,7 +245,7 @@ $profile = $query->get_result()->fetch_assoc();
             </div>
         </div>
     </div>
-    <script src="assets/js/index.js"></script>
+    <script src="assets/js/script.js"></script>
     <script>
         document.querySelectorAll('.status-column').forEach(function(element) {
             element.onclick = function() {

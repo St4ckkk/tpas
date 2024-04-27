@@ -241,7 +241,7 @@ $result = $query->get_result();
 
         </div>
     </div>
-    <script src="assets/js/index.js"></script>
+    <script src="assets/js/script.js"></script>
 </body>
 
 </html>
