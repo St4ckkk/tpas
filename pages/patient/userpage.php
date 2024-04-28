@@ -45,7 +45,7 @@ if (!$userRow) {
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 
     <link rel="stylesheet" href="assets/css/style.css" />
-    <title>appointment.one - Calendar</title>
+    <title>TPAS - Calendar</title>
 </head>
 <style>
     #calendar {
@@ -130,6 +130,10 @@ if (!$userRow) {
     .container {
         margin-top: 50px;
     }
+    #s {
+        color: #3e81ec;
+    
+    }
 </style>
 
 
@@ -140,7 +144,7 @@ if (!$userRow) {
                 <div class="top-bar d-flex justify-content-between align-items-center">
                     <div class="header-area d-flex align-items-center">
                         <img src="assets/img/cd-logoo.png" alt="appointment.one logo" class="logo-small">
-                        <span class="company-name ml-2">TPAS</span>
+                        <span class="company-name ml-2">TPA<span id="s">S</span></span>
                     </div>
                     <ul class="right-links d-flex list-unstyled">
                         <li class="mx-2"><a href="profile"><i class="fas fa-user"></i><span class="icon-label">Profile</span></a></li>

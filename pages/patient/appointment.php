@@ -43,7 +43,7 @@ $stmt->close();
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Make an appointment</title>
+    <title>Appointments</title>
     <link href="assets/css/make-appointment.css" rel="stylesheet">
     <link href="assets/css/date/bootstrap-datepicker.css" rel="stylesheet">
     <link href="assets/css/date/bootstrap-datepicker3.css" rel="stylesheet">
@@ -112,13 +112,17 @@ $stmt->close();
         font-size: 1.5rem;
         text-align: center;
     }
+    .tags span {
+        color: #3e81ec;
+    
+    }
 </style>
 
 <body style="background-color: #fff">
     <div class="header">
         <ul class="left-links">
             <li class="tags brand">
-                <img src="assets/img/cd-logoo.png"> appointment.one
+                <img src="assets/img/cd-logoo.png"> TPA<span>S</span>
             </li>
         </ul>
         <ul class="right-links d-flex list-unstyled">

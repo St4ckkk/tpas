@@ -5,7 +5,7 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>appointment.one - Home</title>
+    <title>TPAS - Home</title>
     <link href="index.css" rel="stylesheet">
     <link href="assets/css/date/bootstrap-datepicker.css" rel="stylesheet">
     <link href="assets/css/date/bootstrap-datepicker3.css" rel="stylesheet">
@@ -85,13 +85,17 @@
         background-color: lime;
         color: #fff;
     }
+    #s {
+        color: #3e81ec;
+    
+    }
 </style>
 
 <body style="background-color: #fff">
     <div class="header">
         <ul class="left-links">
             <li class="tags brand">
-                <img src="assets/img/cd-logoo.png"> appointment.one
+                <img src="assets/img/cd-logoo.png"> TPA<span id="s">S</span>
             </li>
         </ul>
         <ul class="middle-links">
@@ -111,7 +115,7 @@
     <div class="container">
         <div class="hero">
             <div class="hero-cta">
-                <h1>Welcome to appoinment.one</h1>
+                <h1>Welcome to TPAS</h1>
             </div>
             <div>
                 <h3>Make an appointment today!</h3>
