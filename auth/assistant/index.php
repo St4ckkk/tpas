@@ -8,9 +8,24 @@ if (isset($_SESSION['assistantSession'])) {
     exit();
 }
 // Set the default timezone to Philippine Time
+$currentDateTime = date('Y-m-d g:i A');
+$login_error = '';
+$errors = [];
 date_default_timezone_set('Asia/Manila');
-$error = '';
 
+function log_action($con, $accountNumber, $actionDescription, $userType)
+{
+    $currentDateTime = date('Y-m-d g:i A');
+    $sql = "INSERT INTO logs (accountNumber, actionDescription, userType, dateTime) VALUES (?, ?, ?, ?)";
+    $stmt = $con->prepare($sql);
+    if ($stmt) {
+        $stmt->bind_param("ssss", $accountNumber, $actionDescription, $userType, $currentDateTime);
+        $stmt->execute();
+        $stmt->close();
+    } else {
+        error_log("Error preparing log statement: " . $con->error);
+    }
+}
 if (isset($_POST['login'])) {
     $accountNum = mysqli_real_escape_string($con, trim($_POST['accountnum']));
     $email = mysqli_real_escape_string($con, trim($_POST['email']));
@@ -30,21 +45,13 @@ if (isset($_POST['login'])) {
             $_SESSION['assistantSession'] = $assistantId;
             $_SESSION['assistantAccountNumber'] = $accountNum;
             $currentDateTime = date('Y-m-d g:i: A');
-
-
-            $actionDescription = "user logged in on $currentDateTime";
-            $userType = 'assistant';
-            $logQuery = "INSERT INTO logs (accountNumber, actionDescription, userType) VALUES (?, ?, ?)";
-            $logStmt = mysqli_prepare($con, $logQuery);
-            if ($logStmt) {
-                mysqli_stmt_bind_param($logStmt, "sss", $accountNum, $actionDescription, $userType);
-                mysqli_stmt_execute($logStmt);
-                mysqli_stmt_close($logStmt);
-            }
+            log_action($con, $accountNum, "Logged in on $currentDateTime", "assistant");
             header("Location: " . BASE_URL . "dashboard.php");
             exit();
         } else {
             $error = "No account found with that number and email. Please try again.";
+            $currentDateTime = date('Y-m-d g:i: A');
+            log_action($con, NULL, "user tried to log in but account does not exist on $currentDateTime", "unknown");
         }
     } else {
         $error = "An error occurred. Please try again.";

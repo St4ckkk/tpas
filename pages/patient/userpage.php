@@ -28,7 +28,6 @@ if (!$userRow) {
     echo "Failed to fetch user data.";
 }
 ?>
-
 <!DOCTYPE html>
 <html lang="en">
 
@@ -55,13 +54,16 @@ if (!$userRow) {
         margin-top: 10px;
     }
 
+    
+    
 
     .fc-day-grid-event .fc-content {
         color: black;
-        width: 100%;
-        font-size: 10px;
+        width: 500px;
+        font-size: 8px;
         font-weight: bold;
     }
+
 
     .fc-day:hover {
         background-color: #f0f0f0;
@@ -70,6 +72,7 @@ if (!$userRow) {
     .fc-day-grid-event {
         height: 100%;
         border: 2px solid black;
+        cursor: pointer;
     }
 
     .available-appointment {
@@ -121,8 +124,9 @@ if (!$userRow) {
         color: #fff;
         background-color: #3e81ec;
         border-radius: 50%;
-        transition: background-color 0.3s, color 0.3s;  
+        transition: background-color 0.3s, color 0.3s;
     }
+
     .container {
         margin-top: 50px;
     }
@@ -130,7 +134,6 @@ if (!$userRow) {
 
 
 <body>
-
     <div class="container vh-100 d-flex justify-content-center align-items-center">
         <div class="d-flex justify-content-between align-items-start">
             <div class="calendar-container">
@@ -145,18 +148,17 @@ if (!$userRow) {
                         <li class="mx-2"><a href="inbox.php"><i class="fas fa-inbox"></i><span class="icon-label">Inbox</span></a></li>
                         <li class="mx-2"><a href="patientlogout.php?logout"><i class="fas fa-sign-out-alt"></i><span class="icon-label">Logout</span></a></li>
                     </ul>
-
                 </div>
                 <div class="card">
                     <div class="card-header" style="background-color:  #3e81ec;">
                         <h1>Welcome, <?php echo htmlspecialchars($userRow['firstname'] . ' ' . $userRow['lastname']); ?></h1>
-
                     </div>
                     <div class="set">
                         <span>Set an appointment by selecting the available days</span>
                     </div>
                     <div class="card-body">
                         <div id="calendar">
+
                         </div>
                     </div>
                 </div>

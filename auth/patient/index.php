@@ -17,9 +17,24 @@ if (isset($_SESSION['patientSession']) && $_SESSION['patientSession'] != "") {
     header("Location: " . BASE_URL . "userpage.php");
     exit;
 }
-
+$currentDateTime = date('Y-m-d g:i A');
 $login_error = '';
 $errors = [];
+date_default_timezone_set('Asia/Manila');
+
+function log_action($con, $accountNumber, $actionDescription, $userType)
+{
+    $currentDateTime = date('Y-m-d g:i A');
+    $sql = "INSERT INTO logs (accountNumber, actionDescription, userType, dateTime) VALUES (?, ?, ?, ?)";
+    $stmt = $con->prepare($sql);
+    if ($stmt) {
+        $stmt->bind_param("ssss", $accountNumber, $actionDescription, $userType, $currentDateTime);
+        $stmt->execute();
+        $stmt->close();
+    } else {
+        error_log("Error preparing log statement: " . $con->error);
+    }
+}
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     if (isset($_POST['login'])) {
@@ -34,7 +49,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         if ($query === false) {
             die('MySQL prepare error: ' . $con->error);
         }
-
         $query->bind_param("s", $identifier);
         $query->execute();
         $result = $query->get_result();
@@ -42,18 +56,38 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
         if ($row) {
             if ($row['accountStatus'] != 'Verified') {
+                $currentDateTime = date('Y-m-d g:i: A');
                 $login_error = 'Your account is not approved yet. Please <a href="contact.html">contact support</a> for more information.';
+                log_action($con, $row['account_num'], "tried to log in but account is not verified on $currentDateTime", "user",);
             } else {
                 if (password_verify($password, $row['password'])) {
                     $_SESSION['patientSession'] = $row['patientId'];
+                    $_SESSION['patientAccountNumber'] = $row['account_num'];
+                    $accountNum = $row['account_num'];
+                    $currentDateTime = date('Y-m-d g:i: A');
+                    log_action($con, $row['account_num'], "logged in on $currentDateTime", "user");
+                    if ($logStmt) {
+                        mysqli_stmt_bind_param($logStmt, "sss", $accountNum, $actionDescription, $userType);
+                        if (mysqli_stmt_execute($logStmt)) {
+                        } else {
+                            error_log("Error inserting log: " . mysqli_stmt_error($logStmt));
+                        }
+                        mysqli_stmt_close($logStmt);
+                    } else {
+                        error_log("Error preparing log statement: " . $con->error);
+                    }
                     header("Location: " . BASE_URL . "userpage.php");
                     exit();
                 } else {
+                    $currentDateTime = date('Y-m-d g:i: A');
                     $login_error = 'Incorrect password. Please try again.';
+                    log_action($con, $row['account_num'], "tried to log in but entered incorrect password on $currentDateTime", "user");
                 }
             }
         } else {
+            $currentDateTime = date('Y-m-d g:i: A');
             $login_error = 'No account found with those details.';
+            log_action($con, NULL, "user tried to log in but account does not exist on $currentDateTime", "unknown");
         }
     } elseif (isset($_POST['register'])) {
         $firstname = mysqli_real_escape_string($con, trim($_POST['firstname']));
@@ -88,7 +122,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             }
         }
         if ($emailExists) {
+            $currentDateTime = date('Y-m-d g:i: A');
             $errors[] = "The email address is already in use. Please use a different email.";
+            log_action($con, NULL, "user tried to register but email is already in use $currentDateTime", "unknown");
         }
         if (count($errors) === 0) {
             $accountNumber = sprintf("%06d", mt_rand(1, 999999));
@@ -117,6 +153,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
                     $mail->send();
                     echo "<script>alert('Registration successful! An email with your account number has been sent.'); window.location.href='index.php';</script>";
+                    $currentDateTime = date('Y-m-d g:i: A');
+                    log_action($con, $row['account_num'], "registered on $currentDateTime", "user");
                 } catch (Exception $e) {
                     echo "<script>alert('Message could not be sent. Mailer Error: {$mail->ErrorInfo}'); window.location.href='index.php';</script>";
                 }

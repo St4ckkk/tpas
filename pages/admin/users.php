@@ -149,6 +149,10 @@ $profile = $query->get_result()->fetch_assoc();
                     <h3>Messages</h3>
                     <span class="message-count"></span>
                 </a>
+                <a href="logs.php">
+                    <span class="material-icons-sharp">description</span>
+                    <h3>Logs</h3>
+                </a>
                 <a href="sched.php">
                     <span class="material-icons-sharp"> add </span>
                     <h3>Add Schedule</h3>
@@ -163,11 +167,11 @@ $profile = $query->get_result()->fetch_assoc();
             <div class="modal-content">
                 <span class="close">&times;</span>
                 <h2>Change Status</h2>
-                <form action="update-status.php" method="POST">
+                <form action="update-account-status.php" method="POST">
                     <input type="hidden" name="account_num" id="account_num" value="">
                     <select name="newStatus" id="newStatus" required>
                         <option value="" disabled selected>Please select a status</option>
-                        <option value="Approved">Approved</option>
+                        <option value="Verified">Verified</option>
                         <option value="Denied">Denied</option>
                     </select>
                     <button type="submit">Update Status</button>

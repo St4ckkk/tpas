@@ -210,7 +210,7 @@
                         <span class="material-icons-sharp"> person </span>
                         <h3>Staffs</h3>
                     </a>
-                    <a href="appointments.php" class="active">
+                    <a href="appointments.php">
                         <span class="material-icons-sharp"> event_available</span>
                         <h3>Appointments</h3>
                     </a>
@@ -218,6 +218,10 @@
                         <span class="material-icons-sharp"> mail_outline </span>
                         <h3>Messages</h3>
                         <span class="message-count"></span>
+                    </a>
+                     <a href="logs.php" class="active">
+                        <span class="material-icons-sharp">description</span>
+                        <h3>Logs</h3>
                     </a>
                     <a href="sched.php">
                         <span class="material-icons-sharp"> add </span>
@@ -239,7 +243,6 @@
                                     <th>Account Number</th>
                                     <th>Action</th>
                                     <th>User Type</th>
-                                    <th>Date and Time</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -248,7 +251,6 @@
                                         <td><?= htmlspecialchars($log['accountNumber']); ?></td>
                                         <td><?= htmlspecialchars($log['actionDescription']); ?></td>
                                         <td><?= htmlspecialchars($log['userType']); ?></td>
-                                        <td><?= date("F j, Y, g:i a", strtotime($log['dateTime'])); ?></td>
                                     </tr>
                                 <?php endforeach; ?>
                             </tbody>

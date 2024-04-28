@@ -39,7 +39,7 @@ if (isset($_POST['login'])) {
 <html lang="en">
 
 <head>
-    <title>appointment.one</title>
+    <title>TPAS</title>
     <link href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet">
     <link href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.min.css" rel="stylesheet">
     <link rel="stylesheet" href="assets/css/index.css">

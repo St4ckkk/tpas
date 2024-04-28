@@ -162,10 +162,12 @@
             text-decoration: none;
             cursor: pointer;
         }
+
         .bx-trash {
             color: red;
             cursor: pointer;
         }
+
         .bx-trash:hover {
             font-size: 1.5rem;
             transition: 0.3s ease-in-out;
@@ -191,7 +193,7 @@
                         <span class="material-icons-sharp"> dashboard </span>
                         <h3>Dashboard</h3>
                     </a>
-                    <a href="users.php" >
+                    <a href="users.php">
                         <span class="material-icons-sharp"> person_outline </span>
                         <h3>Users</h3>
                     </a>
@@ -207,6 +209,10 @@
                         <span class="material-icons-sharp"> mail_outline </span>
                         <h3>Messages</h3>
                         <span class="message-count"></span>
+                    </a>
+                    <a href="logs.php">
+                        <span class="material-icons-sharp">description</span>
+                        <h3>Logs</h3>
                     </a>
                     <a href="sched.php">
                         <span class="material-icons-sharp"> add </span>

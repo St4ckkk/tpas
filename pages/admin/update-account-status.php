@@ -54,12 +54,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
                 //Recipients
                 $mail->setFrom('tpas052202@gmail.com', 'TPAS Administrator');
-                $mail->addAddress($user['email'], $user['firstname']); // Add a recipient
+                $mail->addAddress($user['email']); // Add a recipient
                 $mail->addReplyTo('tpas052202@gmail.com', 'TPAS Administrator');
 
                 $mail->isHTML(true);
 
-                if ($newStatus == 'Approved') {
+                if ($newStatus == 'Verified') {
                     $mail->Subject = 'Account Approval';
                     $mail->Body    = 'Dear ' . $user['firstname'] . ',<br>Your account has been approved. You can now log in to our system.';
                 } elseif ($newStatus == 'Denied') {

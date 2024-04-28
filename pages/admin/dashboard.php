@@ -11,7 +11,7 @@
     $doctorId = $_SESSION['doctorSession'];
 
     // Fetch total appointments and last update time
-    $query = $con->prepare("SELECT COUNT(*) AS total, MAX(updatedAt) as lastUpdated FROM appointments");
+    $query = $con->prepare("SELECT COUNT(*) AS total, MAX(updatedAt) as lastUpdated FROM appointments WHERE status='Confirmed'");
     $query->execute();
     $result = $query->get_result()->fetch_assoc();
     $totalAppointments = $result['total'];
@@ -23,7 +23,7 @@
         $displayLastUpdatedAppointments = "None";
     }
     // Fetch total users
-    $query = $con->prepare("SELECT COUNT(*) AS total, MAX(updatedAt) as lastUpdated FROM tb_patients");
+    $query = $con->prepare("SELECT COUNT(*) AS total, MAX(updatedAt) as lastUpdated FROM tb_patients WHERE accountStatus ='Verified'");
     $query->execute();
     $result = $query->get_result()->fetch_assoc();
     $totalUsers = $result['total'];
@@ -43,9 +43,17 @@
     $query->execute();
     $profile = $query->get_result()->fetch_assoc();
     // Fetch recent appointments
-    $query = $con->prepare("SELECT appointment_id, first_name, last_name, date, appointment_time, status FROM appointments WHERE status ='Pending' OR status='Processing' ORDER BY date DESC LIMIT 5");
+    $query = $con->prepare("SELECT appointment_id, first_name, last_name, date, appointment_time, status 
+FROM appointments 
+WHERE status = 'Pending' 
+AND (date > CURDATE() OR (date = CURDATE() AND appointment_time <= CURTIME()))
+ORDER BY date ASC, appointment_time ASC
+");
+
+    // Execute the query
     $query->execute();
-    $recentAppointments = $query->get_result();
+    $result = $query->get_result();
+
     $updatesQuery = $con->prepare("
     SELECT 
         a.appointment_id, 
@@ -110,6 +118,7 @@
         <title>Admin Dashboard</title>
         <link rel="stylesheet" href="node_modules/boxicons/css/boxicons.min.css" />
         <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Sharp" rel="stylesheet" />
+        
         <link rel="stylesheet" href="style.css" />
         <script>
             // Define your updates array globally if it's static or loaded on page load
@@ -383,11 +392,19 @@
         main .insights>div.appointments span {
             background-color: #0056b3;
         }
+
         main .insights>div.users span {
             background-color: limegreen;
         }
+
         main .insights>div.reminders span {
             background-color: orange;
+        }
+        .bx-show {
+            font-size: 16px;
+        }
+        .bx-show:hover {
+            color: #0056b3;
         }
     </style>
 
@@ -494,8 +511,8 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <?php if ($recentAppointments->num_rows > 0) : ?>
-                                <?php while ($row = $recentAppointments->fetch_assoc()) : ?>
+                            <?php if ($result->num_rows > 0) : ?>
+                                <?php while ($row = $result->fetch_assoc()) : ?>
                                     <tr>
                                         <td><?= htmlspecialchars($row['first_name'] . ' ' . $row['last_name']) ?></td>
                                         <td><?= date("j F, Y", strtotime($row['date'])) ?></td>
@@ -510,7 +527,7 @@
                                                 <i class="bx bx-time-five"></i>
                                             <?php endif; ?>
                                         </td>
-                                        <td><a href="appDetails.php?id=<?= $row['appointment_id'] ?>">View Details</a></td>
+                                        <td><a href="appDetails.php?id=<?= $row['appointment_id'] ?>"><i class="bx bx-show"></i></a></td>
                                     </tr>
                                 <?php endwhile; ?>
                             <?php else : ?>
@@ -522,6 +539,7 @@
                                     </td>
                                 </tr>
                             <?php endif; ?>
+
                         </tbody>
                     </table>
                 </div>

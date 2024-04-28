@@ -23,12 +23,13 @@ if ($result->num_rows > 0) {
     $scheduleData = $result->fetch_assoc();
     $displayStartTime = date("g:i A", strtotime($scheduleData['startTime']));
     $displayEndTime = date("g:i A", strtotime($scheduleData['endTime']));
-    $scheduleId = $scheduleData['scheduleId'];  // Store schedule ID
+    $scheduleId = $scheduleData['scheduleId'];
 } else {
     echo "<script>alert('No schedule available for this date.'); window.location.href='userpage.php';</script>";
     exit;
 }
 $stmt->close();
+
 
 $query = "SELECT firstname, lastname, phoneno, email FROM tb_patients WHERE patientId = ?";
 $stmt = $con->prepare($query);
@@ -39,8 +40,26 @@ if (!$stmt->fetch()) {
     echo "No user details found. Please check the database or user ID.";
 }
 $stmt->close();
+$currentDateTime = date('Y-m-d g:i A');
+$login_error = '';
+$errors = [];
+date_default_timezone_set('Asia/Manila');
 
+function log_action($con, $accountNumber, $actionDescription, $userType)
+{
+    $currentDateTime = date('Y-m-d g:i A');
+    $sql = "INSERT INTO logs (accountNumber, actionDescription, userType, dateTime) VALUES (?, ?, ?, ?)";
+    $stmt = $con->prepare($sql);
+    if ($stmt) {
+        $stmt->bind_param("ssss", $accountNumber, $actionDescription, $userType, $currentDateTime);
+        $stmt->execute();
+        $stmt->close();
+    } else {
+        error_log("Error preparing log statement: " . $con->error);
+    }
+}
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['submit'])) {
+    $accountNum = $_SESSION['patientAccountNumber']; // Get account number from session
     $date = trim(htmlspecialchars($_POST['date']));
     $appointmentTime = trim(htmlspecialchars($_POST['appointmentTime']));
     $endTime = date('H:i:s', strtotime($appointmentTime) + 60 * 60); // assuming 30-minute appointments
@@ -50,7 +69,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['submit'])) {
     $email = trim(htmlspecialchars($_POST['email']));
     $appointmentType = trim(htmlspecialchars($_POST['appointmentType']));
     $message = trim(htmlspecialchars($_POST['message']));
-
+    $scheduleId = $scheduleData['scheduleId'];
 
     // Check if this user already has an appointment on this date
     $userCheckQuery = "SELECT COUNT(*) AS count FROM appointments WHERE patientId = ? AND date = ?";
@@ -61,7 +80,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['submit'])) {
     $userCheckRow = $userCheckResult->fetch_assoc();
 
     if ($userCheckRow['count'] > 0) {
+        $currentDateTime = date('Y-m-d g:i A');
         echo "<script>alert('You have already booked an appointment on this date. Please choose another date.'); window.history.back();</script>";
+        log_action($con, $accountNum, "tried to book an appointment on a date they already have an appointment on $currentDateTime", "user");
         exit;
     }
 
@@ -74,7 +95,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['submit'])) {
     $timeCheckRow = $timeCheckResult->fetch_assoc();
 
     if ($timeCheckRow['count'] > 0) {
+        $currentDateTime = date('Y-m-d g:i A');
         echo "<script>alert('This time slot is already taken or overlaps with another booking. Please choose another hour.'); window.history.back();</script>";
+        log_action($con, $accountNum, "tried to book an appointment on a time slot that is already taken $currentDateTime", "user");
         exit;
     }
 
@@ -83,7 +106,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['submit'])) {
     $stmt->bind_param("iisssssssss", $scheduleId, $userId, $firstName, $lastName, $phoneNumber, $email, $date, $appointmentTime, $endTime, $appointmentType, $message);
 
     if ($stmt->execute()) {
+        $currentDateTime = date('Y-m-d g:i A');
         echo "<script>alert('Appointment booked successfully. Please check your email for confirmation and further details.'); window.location.href='userpage.php';</script>";
+        log_action($con, $accountNum, "booked an appointment on $currentDateTime", "user");
     } else {
         echo "<script>alert('Error: Could not execute the query: {$stmt->error}');</script>";
     }
