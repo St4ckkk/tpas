@@ -65,11 +65,11 @@ if (isset($_POST['login'])) {
 <html lang="en">
 
 <head>
-    <title>TPAS</title>
+    <title>TPAS - Assistant</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=Aguafina+Script" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <link rel="shortcut icon" href="assets/favicon/tpas.ico" type="image/x-icon">
+    <link rel="shortcut icon" href="assets/favicon/tpasss.ico" type="image/x-icon">
 </head>
 
 <body>
@@ -103,7 +103,7 @@ if (isset($_POST['login'])) {
             <a href="#">Forgot your password?</a>
         </div>
         <div class="background">
-            <h1><span>Welcome to the</span> appointment.one</h1>
+            <h1><span>Welcome to </span>TPAS</h1>
             <p>Secure and efficient access for doctors and nurses to manage appointments and patient care.</p>
         </div>
     </div>

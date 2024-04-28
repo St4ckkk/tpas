@@ -9,8 +9,28 @@ if (!isset($_SESSION['assistantSession'])) {
 }
 
 $assistantId = $_SESSION['assistantSession'];
-$appointmentCount = 0;
-$userCount = 0;
+function getCount($con, $tableName, $condition = '', $params = [], $types = '')
+{
+    $query = "SELECT COUNT(*) AS count FROM $tableName";
+    if ($condition) {
+        $query .= " WHERE $condition";
+    }
+    $stmt = $con->prepare($query);
+    if (!empty($params) && !empty($types)) {
+        $stmt->bind_param($types, ...$params);
+    }
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $row = $result->fetch_assoc();
+    $stmt->close();
+    return $row['count'];
+}
+
+// Get counts of appointments by status
+$totalAppointments = getCount($con, "appointments");
+$confirmedCount = getCount($con, "appointments", "status = ?", ['Confirmed'], 's');
+$pendingCount = getCount($con, "appointments", "status = ?", ['Pending'], 's');
+$canceledCount = getCount($con, "appointments", "status = ?", ['Cancelled'], 's');
 
 // Fetch assistant details
 $query = $con->prepare("SELECT firstName, lastName FROM assistants WHERE assistantId = ?");
@@ -43,21 +63,6 @@ function getAssistantReminderCount($con, $assistantId)
 $reminderCount = getAssistantReminderCount($con, $assistantId);
 
 // Function to get counts from database
-function getCount($con, $tableName, $columnName = 'id')
-{
-    $stmt = $con->prepare("SELECT COUNT(*) AS count FROM $tableName");
-    $stmt->execute();
-    $result = $stmt->get_result();
-    $row = $result->fetch_assoc();
-    return $row['count'];
-}
-
-try {
-    $appointmentCount = getCount($con, "appointments");
-    $userCount = getCount($con, "tb_patients");
-} catch (Exception $e) {
-    echo 'Error: ' . $e->getMessage();
-}
 
 function getUpcomingAppointments($con)
 {
@@ -119,7 +124,7 @@ $reminders = getAssistantReminders($con, $assistantId);
     <link rel="stylesheet" href="node_modules/boxicons/css/boxicons.css">
     <link rel="stylesheet" href="dashboard.css">
     <link rel="shortcut icon" href="assets/favicon/tpasss.ico" type="image/x-icon">
-    <title>Dashboard</title>
+    <title>Dashboard - Assistant</title>
 </head>
 <style>
     .reminder-info {
@@ -283,6 +288,7 @@ $reminders = getAssistantReminders($con, $assistantId);
         align-items: center;
         font-size: 0.7rem;
     }
+
     .status-column i {
         font-size: 0.7rem;
         margin-left: 5px;
@@ -299,7 +305,6 @@ $reminders = getAssistantReminders($con, $assistantId);
         </a>
         <ul class="side-menu">
             <li class="active"><a href="dashboard.php"><i class='bx bxs-dashboard'></i>Dashboard</a></li>
-            <li><a href="user.php"><i class='bx bx-group'></i>Users</a></li>
             <li><a href="appointment.php"><i class='bx bx-calendar-check'></i>Appointments</a></li>
         </ul>
         <ul class="side-menu">
@@ -353,29 +358,39 @@ $reminders = getAssistantReminders($con, $assistantId);
             </div>
 
             <!-- Insights -->
+            <!-- Insights -->
             <ul class="insights">
                 <li>
                     <i class='bx bx-calendar-check'></i>
                     <span class="info">
-                        <h3><?php echo $appointmentCount; ?></h3>
+                        <h3><?php echo $totalAppointments; ?></h3>
                         <p>Total Appointments</p>
                     </span>
                 </li>
                 <li>
-                    <i class='bx bx-group'></i>
+                    <i class='bx bx-loader-circle'></i>
                     <span class="info">
-                        <h3><?php echo $userCount; ?></h3>
-                        <p>Users</p>
+                        <h3><?php echo $confirmedCount; ?></h3>
+                        <p>Confirmed Appointments</p>
                     </span>
                 </li>
                 <li>
-                    <i class='bx bx-bell'></i>
+                    <i class='bx bx-time-five'></i>
                     <span class="info">
-                        <h3><?php echo $reminderCount; ?></h3>
-                        <p>Reminders</p>
+                        <h3><?php echo $pendingCount; ?></h3>
+                        <p>Pending Appointments</p>
+                    </span>
+                </li>
+                <li>
+                    <i class='bx bx-block'></i>
+                    <span class="info">
+                        <h3><?php echo $canceledCount; ?></h3>
+                        <p>Cancelled Appointments</p>
                     </span>
                 </li>
             </ul>
+            <!-- End of Insights -->
+
             <!-- End of Insights -->
 
             <div class="bottom-data">

@@ -115,10 +115,10 @@ ORDER BY date ASC, appointment_time ASC
         <meta charset="UTF-8" />
         <meta http-equiv="X-UA-Compatible" content="IE=edge" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>Admin Dashboard</title>
+        <title>Dashboard - Admin</title>
         <link rel="stylesheet" href="node_modules/boxicons/css/boxicons.min.css" />
         <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Sharp" rel="stylesheet" />
-        
+        <link rel="shortcut icon" href="assets/favicon/tpasss.ico" type="image/x-icon">
         <link rel="stylesheet" href="style.css" />
         <script>
             // Define your updates array globally if it's static or loaded on page load

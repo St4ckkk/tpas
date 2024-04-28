@@ -39,7 +39,7 @@ if (isset($_POST['login'])) {
 <html lang="en">
 
 <head>
-    <title>TPAS</title>
+    <title>TPAS - Admin</title>
     <link href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet">
     <link href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.min.css" rel="stylesheet">
     <link rel="stylesheet" href="assets/css/index.css">
@@ -84,7 +84,7 @@ if (isset($_POST['login'])) {
             <a href="#">Forgot your password?</a>
         </div>
         <div class="background">
-            <h1><span>Welcome to the</span> appointment.one</h1>
+            <h1><span>Welcome to </span>TPAS</h1>
             <p>Secure and efficient access for doctors and nurses to manage appointments and patient care.</p>
         </div>
     </div>
