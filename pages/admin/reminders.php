@@ -31,12 +31,13 @@ $query = $con->prepare("
     FROM reminders AS r
     LEFT JOIN assistants AS a ON r.recipient_id = a.assistantId AND r.recipient_type = 'assistant'
     LEFT JOIN tb_patients AS p ON r.recipient_id = p.patientId AND r.recipient_type = 'patient'
-    ORDER BY r.date DESC
+    WHERE r.creatorId = ?
+    ORDER BY r.date DESC    
 ");
-
-
+$query->bind_param("i", $doctorId);
 $query->execute();
 $result = $query->get_result();
+
 
 
 
@@ -527,16 +528,21 @@ $updatesQuery->close();
         vertical-align: middle;
     }
 
+
     /* Priority Color Classes */
     .priority-1 {
-        color: limegreen;
-    }
-
-    .priority-1 {
-        color: orange;
+        color: blue;
     }
 
     .priority-2 {
+        color: yellow;
+    }
+
+    .priority-3 {
+        color: purple;
+    }
+
+    .priority-4 {
         color: red;
     }
 
@@ -613,10 +619,11 @@ $updatesQuery->close();
             </div>
         </aside>
         <main>
-            <h1>Add Assistant</h1>
+            <h1>Create Reminders</h1>
             <div class="insights schedule-container">
                 <form action="add-reminder.php" method="POST">
                     <div class="form-row">
+                        <input type="hidden" name="creatorId" value="<?= $_SESSION['doctorSession'] ?>">
                         <div class="form-group">
                             <label for="reminderTarget">Target:</label>
                             <select name="reminderTarget" id="reminderTarget" required onchange="loadTargetUsers(this.value);">
@@ -636,6 +643,15 @@ $updatesQuery->close();
                         <div class="form-group">
                             <label for="reminderTitle">Title:</label>
                             <input type="text" name="reminderTitle" id="reminderTitle" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="priority">Priority</label>
+                            <select name="priority" id="priority" required>
+                                <option value="1" class="priority-1">Low</option>
+                                <option value="2" class="priority-2">Medium</option>
+                                <option value="3" class="priority-3">High</option>
+                                <option value="4" class="priority-4">Super High</option>
+                            </select>
                         </div>
                         <div class="form-group">
                             <label for="reminderDate">Date:</label>
@@ -696,7 +712,7 @@ $updatesQuery->close();
                 </div>
             </div>
             <div class="recent-updates">
-                <h2 class="updates-title">Updates</h2>
+                <h2 class="updates-title">Reminders</h2>
                 <div class="updates-list">
                     <?php foreach ($updates as $index => $update) : ?>
                         <div class="update-item" data-index="<?= $index ?>" onclick="showUpdateModal(this.getAttribute('data-index'));">

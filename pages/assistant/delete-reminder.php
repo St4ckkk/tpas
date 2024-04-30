@@ -1,22 +1,26 @@
 <?php
-include 'conn/dbconnect.php';
-header('Content-Type: application/json');
+session_start();
+include 'assets/conn/dbconnect.php'; // Adjust the path as needed
 
-$request = json_decode(file_get_contents('php://input'), true);
+if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    $data = json_decode(file_get_contents("php://input"), true);
+    $reminderId = $data['reminderId'];
 
-if (!isset($request['reminderId'])) {
-    echo json_encode(["success" => false, "message" => "Reminder ID is required"]);
-    exit;
-}
+    if (!isset($reminderId)) {
+        echo json_encode(['success' => false, 'message' => 'Reminder ID is required']);
+        exit;
+    }
 
-$reminderId = $request['reminderId'];
+    $query = $con->prepare("DELETE FROM reminders WHERE id = ?");
+    $query->bind_param("i", $reminderId);
+    $result = $query->execute();
 
-$query = "DELETE FROM reminders WHERE reminderId = ?";
-$stmt = $con->prepare($query);
-$stmt->bind_param("i", $reminderId);
-if ($stmt->execute()) {
-    echo json_encode(["success" => true, "message" => "Reminder deleted successfully"]);
+    if ($result) {
+        echo json_encode(['success' => true]);
+    } else {
+        echo json_encode(['success' => false, 'message' => 'Failed to delete the reminder.']);
+    }
 } else {
-    echo json_encode(["success" => false, "message" => "Failed to delete reminder"]);
+    echo json_encode(['success' => false, 'message' => 'Invalid request method.']);
 }
-$stmt->close();
+?>

@@ -30,7 +30,7 @@
     $lastUpdatedUsers = $result['lastUpdated'];
     $displayLastUpdatedUsers = $lastUpdatedUsers ? date("F j, Y g:i A", strtotime($lastUpdatedUsers)) : "No updates";
     // Fetch recent appointments
-    $query = $con->prepare("SELECT COUNT(*) AS total, MAX(updated_at) as lastUpdated FROM reminders");
+    $query = $con->prepare("SELECT COUNT(*) AS total, MAX(updated_at) as lastUpdated FROM reminders WHERE recipient_type = 'doctor'");
     $query->execute();
     $result = $query->get_result()->fetch_assoc();
     $totalReminders = $result['total'];
@@ -261,11 +261,9 @@ WHERE status = 'Confirmed'");
         .modal-content {
             background-color: #fefefe;
             margin: auto;
-            /* Necessary for aligning the modal content in the center */
             padding: 20px;
             border: 1px solid #888;
             width: 20%;
-            /* Responsive width */
             box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.3), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
             border-radius: 5px;
         }
@@ -312,7 +310,6 @@ WHERE status = 'Confirmed'");
 
         .status-cancelled {
             color: red;
-            /* Ensures cancelled status text is red */
         }
 
         .status-processing {
@@ -366,14 +363,17 @@ WHERE status = 'Confirmed'");
 
         /* Priority Color Classes */
         .priority-1 {
-            color: limegreen;
+            color: blue;
         }
-
-        .priority-1 {
-            color: orange;
-        }
-
         .priority-2 {
+            color: yellow;
+        }
+
+        .priority-3  {
+            color: purple;
+        }
+
+        .priority-4 {
             color: red;
         }
 
@@ -411,13 +411,13 @@ WHERE status = 'Confirmed'");
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 20px;
+            margin-bottom: 5px;
         }
 
         #statusFilter {
             padding: 5px 10px;
             font-size: 16px;
-            border-radius: 5px;
+            border-radius: 10px;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
 
@@ -426,11 +426,11 @@ WHERE status = 'Confirmed'");
         .no-appointments-message {
             padding: 20px;
             margin-top: 20px;
-            background-color: #f9f9f9;
+            background-color: #fff;
             text-align: center;
-            border: 1px solid #ccc;
-            border-radius: 5px;
+            border: 1px solid #fff;  
             font-size: 16px;
+            border-radius: 20px;
         }
 
         .bx {
@@ -440,18 +440,14 @@ WHERE status = 'Confirmed'");
 
         .reminder-title {
             color: orange;
-            /* Set the color for reminder titles */
             display: flex;
             align-items: center;
-            /* Align the icon with the text */
         }
 
         .reminder-icon {
             display: inline-block;
             margin-right: 5px;
-            /* Space between icon and text */
             font-size: 20px;
-            /* Icon size */
         }
 
         .update-title {
@@ -603,7 +599,7 @@ WHERE status = 'Confirmed'");
                         </tbody>
                     </table>
                     <div id="no-appointments-message" class="no-appointments-message" style="display: none;">
-                        <i class="bx bx-info"></i> No appointments available for this status.
+                        <i class="bx bx-info-circle"></i> No appointments available for this status.
                     </div>
                 </div>
 
@@ -633,7 +629,7 @@ WHERE status = 'Confirmed'");
                         const table = document.getElementById('recent-orders--table');
                         const message = document.getElementById('no-appointments-message');
                         const tbody = table.querySelector('tbody');
-                        tbody.innerHTML = ''; // Clear existing rows
+                        tbody.innerHTML = '';
 
                         if (!appointments || appointments.length === 0) {
                             table.style.display = 'none'; // Hide table
@@ -733,12 +729,12 @@ WHERE status = 'Confirmed'");
                             <div class="update-item" data-index="<?= $index ?>" onclick="showUpdateModal(this.getAttribute('data-index'));">
                                 <h3 class="update-title <?= $update['type'] === 'reminder' ? 'reminder-title' : ''; ?>">
                                     <?php if ($update['type'] === 'reminder') : ?>
-                                        <i class="bx bxs-bell reminder-icon"></i> <!-- Bell icon for reminders -->
+                                        <i class="bx bxs-bell reminder-icon"></i>
                                     <?php elseif ($update['type'] === 'appointment') : ?>
                                         <i class="bx bxs-message-square-dots appointment-icon"></i>
                                     <?php endif; ?>
                                     <?= $update['type'] === 'appointment' ? "Appointment Update" : "Reminder"; ?>
-                                </h3>
+                                </h3> 
                                 <span class="update-date"><?= date("F j, Y", strtotime($update['datetime'])); ?></span>
                             </div>
 
@@ -762,7 +758,6 @@ WHERE status = 'Confirmed'");
                 var modalContent = document.getElementById('modalContent');
 
                 modalContent.innerHTML = '';
-                // Here you need to format the date and time when setting it in the modal
                 var formattedDate = new Date(updateData.datetime).toLocaleDateString('en-GB', {
                     day: 'numeric',
                     month: 'long',

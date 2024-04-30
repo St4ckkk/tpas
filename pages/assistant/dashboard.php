@@ -22,15 +22,16 @@ function getCount($con, $tableName, $condition = '', $params = [], $types = '')
     $stmt->execute();
     $result = $stmt->get_result();
     $row = $result->fetch_assoc();
+
     $stmt->close();
     return $row['count'];
 }
 
-// Get counts of appointments by status
-$totalAppointments = getCount($con, "appointments");
 $confirmedCount = getCount($con, "appointments", "status = ?", ['Confirmed'], 's');
 $pendingCount = getCount($con, "appointments", "status = ?", ['Pending'], 's');
+$pendingOrProcessingCount = getCount($con, "appointments", "(status = ? OR status = ?)", ['Pending', 'Processing'], 'ss');
 $canceledCount = getCount($con, "appointments", "status = ?", ['Cancelled'], 's');
+$totalAppointments = $confirmedCount + $pendingOrProcessingCount;
 
 // Fetch assistant details
 $query = $con->prepare("SELECT firstName, lastName FROM assistants WHERE assistantId = ?");
@@ -77,43 +78,64 @@ function getUpcomingAppointments($con)
 }
 
 $upcomingAppointments = getUpcomingAppointments($con);
-function getAssistantReminders($con, $assistantId)
-{
-    $reminders = [];
-    $sql = "
-        SELECT r.id, r.title, r.description, r.priority, r.created_at, r.date,
-               COALESCE(d.doctorFirstName, p.firstname, a.firstName) AS senderFirstName,
-               COALESCE(d.doctorLastName, p.lastname, a.lastName) AS senderLastName,
-               COALESCE(pd.firstname, pa.firstName) AS receiverFirstName,
-               COALESCE(pd.lastname, pa.lastName) AS receiverLastName
-        FROM reminders r
-        LEFT JOIN tb_patients p ON r.senderId = p.patientId AND r.senderType = 'patient'
-        LEFT JOIN doctor d ON r.senderId = d.id AND r.senderType = 'doctor'
-        LEFT JOIN assistants a ON r.senderId = a.assistantId AND r.senderType = 'assistant'
-        LEFT JOIN tb_patients pd ON r.id = pd.patientId AND r.recipient_type = 'patient'
-        LEFT JOIN assistants pa ON r.id = pa.assistantId AND r.recipient_type = 'assistant'
-        WHERE r.id = ? AND r.recipient_type = 'assistant'
-        ORDER BY r.createdAt DESC
-    ";
-    $query = $con->prepare($sql);
-    if (!$query) {
-        die('Prepare failed: ' . $con->error);
-    }
+$updatesQuery = $con->prepare("
+    SELECT 
+        a.appointment_id, 
+        a.first_name, 
+        a.last_name, 
+        a.date AS datetime,
+        a.status,
+        a.updatedAt AS updatedAt,
+        '' AS title, 
+        '' AS description,
+        'appointment' AS type
+    FROM 
+        appointments a
+    JOIN 
+        schedule s ON a.scheduleId = s.scheduleId
+    WHERE 
+        a.status IN ('Cancelled') AND s.doctorId = ?
+    UNION ALL
+    SELECT 
+        r.id AS appointment_id,
+        '' AS first_name,
+        '' AS last_name,
+        r.date AS datetime,
+        r.priority AS status, 
+        r.created_at AS updatedAt,
+        r.title,
+        r.description,
+        'reminder' AS type
+    FROM 
+        reminders r
+    WHERE 
+        r.recipient_id = ? AND r.recipient_type = 'assistant'
+    ORDER BY 
+        datetime DESC
+    LIMIT 10
+");
 
-    $query->bind_param("i", $assistantId);
-    if (!$query->execute()) {
-        die('Execute failed: ' . $query->error);
-    }
 
-    $result = $query->get_result();
-    while ($row = $result->fetch_assoc()) {
-        $reminders[] = $row;
-    }
-    return $reminders;
+if ($updatesQuery === false) {
+    die('MySQL prepare error: ' . $con->error);
+}
+$updatesQuery->bind_param("ii", $assistantId, $assistantId);
+$updatesQuery->execute();
+$updatesResult = $updatesQuery->get_result();
+$updates = [];
+while ($update = $updatesResult->fetch_assoc()) {
+    $updates[] = $update;
+}
+$updatesQuery->close();
+if (isset($_SESSION['success'])) {
+    echo "<script>alert('" . $_SESSION['success'] . "');</script>";
+    unset($_SESSION['success']);
 }
 
-
-$reminders = getAssistantReminders($con, $assistantId);
+if (isset($_SESSION['error'])) {
+    echo "<script>alert('" . $_SESSION['error'] . "');</script>";
+    unset($_SESSION['error']);
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -123,7 +145,7 @@ $reminders = getAssistantReminders($con, $assistantId);
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="node_modules/boxicons/css/boxicons.css">
     <link rel="stylesheet" href="dashboard.css">
-    <link rel="shortcut icon" href="assets/favicon/tpasss.ico" type="image/x-icon">
+    <link rel="shortcut icon" href="assets/favicon/tpass.ico" type="image/x-icon">
     <title>Dashboard - Assistant</title>
 </head>
 <style>
@@ -135,7 +157,6 @@ $reminders = getAssistantReminders($con, $assistantId);
 
     .reminder-info small {
         display: block;
-        /* Each detail on its own line */
         margin-top: 2px;
     }
 
@@ -177,7 +198,7 @@ $reminders = getAssistantReminders($con, $assistantId);
 
     .reminder-info-top {
         margin-bottom: 0;
-        font-size: 0.8rem;
+        font-size: 0.6rem;
         color: #666;
     }
 
@@ -196,7 +217,11 @@ $reminders = getAssistantReminders($con, $assistantId);
     .dropdown-content {
         position: fixed;
         right: 0;
-        width: 2%;
+        width: 2.3%;
+    }
+
+    .reminder-info-top h1 {
+        color: #fff;
     }
 
     .reminder-date small {
@@ -211,7 +236,12 @@ $reminders = getAssistantReminders($con, $assistantId);
     }
 
     .task-title i {
-        margin-right: 10px;
+        margin-right: 5px;
+    }
+
+    .content main .bottom-data .reminders .task-list li.priority-super-high {
+        background-color: purple;
+        color: white;
     }
 
     .content main .bottom-data .reminders .task-list li.priority-high {
@@ -220,12 +250,12 @@ $reminders = getAssistantReminders($con, $assistantId);
     }
 
     .content main .bottom-data .reminders .task-list li.priority-medium {
-        background-color: orange;
-        color: white;
+        background-color: yellowgreen;
+        color: #eee;
     }
 
     .content main .bottom-data .reminders .task-list li.priority-low {
-        background-color: green;
+        background-color: blue;
         color: white;
     }
 
@@ -236,19 +266,20 @@ $reminders = getAssistantReminders($con, $assistantId);
 
     .content main .bottom-data .reminders .task-list li.reminders .bx-bell {
         color: yellow;
+
     }
 
     .reminder-info-top h1 {
-        color: #333;
+        color: gray;
     }
 
     .reminder-details p {
-        font-size: 0.9rem;
+        font-size: 0.7rem;
     }
 
     .reminder-date small {
-        font-size: 0.8rem;
-        color: #333;
+        font-size: 0.7rem;
+        color: #eee;
     }
 
     input[type="date"] {
@@ -292,6 +323,119 @@ $reminders = getAssistantReminders($con, $assistantId);
     .status-column i {
         font-size: 0.7rem;
         margin-left: 5px;
+    }
+
+    .modal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+    }
+
+    .close {
+        float: right;
+        font-size: 1.5rem;
+        line-height: 1rem;
+        cursor: pointer;
+        color: #333;
+    }
+
+    .close:hover {
+        color: #000;
+    }
+
+    .modal-content {
+        background: white;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        width: 90%;
+        max-width: 500px;
+    }
+
+    .form-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .form-group {
+        flex: 1;
+        margin-right: 20px;
+    }
+
+    .form-group:last-child {
+        margin-right: 0;
+    }
+
+    .form-group label {
+        display: block;
+        margin-bottom: 5px;
+    }
+
+    .form-group input[type="text"],
+    .form-group select,
+    .form-group input[type="date"],
+    .form-group textarea {
+        width: 100%;
+        padding: 8px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        margin: 0;
+    }
+
+    .form-group textarea {
+        height: 100px;
+    }
+
+    .modal form button {
+        padding: 10px 20px;
+        border: none;
+        border-radius: 5px;
+        margin-top: 10px;
+        cursor: pointer;
+        font-size: 1rem;
+    }
+
+    .modal form button[type="submit"] {
+        text-align: center;
+        background-color: #4CAF50;
+        color: white;
+    }
+
+    .modal form button[type="button"] {
+        background-color: #f44336;
+        color: white;
+    }
+
+    .modal form button:hover {
+        opacity: 0.8;
+    }
+
+    .form-feedback {
+        margin-bottom: 20px;
+        padding: 10px;
+        border-radius: 5px;
+        color: #fff;
+        text-align: center;
+        display: none;
+        /* Initially hidden */
+    }
+
+    .form-feedback.success {
+        background-color: #4CAF50;
+        /* Green for success */
+    }
+
+    .form-feedback.error {
+        background-color: #f44336;
+        /* Red for errors */
     }
 </style>
 
@@ -357,7 +501,6 @@ $reminders = getAssistantReminders($con, $assistantId);
                 </a>
             </div>
 
-            <!-- Insights -->
             <!-- Insights -->
             <ul class="insights">
                 <li>
@@ -440,7 +583,7 @@ $reminders = getAssistantReminders($con, $assistantId);
                         fetch(`fetch-appointments.php?date=${date}`)
                             .then(response => response.json())
                             .then(appointments => {
-                                tbody.innerHTML = ''; // Clear current appointments
+                                tbody.innerHTML = '';
                                 if (appointments.length > 0) {
                                     appointments.forEach(appointment => {
                                         const row = tbody.insertRow();
@@ -490,7 +633,6 @@ $reminders = getAssistantReminders($con, $assistantId);
                                 class: 'status-processing',
                                 icon: 'bx bx-loader'
                             },
-                            // Add more statuses if necessary
                         };
                         return statuses[status] || {
                             class: 'status-unknown',
@@ -499,33 +641,54 @@ $reminders = getAssistantReminders($con, $assistantId);
                     }
                 </script>
                 <!-- Reminder Modal -->
-                <dialog id="reminderModal" class="modal">
+                <dialog id="reminderModal" class="modal" style="display: none">
                     <div class="modal-content">
                         <span class="close" onclick="closeModal()">&times;</span>
-                        <form action="add-reminder.php" method="POST">
-                            <div class="form-group">
-                                <label for="description">Description:</label>
-                                <input type="text" id="description" name="description" required>
+                        <form action="add-reminders.php" method="POST" id="reminderForm">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="reminderTitle">Title:</label>
+                                    <input type="text" name="reminderTitle" id="reminderTitle" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="priority">Priority</label>
+                                    <select name="priority" id="priority" required>
+                                        <option value="1" class="priority-1">Low</option>
+                                        <option value="2" class="priority-2">Medium</option>
+                                        <option value="3" class="priority-3">High</option>
+                                        <option value="4" class="priority-4">Super High</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="reminderTarget">Reminder For:</label>
+                                    <select name="reminderTarget" id="reminderTarget" required onchange="loadTargetUsers(this.value);">
+                                        <option value="">Select Target</option>
+                                        <option value="doctor">Doctor</option>
+                                        <option value="patient">Patient</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="reminderUser">Recipient:</label>
+                                    <select name="reminderUser" id="reminderUser" required>
+                                        <option value="">Select User</option>
+                                    </select>
+                                </div>
                             </div>
                             <div class="form-group">
-                                <label for="reminderFor">Reminder For:</label>
-                                <select id="reminderFor" name="reminderFor">
-                                    <option value="">Select Target</option>
-                                    <option value="doctor">Doctor</option>
-                                    <option value="patient">Patient</option>
-                                </select>
+                                <label for="reminderDate">Date:</label>
+                                <input type="date" name="reminderDate" id="reminderDate" required>
                             </div>
                             <div class="form-group">
-                                <label for="recipient">Recipient:</label>
-                                <select id="recipient" name="recipient">
-                                    <option value="">Select Recipient</option>
-                                </select>
+                                <label for="reminderDescription">Description:</label>
+                                <textarea name="reminderDescription" id="reminderDescription" required></textarea>
                             </div>
-                            <button type="submit" class="btn btn-primary">Add Reminder</button>
+                            <button type="submit" class="btn-primary">Add Reminder</button>
                         </form>
                     </div>
                 </dialog>
-
+                <!-- Edit Reminder Modal -->
 
 
                 <!-- Reminders -->
@@ -536,8 +699,11 @@ $reminders = getAssistantReminders($con, $assistantId);
                         <button onclick="openModal()" class='bx bx-plus '></button>
                     </div>
                     <ul class="task-list">
-                        <?php foreach ($reminders as $reminder) :
-                            switch ($reminder['priority']) {
+                        <?php foreach ($updates as $index => $update) :
+                            switch ($update['status']) {
+                                case 4:
+                                    $priorityClass = 'priority-super-high';
+                                    break;
                                 case 3:
                                     $priorityClass = 'priority-high';
                                     break;
@@ -551,24 +717,24 @@ $reminders = getAssistantReminders($con, $assistantId);
                                     $priorityClass = 'priority-default';
                             }
                         ?>
-                            <li id="reminder-<?= $reminder['id'] ?>" class="<?= $priorityClass ?>">
+                            <li id="reminder-<?= $update['appointment_id'] ?>" class="<?= $priorityClass ?>">
                                 <div class="task-title">
                                     <i class='bx bx-bell'></i>
                                     <div class="reminder-details">
                                         <div class="reminder-info-top">
-                                            <h1><?= htmlspecialchars($reminder['title']); ?></h1>
+                                            <h1><?= htmlspecialchars($update['title']); ?></h1>
                                         </div>
-                                        <p><?= htmlspecialchars($reminder['description']) ?></p>
+                                        <p><?= htmlspecialchars($update['description']) ?></p>
                                         <div class="reminder-date">
-                                            <small><?= date('M d, Y g:i A', strtotime($reminder['created_at'])) ?></small>
+                                            <small><?= date('M d, Y g:i A', strtotime($update['datetime'])) ?></small>
                                         </div>
                                     </div>
                                 </div>
                                 <div class="dropdown">
-                                    <i class='bx bx-dots-vertical-rounded' id="trigger-<?= $reminder['id'] ?>" onclick="toggleDropdown(this.id)"></i>
-                                    <div class="dropdown-content" style="display:none;">
-                                        <i class="bx bx-edit" onclick="editReminder('<?= $reminder['id'] ?>')"></i>
-                                        <i class="bx bx-trash" onclick="deleteReminder('<?= $reminder['id'] ?>')"></i>
+                                    <i class='bx bx-dots-vertical-rounded' id="trigger-<?= $update['appointment_id'] ?>" onclick="toggleDropdown(this.id)"></i>
+                                    <div class="dropdown-content">
+                                        <i class="bx bx-edit" onclick="editReminder('<?= $update['appointment_id'] ?>')"></i>
+                                        <i class="bx bx-trash" onclick="deleteReminder('<?= $update['appointment_id'] ?>')"></i>
                                     </div>
                                 </div>
                             </li>
@@ -576,11 +742,88 @@ $reminders = getAssistantReminders($con, $assistantId);
                     </ul>
 
                 </div>
+                <!-- Edit Reminder Modal -->
+                <dialog id="editReminderModal" class="modal" style="display: none;">
+                    <div class="modal-content">
+                        <span class="close" onclick="closeEditModal()">&times;</span>
+                        <form action="add-reminders.php" id="editReminderForm" method="POST">
+                            <input type="hidden" name="creatorId" value="<?= $_SESSION['assistantSession'] ?>">
+                            <input type="hidden" id="editReminderId" name="reminderId">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="editTitle">Title:</label>
+                                    <input type="text" id="editTitle" name="title" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="editPriority">Priority:</label>
+                                    <select id="editPriority" name="priority" required>
+                                        <option value="">Select Priority</option>
+                                        <option value="1">Low</option>
+                                        <option value="2">Medium</option>
+                                        <option value="3">High</option>
+                                        <option value="4">Super High</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="editDescription">Description:</label>
+                                <textarea id="editDescription" name="description" required></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label for="editDate">Date:</label>
+                                <input type="date" id="editDate" name="date" required>
+                            </div>
+                            <button type="submit">Update Reminder</button>
+                            <button type="button" onclick="closeEditModal()">Cancel</button>
+                        </form>
+                    </div>
+                </dialog>
 
 
                 <!-- End of Reminders-->
 
                 <script>
+                    function loadTargetUsers(targetType) {
+                        const userSelect = document.getElementById('reminderUser');
+                        userSelect.innerHTML = '<option value="">Select User</option>'; // Reset user selection
+
+                        if (!targetType) return;
+
+                        fetch(`load-users.php?target=${targetType}`)
+                            .then(response => response.json())
+                            .then(data => {
+                                data.forEach(user => {
+                                    const option = document.createElement('option');
+                                    option.value = user.id;
+                                    option.textContent = user.name;
+                                    userSelect.appendChild(option);
+                                });
+                            })
+                            .catch(error => console.error('Error loading users:', error));
+                    }
+
+                    function editReminder(reminderId) {
+                        fetch(`get-reminder-details.php?id=${reminderId}`)
+                            .then(response => response.json())
+                            .then(data => {
+                                document.getElementById('editReminderId').value = reminderId;
+                                document.getElementById("editPriority").value = data.priority;
+                                document.getElementById('editTitle').value = data.title;
+                                document.getElementById('editDescription').value = data.description;
+                                document.getElementById('editDate').value = data.date;
+                                document.getElementById('editReminderModal').style.display = 'block';
+                            })
+                            .catch(error => {
+                                console.error('Error:', error);
+                                alert('An error occurred while fetching reminder details.');
+                            });
+                    }
+
+                    function closeEditModal() {
+                        document.getElementById('editReminderModal').style.display = 'none';
+                    }
+
                     function toggleDropdown(triggerId) {
                         var trigger = document.getElementById(triggerId);
                         var dropdown = trigger.nextElementSibling;
@@ -651,7 +894,6 @@ $reminders = getAssistantReminders($con, $assistantId);
             }
         }
 
-
         function updateRecipients(type) {
             const recipientsDropdown = document.getElementById('recipient');
             recipientsDropdown.innerHTML = '<option value="">Loading...</option>';
@@ -671,37 +913,6 @@ $reminders = getAssistantReminders($con, $assistantId);
                 });
         }
 
-        function updateReminderStatus(reminderId, newStatus) {
-            const data = JSON.stringify({
-                reminderId: reminderId,
-                newStatus: newStatus
-            });
-
-            console.log("Sending Data:", data); // Debugging: Log the data being sent.
-
-            fetch('update-reminder.php', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json', // Ensures that PHP treats the request body as JSON
-                    },
-                    body: data
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        alert(`Reminder status updated successfully.`);
-                        window.location.reload(); // Optionally reload the page or update UI
-                    } else {
-                        alert('Failed to update reminder status.');
-                    }
-                })
-                .catch(error => {
-                    console.error('Error updating reminder status:', error);
-                    alert('Error updating reminder status.');
-                });
-        }
-
-
         function deleteReminder(reminderId) {
             if (confirm("Are you sure you want to delete this reminder?")) {
                 fetch('delete-reminder.php', {
@@ -710,17 +921,17 @@ $reminders = getAssistantReminders($con, $assistantId);
                             'Content-Type': 'application/json',
                         },
                         body: JSON.stringify({
-                            reminderId: reminderId // Ensure this is correctly capturing the ID
+                            reminderId: reminderId
                         })
                     })
                     .then(response => response.json())
                     .then(data => {
                         if (data.success) {
                             alert('Reminder deleted successfully.');
-                            document.getElementById(`reminder-${reminderId}`).remove();
-                            window.location.reload
+                            const element = document.getElementById(`reminder-${reminderId}`);
+                            if (element) element.remove();
                         } else {
-                            alert('Failed to delete reminder.');
+                            alert('Failed to delete reminder. ' + data.message);
                         }
                     })
                     .catch(error => {
@@ -732,4 +943,4 @@ $reminders = getAssistantReminders($con, $assistantId);
     </script>
 </body>
 
-</htm>
+</html>
