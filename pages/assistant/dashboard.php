@@ -45,7 +45,7 @@ if (!$assistant) {
 }
 function getAssistantReminderCount($con, $assistantId)
 {
-    $query = "SELECT COUNT(*) AS count FROM reminders WHERE receiverId = ? AND receiverType = 'assistant'";
+    $query = "SELECT COUNT(*) AS count FROM reminders WHERE id = ? AND recipient_type = 'assistant'";
     $stmt = $con->prepare($query);
     if ($stmt === false) {
         die("MySQL prepare error: " . $con->error);
@@ -81,7 +81,7 @@ function getAssistantReminders($con, $assistantId)
 {
     $reminders = [];
     $sql = "
-        SELECT r.reminderId, r.title, r.description, r.priority, r.createdAt, r.reminderDate,
+        SELECT r.id, r.title, r.description, r.priority, r.created_at, r.date,
                COALESCE(d.doctorFirstName, p.firstname, a.firstName) AS senderFirstName,
                COALESCE(d.doctorLastName, p.lastname, a.lastName) AS senderLastName,
                COALESCE(pd.firstname, pa.firstName) AS receiverFirstName,
@@ -90,9 +90,9 @@ function getAssistantReminders($con, $assistantId)
         LEFT JOIN tb_patients p ON r.senderId = p.patientId AND r.senderType = 'patient'
         LEFT JOIN doctor d ON r.senderId = d.id AND r.senderType = 'doctor'
         LEFT JOIN assistants a ON r.senderId = a.assistantId AND r.senderType = 'assistant'
-        LEFT JOIN tb_patients pd ON r.receiverId = pd.patientId AND r.receiverType = 'patient'
-        LEFT JOIN assistants pa ON r.receiverId = pa.assistantId AND r.receiverType = 'assistant'
-        WHERE r.receiverId = ? AND r.receiverType = 'assistant'
+        LEFT JOIN tb_patients pd ON r.id = pd.patientId AND r.recipient_type = 'patient'
+        LEFT JOIN assistants pa ON r.id = pa.assistantId AND r.recipient_type = 'assistant'
+        WHERE r.id = ? AND r.recipient_type = 'assistant'
         ORDER BY r.createdAt DESC
     ";
     $query = $con->prepare($sql);
@@ -551,7 +551,7 @@ $reminders = getAssistantReminders($con, $assistantId);
                                     $priorityClass = 'priority-default';
                             }
                         ?>
-                            <li id="reminder-<?= $reminder['reminderId'] ?>" class="<?= $priorityClass ?>">
+                            <li id="reminder-<?= $reminder['id'] ?>" class="<?= $priorityClass ?>">
                                 <div class="task-title">
                                     <i class='bx bx-bell'></i>
                                     <div class="reminder-details">
@@ -560,15 +560,15 @@ $reminders = getAssistantReminders($con, $assistantId);
                                         </div>
                                         <p><?= htmlspecialchars($reminder['description']) ?></p>
                                         <div class="reminder-date">
-                                            <small><?= date('M d, Y g:i A', strtotime($reminder['createdAt'])) ?></small>
+                                            <small><?= date('M d, Y g:i A', strtotime($reminder['created_at'])) ?></small>
                                         </div>
                                     </div>
                                 </div>
                                 <div class="dropdown">
-                                    <i class='bx bx-dots-vertical-rounded' id="trigger-<?= $reminder['reminderId'] ?>" onclick="toggleDropdown(this.id)"></i>
+                                    <i class='bx bx-dots-vertical-rounded' id="trigger-<?= $reminder['id'] ?>" onclick="toggleDropdown(this.id)"></i>
                                     <div class="dropdown-content" style="display:none;">
-                                        <i class="bx bx-edit" onclick="editReminder('<?= $reminder['reminderId'] ?>')"></i>
-                                        <i class="bx bx-trash" onclick="deleteReminder('<?= $reminder['reminderId'] ?>')"></i>
+                                        <i class="bx bx-edit" onclick="editReminder('<?= $reminder['id'] ?>')"></i>
+                                        <i class="bx bx-trash" onclick="deleteReminder('<?= $reminder['id'] ?>')"></i>
                                     </div>
                                 </div>
                             </li>
