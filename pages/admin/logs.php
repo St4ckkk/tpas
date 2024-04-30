@@ -44,6 +44,7 @@
         <link rel="stylesheet" href="node_modules/boxicons/css/boxicons.min.css" />
         <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Sharp" rel="stylesheet" />
         <link rel="stylesheet" href="style.css" />
+        <link rel="shortcut icon" href="assets/favicon/tpasss.ico" type="image/x-icon">
     </head>
     <style>
         .status-column i {
@@ -214,12 +215,12 @@
                         <span class="material-icons-sharp"> event_available</span>
                         <h3>Appointments</h3>
                     </a>
-                    <a href="#">
-                        <span class="material-icons-sharp"> mail_outline </span>
-                        <h3>Messages</h3>
+                    <a href="reminders.php">
+                        <span class="material-icons-sharp">notifications </span>
+                        <h3>Reminders</h3>
                         <span class="message-count"></span>
                     </a>
-                     <a href="logs.php" class="active">
+                    <a href="logs.php" class="active">
                         <span class="material-icons-sharp">description</span>
                         <h3>Logs</h3>
                     </a>

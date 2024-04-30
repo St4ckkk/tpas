@@ -22,7 +22,15 @@ $query = $con->prepare("SELECT accountNumber, firstName, lastName, email, phoneN
 $query->bind_param("ii", $recordsPerPage, $offset);
 $query->execute();
 $result = $query->get_result();
+$logQuery = $con->prepare("SELECT id, accountNumber, actionDescription, userType, dateTime FROM logs WHERE userType = ? ORDER BY dateTime DESC");
 
+// Bind the 'assistant' string to the userType parameter
+$userType = 'assistant';
+$logQuery->bind_param("s", $userType);
+
+// Execute the query
+$logQuery->execute();
+$logResult = $logQuery->get_result();
 ?>
 
 
@@ -37,6 +45,7 @@ $result = $query->get_result();
     <link rel="stylesheet" href="node_modules/boxicons/css/boxicons.min.css" />
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Sharp" rel="stylesheet" />
     <link rel="stylesheet" href="style.css" />
+    <link rel="shortcut icon" href="assets/favicon/tpasss.ico" type="image/x-icon">
 </head>
 <style>
     .status-column i {
@@ -121,6 +130,42 @@ $result = $query->get_result();
         margin-left: 16rem;
         margin-top: 0;
     }
+
+    .logs-container {
+        padding: var(--card-padding);
+        border-radius: var(--border-radius-2);
+        box-shadow: var(--box-shadow);
+        overflow-x: auto;
+        color: var(--color-dark);
+
+    }
+
+    .logs-container table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .logs-container th,
+    .logs-container td {
+        padding: 5px;
+        text-align: left;
+        border-bottom: 1px solid var(--color-info-light);
+    }
+
+    .logs-container th {
+        background-color: var(--color-primary);
+        color: var(--color-white);
+    }
+
+    .logs-container td {
+        background-color: var(--color-light);
+        color: var(--color-dark);
+
+    }
+
+    .logs-container thead {
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
 </style>
 
 <body>
@@ -153,9 +198,9 @@ $result = $query->get_result();
                     <span class="material-icons-sharp"> event_available </span>
                     <h3>Appointments</h3>
                 </a>
-                <a href="#">
-                    <span class="material-icons-sharp"> mail_outline </span>
-                    <h3>Messages</h3>
+                <a href="reminders.php">
+                    <span class="material-icons-sharp">notifications </span>
+                    <h3>Reminders</h3>
                     <span class="message-count"></span>
                 </a>
                 <a href="logs.php">
@@ -234,9 +279,26 @@ $result = $query->get_result();
                 </div>
             </div>
             <div class="recent-updates">
-                <h2>Logs</h2>
-                <table id="recent-sched--table">
-                </table>
+                <h2>Assistant Logs</h2>
+                <div class="logs-container">
+                    <table id="">
+                        <thead>
+                            <tr>
+                                <th>Account Number</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php while ($log = $logResult->fetch_assoc()) : ?>
+                                <tr>
+                                    <td><?= htmlspecialchars($log['accountNumber']) ?></td>
+                                    <td><?= htmlspecialchars($log['actionDescription']) ?></td>
+                                </tr>
+                            <?php endwhile; ?>
+                        </tbody>
+                    </table>
+                </div>
+
             </div>
 
         </div>

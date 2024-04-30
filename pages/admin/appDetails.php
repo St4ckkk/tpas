@@ -190,7 +190,7 @@
                         <span class="material-icons-sharp"> dashboard </span>
                         <h3>Dashboard</h3>
                     </a>
-                    <a href="users.php" >
+                    <a href="users.php">
                         <span class="material-icons-sharp"> person_outline </span>
                         <h3>Users</h3>
                     </a>
@@ -202,9 +202,9 @@
                         <span class="material-icons-sharp"> event_available </span>
                         <h3>Appointments</h3>
                     </a>
-                    <a href="#">
-                        <span class="material-icons-sharp"> mail_outline </span>
-                        <h3>Messages</h3>
+                    <a href="reminders.php">
+                        <span class="material-icons-sharp">notifications </span>
+                        <h3>Reminders</h3>
                         <span class="message-count"></span>
                     </a>
                     <a href="sched.php">

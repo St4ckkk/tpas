@@ -157,6 +157,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     log_action($con, $row['account_num'], "registered on $currentDateTime", "user");
                 } catch (Exception $e) {
                     echo "<script>alert('Message could not be sent. Mailer Error: {$mail->ErrorInfo}'); window.location.href='index.php';</script>";
+                    $currentDateTime = date('Y-m-d g:i: A');
+                    log_action($con, $row['account_num'], "registered on $currentDateTime", "user");
                 }
             } else {
                 $errors[] = "Error in registration: " . $con->error;

@@ -30,7 +30,7 @@
     $lastUpdatedUsers = $result['lastUpdated'];
     $displayLastUpdatedUsers = $lastUpdatedUsers ? date("F j, Y g:i A", strtotime($lastUpdatedUsers)) : "No updates";
     // Fetch recent appointments
-    $query = $con->prepare("SELECT COUNT(*) AS total, MAX(updatedAt) as lastUpdated FROM reminders");
+    $query = $con->prepare("SELECT COUNT(*) AS total, MAX(updated_at) as lastUpdated FROM reminders");
     $query->execute();
     $result = $query->get_result()->fetch_assoc();
     $totalReminders = $result['total'];
@@ -45,10 +45,8 @@
     // Fetch recent appointments
     $query = $con->prepare("SELECT appointment_id, first_name, last_name, date, appointment_time, status 
 FROM appointments 
-WHERE status = 'Pending' 
-AND (date > CURDATE() OR (date = CURDATE() AND appointment_time <= CURTIME()))
-ORDER BY date ASC, appointment_time ASC
-");
+WHERE status = 'Confirmed'");
+
 
     // Execute the query
     $query->execute();
@@ -73,19 +71,19 @@ ORDER BY date ASC, appointment_time ASC
         a.status IN ('Cancelled') AND s.doctorId = ?
     UNION ALL
     SELECT 
-        r.reminderId AS appointment_id,
+        r.id AS appointment_id,
         '' AS first_name,
         '' AS last_name,
-        r.reminderDate AS datetime,
+        r.date AS datetime,
         r.priority AS status, 
-        r.createdAt AS updatedAt,
+        r.created_at AS updatedAt,
         r.title,
         r.description,
         'reminder' AS type
     FROM 
         reminders r
     WHERE 
-        r.receiverId = ? AND r.receiverType = 'doctor'
+        r.recipient_id = ? AND r.recipient_type = 'doctor'
     ORDER BY 
         datetime DESC
     LIMIT 10
@@ -304,20 +302,20 @@ ORDER BY date ASC, appointment_time ASC
         }
 
 
-        .pending {
+        .status-pending {
             color: orange;
         }
 
-        .confirmed {
+        .status-confirmed {
             color: limegreen;
         }
 
-        .denied,
-        .cancelled {
+        .status-cancelled {
             color: red;
+            /* Ensures cancelled status text is red */
         }
 
-        .processing {
+        .status-processing {
             color: #007bff;
         }
 
@@ -400,11 +398,92 @@ ORDER BY date ASC, appointment_time ASC
         main .insights>div.reminders span {
             background-color: orange;
         }
+
         .bx-show {
             font-size: 16px;
         }
+
         .bx-show:hover {
             color: #0056b3;
+        }
+
+        .header-wrapper {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        #statusFilter {
+            padding: 5px 10px;
+            font-size: 16px;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+
+
+        .no-appointments-message {
+            padding: 20px;
+            margin-top: 20px;
+            background-color: #f9f9f9;
+            text-align: center;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+
+        .bx {
+            vertical-align: middle;
+            margin-right: 10px;
+        }
+
+        .reminder-title {
+            color: orange;
+            /* Set the color for reminder titles */
+            display: flex;
+            align-items: center;
+            /* Align the icon with the text */
+        }
+
+        .reminder-icon {
+            display: inline-block;
+            margin-right: 5px;
+            /* Space between icon and text */
+            font-size: 20px;
+            /* Icon size */
+        }
+
+        .update-title {
+            display: flex;
+            align-items: center;
+        }
+
+        .reminder-icon,
+        .appointment-icon {
+            display: inline-block;
+            margin-right: 5px;
+            font-size: 20px;
+        }
+
+        .modal-status-confirmed {
+            color: limegreen;
+        }
+
+        .modal-status-cancelled {
+            color: red;
+        }
+
+        .modal-status-pending {
+            color: orange;
+        }
+
+        .modal-status-denied {
+            color: #dc3545;
+        }
+
+        .modal-status-unknown {
+            color: grey;
         }
     </style>
 
@@ -500,7 +579,16 @@ ORDER BY date ASC, appointment_time ASC
 
 
                 <div class="recent-orders">
-                    <h2>Upcoming Appointments</h2>
+                    <div class="header-wrapper">
+                        <h1 id="statusHeading">All Appointments</h1>
+                        <select id="statusFilter" onchange="filterAppointments()">
+                            <option value="All">All</option>
+                            <option value="Confirmed">Confirmed</option>
+                            <option value="Pending">Pending</option>
+                            <option value="Cancelled">Cancelled</option>
+                            <option value="Denied">Denied</option>
+                        </select>
+                    </div>
                     <table id="recent-orders--table">
                         <thead>
                             <tr>
@@ -508,41 +596,116 @@ ORDER BY date ASC, appointment_time ASC
                                 <th>Date</th>
                                 <th>Time</th>
                                 <th>Status</th>
+                                <th></th>
                             </tr>
                         </thead>
                         <tbody>
-                            <?php if ($result->num_rows > 0) : ?>
-                                <?php while ($row = $result->fetch_assoc()) : ?>
-                                    <tr>
-                                        <td><?= htmlspecialchars($row['first_name'] . ' ' . $row['last_name']) ?></td>
-                                        <td><?= date("j F, Y", strtotime($row['date'])) ?></td>
-                                        <td><?= date("g:i A", strtotime($row['appointment_time'])) ?></td>
-                                        <td class="status-column <?= $row['status'] === 'Pending' ? 'status-pending' : ($row['status'] === 'Processing' ? 'status-processing' : 'status-cancelled') ?>">
-                                            <?= htmlspecialchars($row['status']) ?>
-                                            <?php if ($row['status'] === 'Approved') : ?>
-                                                <i class="bx bx-check-circle"></i>
-                                            <?php elseif ($row['status'] === 'Denied') : ?>
-                                                <i class="bx bx-block"></i>
-                                            <?php elseif ($row['status'] === 'Pending') : ?>
-                                                <i class="bx bx-time-five"></i>
-                                            <?php endif; ?>
-                                        </td>
-                                        <td><a href="appDetails.php?id=<?= $row['appointment_id'] ?>"><i class="bx bx-show"></i></a></td>
-                                    </tr>
-                                <?php endwhile; ?>
-                            <?php else : ?>
-                                <tr class="no-data">
-                                    <td colspan="5">
-                                        <div class="no-data-content">
-                                            <i class="bx bx-info-circle"></i> No upcoming appointments.
-                                        </div>
-                                    </td>
-                                </tr>
-                            <?php endif; ?>
-
                         </tbody>
                     </table>
+                    <div id="no-appointments-message" class="no-appointments-message" style="display: none;">
+                        <i class="bx bx-info"></i> No appointments available for this status.
+                    </div>
                 </div>
+
+                <script>
+                    document.addEventListener('DOMContentLoaded', function() {
+                        const savedStatus = localStorage.getItem('selectedStatus') || 'All';
+                        document.getElementById('statusFilter').value = savedStatus;
+                        updateStatusHeadingAndTable(savedStatus);
+                    });
+
+                    function filterAppointments() {
+                        const status = document.getElementById('statusFilter').value;
+                        localStorage.setItem('selectedStatus', status);
+                        updateStatusHeadingAndTable(status);
+                    }
+
+                    function updateStatusHeadingAndTable(status) {
+                        const statusHeading = document.getElementById('statusHeading');
+                        statusHeading.textContent = `${status} Appointments`;
+                        fetch(`update-app-table.php?status=${status}`)
+                            .then(response => response.json())
+                            .then(data => displayAppointments(data))
+                            .catch(error => console.error('Error:', error));
+                    }
+
+                    function displayAppointments(appointments) {
+                        const table = document.getElementById('recent-orders--table');
+                        const message = document.getElementById('no-appointments-message');
+                        const tbody = table.querySelector('tbody');
+                        tbody.innerHTML = ''; // Clear existing rows
+
+                        if (!appointments || appointments.length === 0) {
+                            table.style.display = 'none'; // Hide table
+                            message.style.display = 'block'; // Show message
+                            message.textContent = 'No appointments available for this status.';
+                            return;
+                        }
+
+                        // Display table and hide message
+                        table.style.display = '';
+                        message.style.display = 'none';
+
+                        appointments.forEach(appointment => {
+                            const statusInfo = getStatusDetails(appointment.status);
+                            const formattedTime = formatAMPMTime(appointment.appointment_time);
+                            const row = tbody.insertRow();
+                            row.innerHTML = `
+                <td>${appointment.first_name} ${appointment.last_name}</td>
+                <td>${appointment.date}</td>
+                <td>${formattedTime}</td>
+                <td class="${statusInfo.class}">
+                    ${appointment.status} <i class="${statusInfo.icon}"></i>
+                </td>
+                 <td><a href="appDetails.php?id=${appointment.appointment_id}"><i class="bx bx-show"></i></a></td>
+            `;
+                        });
+                    }
+
+                    function getStatusDetails(status) {
+                        const statuses = {
+                            'All': {
+                                class: 'status-all',
+                                icon: 'bx bx-list-ul'
+                            },
+                            'Confirmed': {
+                                class: 'status-confirmed',
+                                icon: 'bx bx-check-circle'
+                            },
+                            'Cancelled': {
+                                class: 'status-cancelled',
+                                icon: 'bx bx-x-circle'
+                            },
+                            'Pending': {
+                                class: 'status-pending',
+                                icon: 'bx bx-time-five'
+                            },
+                            'Denied': {
+                                class: 'status-denied',
+                                icon: 'bx bx-block'
+                            },
+                            'Processing': {
+                                class: 'status-processing',
+                                icon: 'bx bx-loader'
+                            },
+                            'Unknown': {
+                                class: 'status-unknown',
+                                icon: 'bx bx-help-circle'
+                            }
+                        };
+                        return statuses[status] || statuses['Unknown'];
+                    }
+
+                    function formatAMPMTime(time) {
+                        const [hours, minutes] = time.split(':');
+                        let hour = parseInt(hours);
+                        const isPM = hour >= 12;
+                        hour = hour % 12 || 12;
+                        return `${hour}:${minutes.padStart(2, '0')} ${isPM ? 'PM' : 'AM'}`;
+                    }
+                </script>
+
+
             </main>
 
             <div class="right">
@@ -569,6 +732,11 @@ ORDER BY date ASC, appointment_time ASC
                         <?php foreach ($updates as $index => $update) : ?>
                             <div class="update-item" data-index="<?= $index ?>" onclick="showUpdateModal(this.getAttribute('data-index'));">
                                 <h3 class="update-title <?= $update['type'] === 'reminder' ? 'reminder-title' : ''; ?>">
+                                    <?php if ($update['type'] === 'reminder') : ?>
+                                        <i class="bx bxs-bell reminder-icon"></i> <!-- Bell icon for reminders -->
+                                    <?php elseif ($update['type'] === 'appointment') : ?>
+                                        <i class="bx bxs-message-square-dots appointment-icon"></i>
+                                    <?php endif; ?>
                                     <?= $update['type'] === 'appointment' ? "Appointment Update" : "Reminder"; ?>
                                 </h3>
                                 <span class="update-date"><?= date("F j, Y", strtotime($update['datetime'])); ?></span>
@@ -607,13 +775,13 @@ ORDER BY date ASC, appointment_time ASC
                 });
 
                 if (updateData.type === 'appointment') {
-                    const statusClass = updateData.status ? `modal-status ${updateData.status.toLowerCase()}` : 'modal-status unknown';
+                    const statusClass = updateData.status ? `modal-status-${updateData.status.toLowerCase()}` : 'modal-status-unknown';
                     modalContent.innerHTML = `
-            <h3>Appointment Details</h3>
-            <div class="${statusClass} modal-title">${updateData.status || 'No status'}</div>
-            <div class="recipients">${updateData.first_name} ${updateData.last_name}</div>
-            <div class="modal-date">${formattedDate} : ${formattedTime}</div>
-        `;
+        <h3>Appointment Details</h3>
+        <div class="${statusClass} modal-title">${updateData.status || 'No status'}</div>
+        <div class="recipients">${updateData.first_name} ${updateData.last_name}</div>
+        <div class="modal-date">${formattedDate} : ${formattedTime}</div>
+    `;
                 } else if (updateData.type === 'reminder') {
                     const priorityClass = updateData.status ? `priority-${updateData.status.toLowerCase()}` : '';
                     modalContent.innerHTML = `
