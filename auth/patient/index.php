@@ -38,7 +38,6 @@ function log_action($con, $accountNumber, $actionDescription, $userType)
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     if (isset($_POST['login'])) {
-        // Handle login
         $identifier = mysqli_real_escape_string($con, $_POST['identifier']);
         $password = $_POST['password'];
         $sql = strpos($identifier, '@') !== false ?
@@ -55,39 +54,43 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $row = $result->fetch_assoc();
 
         if ($row) {
-            if ($row['accountStatus'] != 'Verified') {
-                $currentDateTime = date('Y-m-d g:i: A');
-                $login_error = 'Your account is not approved yet. Please <a href="contact.html">contact support</a> for more information.';
-                log_action($con, $row['account_num'], "tried to log in but account is not verified on $currentDateTime", "user",);
+            $currentDateTime = date('Y-m-d H:i:s');
+            // First check if the account is locked
+            if (!is_null($row['lock_until']) && strtotime($row['lock_until']) > strtotime($currentDateTime)) {
+                $login_error = 'Your account is currently locked until ' . date('g:i A', strtotime($row['lock_until'])) . '. Please try again after the lock period has expired.';
+                log_action($con, $row['account_num'], "Attempted login while locked out", "user");
             } else {
-                if (password_verify($password, $row['password'])) {
-                    $_SESSION['patientSession'] = $row['patientId'];
-                    $_SESSION['patientAccountNumber'] = $row['account_num'];
-                    $accountNum = $row['account_num'];
-                    $currentDateTime = date('Y-m-d g:i: A');
-                    log_action($con, $row['account_num'], "logged in on $currentDateTime", "user");
-                    if ($logStmt) {
-                        mysqli_stmt_bind_param($logStmt, "sss", $accountNum, $actionDescription, $userType);
-                        if (mysqli_stmt_execute($logStmt)) {
-                        } else {
-                            error_log("Error inserting log: " . mysqli_stmt_error($logStmt));
-                        }
-                        mysqli_stmt_close($logStmt);
-                    } else {
-                        error_log("Error preparing log statement: " . $con->error);
-                    }
-                    header("Location: " . BASE_URL . "userpage.php");
-                    exit();
+                // Check for account verification
+                if ($row['accountStatus'] != 'Verified') {
+                    $login_error = 'Your account is not approved yet. Please <a href="contact.html">contact support</a> for more information.';
+                    log_action($con, $row['account_num'], "Attempted to log in but account is not verified", "user");
                 } else {
-                    $currentDateTime = date('Y-m-d g:i: A');
-                    $login_error = 'Incorrect password. Please try again.';
-                    log_action($con, $row['account_num'], "tried to log in but entered incorrect password on $currentDateTime", "user");
+                    // If account is verified and not locked, proceed to check the password
+                    if (password_verify($password, $row['password'])) {
+                        $con->query("UPDATE tb_patients SET login_attempts = 0, lock_until = NULL WHERE patientId = {$row['patientId']}");
+                        $_SESSION['patientSession'] = $row['patientId'];
+                        $_SESSION['patientAccountNumber'] = $row['account_num'];
+                        log_action($con, $row['account_num'], "Successfully logged in", "user");
+                        header("Location: " . BASE_URL . "userpage.php");
+                        exit();
+                    } else {
+                        // Incorrect password, increment failed attempts
+                        $failedAttempts = $row['login_attempts'] + 1;
+                        if ($failedAttempts >= 5) {
+                            $lockoutTime = date('Y-m-d H:i:s', strtotime("+5 minutes"));
+                            $con->query("UPDATE tb_patients SET login_attempts = $failedAttempts, lock_until = '$lockoutTime' WHERE patientId = {$row['patientId']}");
+                            $login_error = 'Your account has been locked due to too many failed attempts. Please try again in 5 minutes.';
+                        } else {
+                            $con->query("UPDATE tb_patients SET login_attempts = $failedAttempts WHERE patientId = {$row['patientId']}");
+                            $login_error = 'Incorrect password. Please try again.';
+                        }
+                        log_action($con, $row['account_num'], "Failed login attempt due to incorrect password", "user");
+                    }
                 }
             }
         } else {
-            $currentDateTime = date('Y-m-d g:i: A');
             $login_error = 'No account found with those details.';
-            log_action($con, NULL, "user tried to log in but account does not exist on $currentDateTime", "unknown");
+            log_action($con, NULL, "Attempt to login with non-existent account details", "unknown");
         }
     } elseif (isset($_POST['register'])) {
         $firstname = mysqli_real_escape_string($con, trim($_POST['firstname']));
