@@ -638,7 +638,6 @@ WHERE status = 'Confirmed'");
                             return;
                         }
 
-                        // Display table and hide message
                         table.style.display = '';
                         message.style.display = 'none';
 

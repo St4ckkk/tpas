@@ -75,6 +75,12 @@
         font-size: 16px;
     }
 
+    .not-available {
+        background-color: red;
+        color: #fff;
+        cursor: pointer;
+    }
+
     .available-day {
         background-color: limegreen;
         color: #fff;
@@ -85,9 +91,15 @@
         background-color: lime;
         color: #fff;
     }
+
+    .datepicker-dropdown .datepicker-days .table-condensed tbody tr>td.day.not-available:hover {
+        background-color: coral;
+        color: #fff;
+    }
+
     #s {
         color: #3e81ec;
-    
+
     }
 </style>
 
@@ -181,11 +193,18 @@
                             classes: 'available-day',
                             tooltip: 'Doctor is Available'
                         };
+                    } else if (status === 'red') {
+                        return {
+                            classes: 'not-available',
+                            tooltip: 'Doctor is not Available'
+                        };
                     }
                     return {};
                 }
             }).on('changeMonth', function(e) {
-                fetchMonthData(moment(e.date));
+                var monthDate = moment(e.date);
+                console.log("Changing month to: ", monthDate.format('YYYY-MM-DD'));
+                fetchMonthData(monthDate);
             }).on('changeDate', function(e) {
                 // Your existing code to handle date changes
             });

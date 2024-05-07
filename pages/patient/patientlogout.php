@@ -1,5 +1,6 @@
 <?php
 session_start();
+require_once 'timeout.php';
 define('BASE_URL1', '/TPAS/auth/patient/');
 define('BASE_URL2', '/TPAS/pages/patient/');
 if (isset($_GET['logout'])) {

@@ -13,7 +13,29 @@ $selectedDate = isset($_GET['date']) ? $_GET['date'] : null;
 if (empty($selectedDate)) {
     die("<script>alert('Error: No date provided. Please select a valid date.'); window.location.href='userpage.php';</script>");
 }
+$query = "SELECT a.appointment_time, a.endTime, d.doctorLastName
+          FROM appointments a
+          JOIN schedule s ON a.scheduleId = s.scheduleId
+          JOIN doctor d ON s.doctorId = d.id
+          WHERE a.date = ? AND a.status = 'Confirmed'";
+$stmt = $con->prepare($query);
+$stmt->bind_param("s", $selectedDate);
+$stmt->execute();
+$bookedAppointmentsResult = $stmt->get_result();
 
+$bookedAppointments = [];
+while ($appointment = $bookedAppointmentsResult->fetch_assoc()) {
+    // Format time from MySQL (usually in HH:MM:SS format) to AM/PM format
+    $startTimeFormatted = date("g:i A", strtotime($appointment['appointment_time']));
+    $endTimeFormatted = date("g:i A", strtotime($appointment['endTime']));
+
+    $bookedAppointments[] = [
+        'startTime' => $startTimeFormatted,
+        'endTime' => $endTimeFormatted,
+        'doctorLastName' => $appointment['doctorLastName']
+    ];
+}
+$stmt->close();
 $stmt = $con->prepare("SELECT scheduleId, startDate, startTime, endTime FROM schedule WHERE startDate = ?");
 $stmt->bind_param("s", $selectedDate);
 $stmt->execute();
@@ -137,6 +159,7 @@ $con->close();
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/bootstrap-icons.css">
     <!-- Bootstrap CSS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
 
 </head>
@@ -165,13 +188,22 @@ $con->close();
         border-color: #4A90E2;
         box-shadow: 0 0 8px 0 rgba(74, 144, 226, 0.5);
     }
+
+    .list-group-item strong {
+        color: #333;
+    }
+
+    .tags span {
+        color: #4A90E2;
+
+    }
 </style>
 
 <body style="background-color: #fff">
     <div class="header">
         <ul class="left-links">
             <li class="tags brand">
-                <img src="assets/img/cd-logoo.png"> appointment.one
+                <img src="assets/img/cd-logoo.png"> TPA<span>S</span>
             </li>
         </ul>
         <ul class="right-links d-flex list-unstyled">
@@ -184,65 +216,88 @@ $con->close();
     </div>
     <div class="container mt-5">
         <div class="row">
-            <div class="col-md-6 offset-md-3 p-4">
+            <div class="col-md-6">
                 <div class="col-12">
-                    <h1 class="fw-normal text-secondary text-uppercase mb-4">Appointment form</h1>
+                    <h1 class="fw-normal text-secondary text-uppercase mb-4">Appointment Form</h1>
+                    <form method="post">
+                        <div class="row g-3">
+                            <input type="hidden" name="patientId" value="<?php echo htmlspecialchars($userId); ?>">
+                            <div class="col-md-6">
+                                <label for="firstName">First Name:</label>
+                                <input type="text" class="form-control" name="firstName" value="<?php echo htmlspecialchars($firstName); ?>" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="lastName">Last Name:</label>
+                                <input type="text" class="form-control" name="lastName" value="<?php echo htmlspecialchars($lastName); ?>" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="phoneNumber">Phone Number:</label>
+                                <input type="tel" class="form-control" name="phoneNumber" value="<?php echo htmlspecialchars($phoneNumber); ?>" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="email">Email:</label>
+                                <input type="email" class="form-control" name="email" value="<?php echo htmlspecialchars($email); ?>" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="startDate" class="form-label">Date</label>
+                                <input type="text" class="form-control" name="date" value="<?php echo htmlspecialchars($scheduleData['startDate']); ?>" readonly>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="availTime">Available Time: </label>
+                                <small id="startTime" data-time="<?php echo htmlspecialchars($scheduleData['startTime']); ?>"><?php echo htmlspecialchars($displayStartTime); ?></small> :
+                                <small id="endTime" data-time="<?php echo htmlspecialchars($scheduleData['endTime']); ?>"><?php echo htmlspecialchars($displayEndTime); ?></small>
+                                <input type="time" class="form-control" id="appointmentTime" name="appointmentTime" min="<?php echo htmlspecialchars($scheduleData['startTime']); ?>" max="<?php echo htmlspecialchars($scheduleData['endTime']); ?>">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="appointmentType">Reason For Visit</label>
+                                <select class="form-control" name="appointmentType" required>
+                                    <option value="">Select Type</option>
+                                    <option value="consultation">Consultation</option>
+                                    <option value="follow-up">Follow-Up</option>
+                                    <option value="routine-check">Routine Check</option>
+                                    <option value="emergency">Emergency</option>
+                                </select>
+                            </div>
+                            <div class="col-12">
+                                <label for="msg">Message</label>
+                                <textarea class="form-control" placeholder="Message (Optional symptoms, questions, etc.)" name="message"></textarea>
+                            </div>
+
+                            <div class="col-12 mt-5">
+                                <button type="submit" name="submit" class="btn btn-primary float-end">Book Appointment</button>
+                                <button type="button" class="btn btn-outline-secondary float-end me-2">Cancel</button>
+                            </div>
+                        </div>
+                    </form>
                 </div>
-                <form method="post">
-                    <div class="row g-3">
-                        <input type="hidden" name="patientId" value="<?php echo htmlspecialchars($userId); ?>">
-                        <div class="col-md-6">
-                            <label for="firstName">First Name:</label>
-                            <input type="text" class="form-control" name="firstName" value="<?php echo htmlspecialchars($firstName); ?>" required>
-                        </div>
-                        <div class="col-md-6">
-                            <label for="lastName">Last Name:</label>
-                            <input type="text" class="form-control" name="lastName" value="<?php echo htmlspecialchars($lastName); ?>" required>
-                        </div>
-                        <div class="col-md-6">
-                            <label for="phoneNumber">Phone Number:</label>
-                            <input type="tel" class="form-control" name="phoneNumber" value="<?php echo htmlspecialchars($phoneNumber); ?>" required>
-                        </div>
-                        <div class="col-md-6">
-                            <label for="email">Email:</label>
-                            <input type="email" class="form-control" name="email" value="<?php echo htmlspecialchars($email); ?>" required>
-                        </div>
-                        <div class="col-md-6">
-                            <label for="startDate" class="form-label">Date</label>
-                            <input type="text" class="form-control" name="date" value="<?php echo htmlspecialchars($scheduleData['startDate']); ?>" readonly>
-                        </div>
-                        <div class="col-md-6">
-                            <label for="availTime">Available Time: </label>
-                            <small id="startTime" data-time="<?php echo htmlspecialchars($scheduleData['startTime']); ?>"><?php echo htmlspecialchars($displayStartTime); ?></small> :
-                            <small id="endTime" data-time="<?php echo htmlspecialchars($scheduleData['endTime']); ?>"><?php echo htmlspecialchars($displayEndTime); ?></small>
-                            <input type="time" class="form-control" id="appointmentTime" name="appointmentTime" min="<?php echo htmlspecialchars($scheduleData['startTime']); ?>" max="<?php echo htmlspecialchars($scheduleData['endTime']); ?>">
-
-                        </div>
-                        <div class="col-md-6">
-                            <label for="appointmentType">Reason For Visit</label>
-                            <select class="form-control" name="appointmentType" required>
-                                <option value="">Select Type</option>
-                                <option value="consultation">Consultation</option>
-                                <option value="follow-up">Follow-Up</option>
-                                <option value="routine-check">Routine Check</option>
-                                <option value="emergency">Emergency</option>
-                            </select>
-                        </div>
-                        <div class="col-12">
-                            <label for="msg">Message</label>
-                            <textarea class="form-control" placeholder="Message (Optional symptoms, questions, etc.)" name="message"></textarea>
-                        </div>
-
-                        <div class="col-12 mt-5">
-                            <button type="submit" name="submit" class="btn btn-primary float-end">Book Appointment</button>
-                            <button type="button" class="btn btn-outline-secondary float-end me-2">Cancel</button>
-                        </div>
-                    </div>
-                </form>
+            </div>
+            <div class="col-md-6">
+                <h1 class="fw-normal text-secondary text-uppercase mb-4">Booked Appointments</h1>
+                <div class="list-group" id="bookedTimesList">
+                </div>
             </div>
         </div>
     </div>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            var bookedAppointments = <?php echo json_encode($bookedAppointments); ?>;
 
+            var listContainer = document.getElementById('bookedTimesList');
+            bookedAppointments.forEach(function(appointment) {
+                var startTime = appointment.startTime; // Already formatted in PHP
+                var endTime = appointment.endTime; // Already formatted in PHP
+                var doctorName = appointment.doctorLastName;
+
+                var listItem = document.createElement('a');
+                listItem.className = 'list-group-item list-group-item-action list-group-item-primary';
+                listItem.innerHTML = '<strong>' + startTime + ' to ' + endTime + '</strong> - Dr. ' + doctorName + ' (Booked/Confirmed)';
+
+                listContainer.appendChild(listItem);
+            });
+        });
+    </script>
+    <!-- Correct order of scripts at the end of your body tag -->
+    
     <script src="assets/js/jquery.js"></script>
     <script src="assets/js/date/bootstrap-datepicker.js"></script>
     <script src="assets/js/bootstrap.min.js"></script>

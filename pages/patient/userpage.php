@@ -1,14 +1,14 @@
 <?php
 session_start();
-require_once 'assets/conn/dbconnect.php'; // Ensures the script fails if the file is not found.
-
+require_once 'assets/conn/dbconnect.php';
+require_once 'timeout.php';
 define('BASE_URL', '/TPAS/auth/patient/');
+
 if (!isset($_SESSION['patientSession'])) {
     header("Location: " . BASE_URL . "index.php");
     exit;
 }
 
-// Initialize variables and functions.
 $usersession = $_SESSION['patientSession'];
 $userRow = getUserData($con, $usersession);
 
@@ -37,12 +37,11 @@ if (!$userRow) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="keywords" content="calendar, events, reminders, javascript, html, css, open source coding" />
     <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
-    <link href='https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.10.0/fullcalendar.min.css' rel='stylesheet' />
-    <script src='https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js'></script>
-    <script src='https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js'></script>
-    <script src='https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.10.0/fullcalendar.min.js'></script>
+    <link rel="stylesheet" href="node_modules/fullcalendar/dist/fullcalendar.min.css">
     <link rel="shortcut icon" href="assets/favicon/favicon (5).ico" type="image/x-icon">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
+
 
     <link rel="stylesheet" href="assets/css/style.css" />
     <title>TPAS - Calendar</title>
@@ -54,8 +53,8 @@ if (!$userRow) {
         margin-top: 10px;
     }
 
-    
-    
+
+
 
     .fc-day-grid-event .fc-content {
         color: black;
@@ -77,6 +76,11 @@ if (!$userRow) {
 
     .available-appointment {
         background-color: limegreen !important;
+        cursor: pointer;
+    }
+
+    .not-available-appointment {
+        background-color: red !important;
         cursor: pointer;
     }
 
@@ -130,9 +134,10 @@ if (!$userRow) {
     .container {
         margin-top: 50px;
     }
+
     #s {
         color: #3e81ec;
-    
+
     }
 </style>
 
@@ -175,8 +180,11 @@ if (!$userRow) {
 
 
 
-
+    <script src='https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js'></script>
+    <script src='node_modules/moment/moment.js'></script>
+    <script src='node_modules/fullcalendar/dist/fullcalendar.min.js'></script>
     <script src="script.js"></script>
+    <script src="timeout.js"></script>
     <script>
         $(function() {
             $('[data-toggle="tooltip"]').tooltip();
@@ -194,13 +202,20 @@ if (!$userRow) {
                         dayRender: function(date, cell) {
                             if (data.availableDays.includes(date.format('YYYY-MM-DD'))) {
                                 cell.addClass('available-appointment');
+                            } else if (data.notAvailableDays.includes(date.format('YYYY-MM-DD'))) {
+                                cell.addClass('not-available-appointment');
                             }
                         },
                         events: 'fetch-schedule.php',
                         eventLimit: true,
                         displayEventTime: false,
                         dayClick: function(date, jsEvent, view) {
-                            window.location.href = `make-appointment.php?date=${date.format('YYYY-MM-DD')}`;
+                            var dateStr = date.format('YYYY-MM-DD');
+                            if (data.availableDays.includes(dateStr)) {
+                                window.location.href = `make-appointment.php?date=${dateStr}`;
+                            } else {
+                                alert("This date is not available for appointments.");
+                            }
                         }
                     });
                 });

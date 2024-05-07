@@ -3,7 +3,7 @@ session_start();
 define('BASE_URL', '/TPAS/pages/patient/');
 require_once 'assets/conn/dbconnect.php';
 
-// It's good to set the header early to avoid issues with output buffering
+// Set the header early to avoid issues with output buffering
 header('Content-Type: application/json');
 
 $query = "SELECT
@@ -29,14 +29,19 @@ if (!$result) {
 $events = [];
 
 while ($row = $result->fetch_assoc()) {
-  $fullStart = date('Y-m-d H:i:s', strtotime($row['startDate'] . ' ' . $row['startTime']));
+  $fullStart = date('Y-m-d\TH:i:s', strtotime($row['startDate'] . ' ' . $row['startTime']));
+  
+  // Determine color based on the status
+  $color = ($row['status'] === 'available') ? 'limegreen' : 'red';
+
   $events[] = [
     'id' => $row['scheduleId'],
     'title' => $row['doctorName'],
     'start' => $fullStart,
     'allDay' => false, 
-    'color' => 'limegreen'
+    'color' => $color // Use the determined color
   ];
 }
 
 echo json_encode($events);
+?>

@@ -2,18 +2,48 @@
 // Start session and include database connection
 session_start();
 require_once 'assets/conn/dbconnect.php';
+
+// Check if user is authorized
 if (!isset($_SESSION['patientSession'])) {
     echo json_encode(['error' => 'Unauthorized access']);
     exit;
 }
-$query = "SELECT DISTINCT startDate FROM schedule WHERE status = 'available'";
-$result = $con->query($query);
-if ($result === false) {
-    echo json_encode(['error' => $con->error]);
+
+// Prepare the query to select both available and not-available dates
+$query = "SELECT startDate, status FROM schedule WHERE status IN ('available', 'not-available')";
+$stmt = $con->prepare($query);
+
+// Check if the preparation of the statement failed
+if ($stmt === false) {
+    echo json_encode(['error' => 'Prepare error: ' . $con->error]);
     exit;
 }
-$availableDays = [];
-while ($row = $result->fetch_assoc()) {
-    $availableDays[] = $row['startDate'];
+
+// Execute the statement
+$stmt->execute();
+$result = $stmt->get_result();
+
+// Check for errors in execution
+if ($result === false) {
+    echo json_encode(['error' => 'Execution error: ' . $con->error]);
+    exit;
 }
-echo json_encode(['availableDays' => $availableDays]);
+
+// Fetch results and categorize them by status
+$availableDays = [];
+$notAvailableDays = [];
+
+while ($row = $result->fetch_assoc()) {
+    if ($row['status'] === 'available') {
+        $availableDays[] = $row['startDate'];
+    } else if ($row['status'] === 'not-available') {
+        $notAvailableDays[] = $row['startDate'];
+    }
+}
+
+// Output the days categorized by status
+echo json_encode([
+    'availableDays' => $availableDays,
+    'notAvailableDays' => $notAvailableDays
+]);
+?>

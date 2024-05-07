@@ -10,19 +10,19 @@ if (!isset($_SESSION['patientSession'])) {
 $userId = $_SESSION['patientSession'];
 $stmt = $con->prepare("
     SELECT 
+        a.appointment_id AS appointment_id,
         a.date, 
         a.appointment_time, 
         a.endTime, 
         a.appointment_type, 
         a.status,
-       d.doctorLastName AS doctorName
+        d.doctorLastName AS doctorName
     FROM appointments AS a
     JOIN schedule AS s ON a.scheduleId = s.scheduleId
     JOIN doctor AS d ON s.doctorId = d.id
     WHERE a.patientId = ?
     ORDER BY a.date DESC
 ");
-
 $stmt->bind_param("i", $userId);
 $stmt->execute();
 $result = $stmt->get_result();
@@ -32,6 +32,7 @@ while ($row = $result->fetch_assoc()) {
     $appointments[] = $row;
 }
 $stmt->close();
+
 ?>
 
 
@@ -54,6 +55,8 @@ $stmt->close();
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/bootstrap-icons.css">
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Bundle JS (includes Popper) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
 
 </head>
 <style>
@@ -112,9 +115,10 @@ $stmt->close();
         font-size: 1.5rem;
         text-align: center;
     }
+
     .tags span {
         color: #3e81ec;
-    
+
     }
 </style>
 
@@ -144,6 +148,7 @@ $stmt->close();
                     <th>Reason</th>
                     <th>Doctor</th>
                     <th>Status</th>
+                    <th>Actions</th>
                 </tr>
             </thead>
             <tbody>
@@ -156,6 +161,13 @@ $stmt->close();
                             <td><?= htmlspecialchars($appointment['appointment_type']); ?></td>
                             <td><?= htmlspecialchars($appointment['doctorName']); ?></td>
                             <td><?= ucfirst($appointment['status']); ?></td>
+                            <td>
+                                <?php if ($appointment['status'] == 'Pending') : ?>
+                                    <button onclick="cancelAppointment(<?= $appointment['appointment_id']; ?>)" class="btn btn-danger">Cancel</button>
+                                    <a href="reschedule.php?appointment_id=<?= $appointment['appointment_id']; ?>" class="btn btn-primary">Reschedule</a>
+
+                                <?php endif; ?>
+                            </td>
                         </tr>
                     <?php endforeach; ?>
                 <?php else : ?>
@@ -166,13 +178,16 @@ $stmt->close();
             </tbody>
         </table>
     </div>
-
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>>
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script> <!-- Optional: jQuery, if you're using Bootstrap's bundle that depends on jQuery -->
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.min.js"></script>
     <script src="assets/js/jquery.js"></script>
     <script src="assets/js/date/bootstrap-datepicker.js"></script>
     <script src="assets/js/bootstrap.min.js"></script>
     <script src="assets/js/main.js"> </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
+
+
 </body>
 
 </html>
