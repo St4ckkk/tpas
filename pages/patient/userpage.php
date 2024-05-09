@@ -152,7 +152,7 @@ if (!$userRow) {
                         <span class="company-name ml-2">TPA<span id="s">S</span></span>
                     </div>
                     <ul class="right-links d-flex list-unstyled">
-                        <li class="mx-2"><a href="profile"><i class="fas fa-user"></i><span class="icon-label">Profile</span></a></li>
+                        <li class="mx-2"><a href="profile.php"><i class="fas fa-user"></i><span class="icon-label">Profile</span></a></li>
                         <li class="mx-2"><a href="appointment.php"><i class="fas fa-calendar-alt"></i><span class="icon-label">History</span></a></li>
                         <li class="mx-2"><a href="inbox.php"><i class="fas fa-inbox"></i><span class="icon-label">Inbox</span></a></li>
                         <li class="mx-2"><a href="patientlogout.php?logout"><i class="fas fa-sign-out-alt"></i><span class="icon-label">Logout</span></a></li>
