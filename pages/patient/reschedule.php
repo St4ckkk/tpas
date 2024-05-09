@@ -1,6 +1,6 @@
 <?php
 session_start();
-require_once 'assets/conn/dbconnect.php'; // Database connection
+require_once 'assets/conn/dbconnect.php'; 
 
 if (!isset($_SESSION['patientSession'])) {
     header("Location: index.php");
@@ -29,8 +29,7 @@ if ($isReschedule) {
     $selectedDate = $appointmentDetails['date'];
     $stmt->close();
 } else {
-    // Assume today's date or a selected date from a date picker
-    $selectedDate = date('Y-m-d'); // This should be dynamic based on user selection
+    $selectedDate = date('Y-m-d');
 }
 
 $query = "SELECT a.appointment_time, a.endTime, d.doctorLastName
