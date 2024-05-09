@@ -55,7 +55,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
         if ($row) {
             $currentDateTime = date('Y-m-d H:i:s');
-            // First check if the account is locked
             if (!is_null($row['lock_until']) && strtotime($row['lock_until']) > strtotime($currentDateTime)) {
                 $currentDateTime = date('Y-m-d g:i A');
                 $login_error = 'Your account is currently locked until ' . date('g:i A', strtotime($row['lock_until'])) . '. Please try again after the lock period has expired.';
@@ -76,7 +75,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                         header("Location: " . BASE_URL . "userpage.php");
                         exit();
                     } else {
-                        // Incorrect password, increment failed attempts
+             
                         $failedAttempts = $row['login_attempts'] + 1;
                         if ($failedAttempts >= 5) {
 
