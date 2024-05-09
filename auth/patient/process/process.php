@@ -65,7 +65,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     $login_error = 'Your account is not approved yet. Please <a href="contact.html">contact support</a> for more information.';
                     log_action($con, $row['account_num'], "Attempted to log in but account is not verified on $currentDateTime", "user");
                 } else {
-      
+                    // If account is verified and not locked, proceed to check the password
                     if (password_verify($password, $row['password'])) {
                         $currentDateTime = date('Y-m-d g:i A');
                         $con->query("UPDATE tb_patients SET login_attempts = 0, lock_until = NULL WHERE patientId = {$row['patientId']}");
