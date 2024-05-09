@@ -273,8 +273,7 @@ WHERE status = 'Confirmed'");
             font-size: 24px;
             /* Larger and bolder */
             color: #333;
-            margin-bottom: 8px;
-            /* More space below the title */
+            margin-bottom: 8px
         }
 
         .modal-description {
@@ -282,7 +281,6 @@ WHERE status = 'Confirmed'");
             color: #555;
             margin-top: 5px;
             margin-bottom: 10px;
-            /* Additional spacing for clarity */
         }
 
         .modal-priority {
@@ -296,7 +294,6 @@ WHERE status = 'Confirmed'");
             color: #666;
             text-align: right;
             margin-top: auto;
-            /* Align date to the bottom of the modal content */
         }
 
 
@@ -314,6 +311,9 @@ WHERE status = 'Confirmed'");
 
         .status-processing {
             color: #007bff;
+        }
+        .status-reschedule {
+            color: #0056b3;
         }
 
         .low,
@@ -682,6 +682,10 @@ WHERE status = 'Confirmed'");
                             'Processing': {
                                 class: 'status-processing',
                                 icon: 'bx bx-loader'
+                            },
+                            'Reschedule': {
+                                class: 'status-reschedule',
+                                icon: 'bx bx-calendar'
                             },
                             'Unknown': {
                                 class: 'status-unknown',

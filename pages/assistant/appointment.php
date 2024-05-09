@@ -293,7 +293,9 @@
         .status-processing {
             color: blue;
         }
-
+        .status-reschedule {
+            color: blue;
+        }
         .status-unknown {
             color: grey;
         }
@@ -390,6 +392,7 @@
                                 <option value="Pending">Pending</option>
                                 <option value="Cancelled">Cancelled</option>
                                 <option value="Denied">Denied</option>
+                                <option value="Reschedule">Reschedule</option>
                             </select>
                             <table>
                                 <thead>
@@ -470,14 +473,14 @@
 
             function updateUserStatus(accountNum, newStatus) {
                 const data = JSON.stringify({
-                    account_num: accountNum, // ensure the key name matches the expected PHP key
-                    accountStatus: newStatus // ensure the key name matches the expected PHP key
+                    account_num: accountNum, 
+                    accountStatus: newStatus 
                 });
 
                 fetch('update-status.php', {
                         method: 'POST',
                         headers: {
-                            'Content-Type': 'application/json', // correct header to indicate JSON body
+                            'Content-Type': 'application/json',
                         },
                         body: data
                     })
@@ -498,7 +501,6 @@
         </script>
         <script>
             document.addEventListener('DOMContentLoaded', function() {
-                // Load and set the initial status from local storage or default to 'All'
                 const savedStatus = localStorage.getItem('selectedStatus') || 'All';
                 document.getElementById('statusFilter').value = savedStatus;
                 updateStatusHeadingAndTable(savedStatus);
@@ -506,7 +508,7 @@
 
             function filterAppointments() {
                 const status = document.getElementById('statusFilter').value;
-                localStorage.setItem('selectedStatus', status); // Save to local storage
+                localStorage.setItem('selectedStatus', status);
                 updateStatusHeadingAndTable(status);
             }
 
@@ -516,7 +518,7 @@
                 const statusDetails = getStatusDetails(status);
 
                 statusHeading.textContent = `${status} Appointments`;
-                statusIcon.className = statusDetails.iconClass; // Update the icon in the header
+                statusIcon.className = statusDetails.iconClass; 
                 fetch(`fetchDiffAppointments.php?status=${status}`)
                     .then(response => response.json())
                     .then(data => displayAppointments(data))
@@ -525,7 +527,7 @@
 
             function displayAppointments(appointments) {
                 const tbody = document.querySelector('table tbody');
-                tbody.innerHTML = ''; // Clear existing rows
+                tbody.innerHTML = ''; 
                 appointments.forEach(appointment => {
                     const statusInfo = getStatusDetails(appointment.status);
                     const formattedTime = formatAMPMTime(appointment.appointment_time);
@@ -566,6 +568,10 @@
                     'Processing': {
                         class: 'status-processing',
                         iconClass: 'bx bx-loader'
+                    },
+                    'Reschedule': {
+                        class: 'status-reschedule',
+                        iconClass: 'bx bx-calendar'
                     },
                     'Unknown': {
                         class: 'status-unknown',

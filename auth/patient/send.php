@@ -16,7 +16,7 @@ require './PHPMailer/src/SMTP.php';
 
 
 
-// Ensure that data is only processed on POST
+
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $name = isset($_POST['name']) ? $_POST['name'] : '';
     $account_num = isset($_POST['accountNumber']) ? $_POST['accountNumber'] : '';

@@ -99,11 +99,14 @@ $stmt->close();
 
     .status-cancelled {
         background-color: red;
-        /* Note: lightred is not a valid color, you might want to use a hex code or 'lightcoral' */
     }
 
     .status-denied {
         background-color: red;
+    }
+
+    .status-reschedule{
+        background-color: #3e81ec;
     }
 
     td {

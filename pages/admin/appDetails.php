@@ -68,6 +68,10 @@
             color: limegreen;
         }
 
+        .status-column.status-reschedule {
+            color: #007bff;
+        }
+
         th {
             font-weight: bold;
         }
@@ -242,7 +246,7 @@
                                 <td><?= date("g:i A", strtotime($appointmentDetails['appointment_time'])) ?></td>
                                 <td><?= $appointmentDetails['appointment_type'] ?></td>
                                 <td><?= $appointmentDetails['message'] ?></td>
-                                <td class="status-column <?= $appointmentDetails['status'] === 'Pending' ? 'status-pending' : ($appointmentDetails['status'] === 'Processing' ? 'status-processing' : ($appointmentDetails['status'] === 'Confirmed' ? 'status-confirmed' : ($appointmentDetails['status'] === 'Denied' ? 'status-denied' : ($appointmentDetails['status'] === 'Cancelled' ? 'status-cancelled' : ($appointmentDetails['status'] === 'Completed' ? 'status-completed' : ''))))) ?>">
+                                <td class="status-column <?= $appointmentDetails['status'] === 'Pending' ? 'status-pending' : ($appointmentDetails['status'] === 'Processing' ? 'status-processing' : ($appointmentDetails['status'] === 'Confirmed' ? 'status-confirmed' : ($appointmentDetails['status'] === 'Denied' ? 'status-denied' : ($appointmentDetails['status'] === 'Cancelled' ? 'status-cancelled' : ($appointmentDetails['status'] === 'Completed' ? 'status-completed' : ($appointmentDetails['status'] === 'Reschedule' ? 'status-reschedule' : '')))))) ?>">
                                     <?= htmlspecialchars($appointmentDetails['status']) ?>
                                     <?php if ($appointmentDetails['status'] === 'Confirmed') : ?>
                                         <i class="bx bx-check-circle"></i>
@@ -255,7 +259,9 @@
                                     <?php elseif ($appointmentDetails['status'] === 'Cancelled') : ?>
                                         <i class="bx bx-x-circle"></i>
                                     <?php elseif ($appointmentDetails['status'] === 'Completed') : ?>
-                                        <i class="bx bx-badge-check"></i> <!-- Example icon for 'Completed' -->
+                                        <i class="bx bx-badge-check"></i>
+                                    <?php elseif ($appointmentDetails['status'] === 'Reschedule') : ?>
+                                        <i class="bx bx-calendar"></i>
                                     <?php endif; ?>
                                 </td>
 

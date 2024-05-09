@@ -70,6 +70,7 @@ if ($result->num_rows > 0) {
 }
 $stmt->close();
 // Handling form submission
+// Handling form submission
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['submit'])) {
     $firstName = trim($_POST['firstName']);
     $lastName = trim($_POST['lastName']);
@@ -79,25 +80,27 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['submit'])) {
     $appointmentTime = trim($_POST['appointmentTime']);
     $appointmentType = trim($_POST['appointmentType']);
     $message = trim($_POST['message']);
+    $newStatus = 'Reschedule';  // Default status for new and rescheduled appointments
 
     if ($isReschedule) {
         // Update existing appointment
-        $stmt = $con->prepare("UPDATE appointments SET first_name=?, last_name=?, phone_number=?, email=?, date=?, appointment_time=?, appointment_type=?, message=? WHERE appointment_id=?");
-        $stmt->bind_param("ssssssssi", $firstName, $lastName, $phoneNumber, $email, $date, $appointmentTime, $appointmentType, $message, $appointmentId);
+        $stmt = $con->prepare("UPDATE appointments SET first_name=?, last_name=?, phone_number=?, email=?, date=?, appointment_time=?, appointment_type=?, message=?, status=? WHERE appointment_id=?");
+        $stmt->bind_param("sssssssssi", $firstName, $lastName, $phoneNumber, $email, $date, $appointmentTime, $appointmentType, $message, $newStatus, $appointmentId);
     } else {
         // Insert new appointment
-        $stmt = $con->prepare("INSERT INTO appointments (patientId, first_name, last_name, phone_number, email, date, appointment_time, appointment_type, message) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
-        $stmt->bind_param("issssssss", $userId, $firstName, $lastName, $phoneNumber, $email, $date, $appointmentTime, $appointmentType, $message);
+        $stmt = $con->prepare("INSERT INTO appointments (patientId, first_name, last_name, phone_number, email, date, appointment_time, appointment_type, message, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        $stmt->bind_param("isssssssss", $userId, $firstName, $lastName, $phoneNumber, $email, $date, $appointmentTime, $appointmentType, $message, $newStatus);
     }
 
     if ($stmt->execute()) {
-        echo "<script>alert('Appointment successfully scheduled.'); window.location.href='userpage.php';</script>";
+        echo "<script>alert('Appointment successfully scheduled with status pending.'); window.location.href='userpage.php';</script>";
     } else {
         echo "<script>alert('Error scheduling appointment: {$stmt->error}');</script>";
     }
     $stmt->close();
 }
 $con->close();
+
 ?>
 
 <!DOCTYPE html>
@@ -172,7 +175,7 @@ $con->close();
                             </div>
                             <div class="col-md-6">
                                 <label for="date">Date:</label>
-                                <input type="text" class="form-control" id="datepicker">
+                                <input type="text" name="date" class="form-control" id="datepicker">
                             </div>
                             <div class="col-md-6">
                                 <label for="availTime">Available Time: </label>
