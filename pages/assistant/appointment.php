@@ -29,7 +29,8 @@
         <link rel="stylesheet" href="node_modules/boxicons/css/boxicons.css">
         <link rel="stylesheet" href="dashboard.css">
         <link rel="shortcut icon" href="assets/favicon/tpass.ico" type="image/x-icon">
-
+        <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+        <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/css/bootstrap-datepicker.min.css" rel="stylesheet">
         <title>Dashboard</title>
     </head>
     <style>
@@ -293,9 +294,11 @@
         .status-processing {
             color: blue;
         }
+
         .status-reschedule {
             color: blue;
         }
+
         .status-unknown {
             color: grey;
         }
@@ -315,7 +318,23 @@
             font-size: 0.7rem;
             margin-left: 5px;
         }
-    </style>
+
+        body {
+            background: var(--grey);
+            overflow-x: hidden;
+        }
+
+        .breadcrumb {
+            background: var(--grey);
+        }
+
+        .slash {
+            color: var(--dark);
+        }
+
+        .sidebar li a {
+            text-decoration: none;
+        }
     </style>
 
     <body>
@@ -370,7 +389,7 @@
                             <li><a href="#">
                                     Appointments List
                                 </a></li>
-                            /
+                            <span class="slash">/</span>
                             <li><a href="#" class="active">Appointments</a></li>
 
                         </ul>
@@ -429,6 +448,9 @@
         </div>
 
         <script src="scripts.js"></script>
+        <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/js/bootstrap-datepicker.min.js"></script>
         <script>
             var currentAccountNum = null;
             var currentStatus = null;
@@ -473,8 +495,8 @@
 
             function updateUserStatus(accountNum, newStatus) {
                 const data = JSON.stringify({
-                    account_num: accountNum, 
-                    accountStatus: newStatus 
+                    account_num: accountNum,
+                    accountStatus: newStatus
                 });
 
                 fetch('update-status.php', {
@@ -488,7 +510,7 @@
                     .then(data => {
                         if (data.success) {
                             alert("Status updated successfully.");
-                            window.location.reload(); 
+                            window.location.reload();
                         } else {
                             alert("Failed to update status: " + data.message);
                         }
@@ -518,7 +540,7 @@
                 const statusDetails = getStatusDetails(status);
 
                 statusHeading.textContent = `${status} Appointments`;
-                statusIcon.className = statusDetails.iconClass; 
+                statusIcon.className = statusDetails.iconClass;
                 fetch(`fetchDiffAppointments.php?status=${status}`)
                     .then(response => response.json())
                     .then(data => displayAppointments(data))
@@ -527,7 +549,7 @@
 
             function displayAppointments(appointments) {
                 const tbody = document.querySelector('table tbody');
-                tbody.innerHTML = ''; 
+                tbody.innerHTML = '';
                 appointments.forEach(appointment => {
                     const statusInfo = getStatusDetails(appointment.status);
                     const formattedTime = formatAMPMTime(appointment.appointment_time);

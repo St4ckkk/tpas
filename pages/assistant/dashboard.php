@@ -17,12 +17,21 @@ include_once('includes/dashboard.php');
     <title>Dashboard - Assistant</title>
 </head>
 <style>
-    main {
-        background-color: #eeeeee;
-        height: 100vh;
+    body {
+        background: var(--grey);
+        overflow-x: hidden;
     }
 
-    .sidebar li a{
+    .breadcrumb {
+        background: var(--grey);
+    }
+    .slash{
+        color:var(--dark);
+    }
+
+   
+
+    .sidebar li a {
         text-decoration: none;
     }
 
@@ -344,6 +353,7 @@ include_once('includes/dashboard.php');
         <ul class="side-menu">
             <li class="active"><a href="dashboard.php"><i class='bx bxs-dashboard'></i>Dashboard</a></li>
             <li><a href="appointment.php"><i class='bx bx-calendar-check'></i>Appointments</a></li>
+            <li><a href="profile.php"><i class='bx bx-user'></i>Profile</a></li>
         </ul>
         <ul class="side-menu">
             <li>
@@ -385,7 +395,7 @@ include_once('includes/dashboard.php');
                         <li><a href="#">
                                 Home
                             </a></li>
-                        /
+                        <span class="slash">/</span>
                         <li><a href="#" class="active">Dashboard</a></li>
                     </ul>
                 </div>
