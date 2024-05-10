@@ -384,7 +384,7 @@
                 <div class="bottom-data">
                     <div class="orders">
                         <div class="header">
-                            <i id="statusIcon" class='bx bx-badge-check'></i> <!-- Icon element with a placeholder class -->
+                            <i id="statusIcon" class='bx bx-badge-check'></i>
                             <h3 id="statusHeading">All Appointments</h3>
                             <select id="statusFilter" onchange="filterAppointments()">
                                 <option value="All">All</option>
@@ -488,7 +488,7 @@
                     .then(data => {
                         if (data.success) {
                             alert("Status updated successfully.");
-                            window.location.reload(); // Refresh or redirect as necessary
+                            window.location.reload(); 
                         } else {
                             alert("Failed to update status: " + data.message);
                         }
@@ -559,7 +559,7 @@
                     },
                     'Pending': {
                         class: 'status-pending',
-                        iconClass: 'bx bx-time-five'
+                        iconClass: 'bx bx-loader-circle'
                     },
                     'Denied': {
                         class: 'status-denied',
@@ -571,7 +571,7 @@
                     },
                     'Reschedule': {
                         class: 'status-reschedule',
-                        iconClass: 'bx bx-calendar'
+                        iconClass: 'bx bx-time'
                     },
                     'Unknown': {
                         class: 'status-unknown',

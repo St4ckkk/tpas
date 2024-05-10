@@ -1,141 +1,5 @@
 <?php
-session_start();
-include_once 'assets/conn/dbconnect.php';
-// Initialize counts
-define('BASE_URL', '/TPAS/auth/assistant/');
-if (!isset($_SESSION['assistantSession'])) {
-    header("Location: " . BASE_URL . "index.php");
-    exit();
-}
-
-$assistantId = $_SESSION['assistantSession'];
-function getCount($con, $tableName, $condition = '', $params = [], $types = '')
-{
-    $query = "SELECT COUNT(*) AS count FROM $tableName";
-    if ($condition) {
-        $query .= " WHERE $condition";
-    }
-    $stmt = $con->prepare($query);
-    if (!empty($params) && !empty($types)) {
-        $stmt->bind_param($types, ...$params);
-    }
-    $stmt->execute();
-    $result = $stmt->get_result();
-    $row = $result->fetch_assoc();
-
-    $stmt->close();
-    return $row['count'];
-}
-
-$confirmedCount = getCount($con, "appointments", "status = ?", ['Confirmed'], 's');
-$pendingCount = getCount($con, "appointments", "status = ?", ['Pending'], 's');
-$pendingOrProcessingCount = getCount($con, "appointments", "(status = ? OR status = ?)", ['Pending', 'Processing'], 'ss');
-$canceledCount = getCount($con, "appointments", "status = ?", ['Cancelled'], 's');
-$totalAppointments = $confirmedCount + $pendingOrProcessingCount;
-
-// Fetch assistant details
-$query = $con->prepare("SELECT firstName, lastName FROM assistants WHERE assistantId = ?");
-$query->bind_param("i", $assistantId);
-$query->execute();
-$result = $query->get_result();
-$assistant = $result->fetch_assoc();
-
-if (!$assistant) {
-    echo 'Error fetching assistant details.';
-    exit;
-}
-function getAssistantReminderCount($con, $assistantId)
-{
-    $query = "SELECT COUNT(*) AS count FROM reminders WHERE id = ? AND recipient_type = 'assistant'";
-    $stmt = $con->prepare($query);
-    if ($stmt === false) {
-        die("MySQL prepare error: " . $con->error);
-    }
-    $stmt->bind_param("i", $assistantId);
-    if (!$stmt->execute()) {
-        die("Execution failed: " . $stmt->error);
-    }
-    $result = $stmt->get_result();
-    $row = $result->fetch_assoc();
-    $stmt->close();
-    return $row['count'];
-}
-
-$reminderCount = getAssistantReminderCount($con, $assistantId);
-
-// Function to get counts from database
-
-function getUpcomingAppointments($con)
-{
-    $appointments = [];
-    $query = $con->prepare("SELECT first_name, last_name, date, status FROM appointments WHERE status='Confirmed'");
-    $query->execute();
-    $result = $query->get_result();
-    while ($row = $result->fetch_assoc()) {
-        $appointments[] = $row;
-    }
-    return $appointments;
-}
-
-$upcomingAppointments = getUpcomingAppointments($con);
-$updatesQuery = $con->prepare("
-    SELECT 
-        a.appointment_id, 
-        a.first_name, 
-        a.last_name, 
-        a.date AS datetime,
-        a.status,
-        a.updatedAt AS updatedAt,
-        '' AS title, 
-        '' AS description,
-        'appointment' AS type
-    FROM 
-        appointments a
-    JOIN 
-        schedule s ON a.scheduleId = s.scheduleId
-    WHERE 
-        a.status IN ('Cancelled') AND s.doctorId = ?
-    UNION ALL
-    SELECT 
-        r.id AS appointment_id,
-        '' AS first_name,
-        '' AS last_name,
-        r.date AS datetime,
-        r.priority AS status, 
-        r.created_at AS updatedAt,
-        r.title,
-        r.description,
-        'reminder' AS type
-    FROM 
-        reminders r
-    WHERE 
-        r.recipient_id = ? AND r.recipient_type = 'assistant'
-    ORDER BY 
-        datetime DESC
-    LIMIT 10
-");
-
-
-if ($updatesQuery === false) {
-    die('MySQL prepare error: ' . $con->error);
-}
-$updatesQuery->bind_param("ii", $assistantId, $assistantId);
-$updatesQuery->execute();
-$updatesResult = $updatesQuery->get_result();
-$updates = [];
-while ($update = $updatesResult->fetch_assoc()) {
-    $updates[] = $update;
-}
-$updatesQuery->close();
-if (isset($_SESSION['success'])) {
-    echo "<script>alert('" . $_SESSION['success'] . "');</script>";
-    unset($_SESSION['success']);
-}
-
-if (isset($_SESSION['error'])) {
-    echo "<script>alert('" . $_SESSION['error'] . "');</script>";
-    unset($_SESSION['error']);
-}
+include_once('includes/dashboard.php');
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -146,9 +10,22 @@ if (isset($_SESSION['error'])) {
     <link rel="stylesheet" href="node_modules/boxicons/css/boxicons.css">
     <link rel="stylesheet" href="dashboard.css">
     <link rel="shortcut icon" href="assets/favicon/tpass.ico" type="image/x-icon">
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/css/bootstrap-datepicker.min.css" rel="stylesheet">
+
+    <!-- Bootstrap Datepicker CSS -->
     <title>Dashboard - Assistant</title>
 </head>
 <style>
+    main {
+        background-color: #eeeeee;
+        height: 100vh;
+    }
+
+    .sidebar li a{
+        text-decoration: none;
+    }
+
     .reminder-info {
         margin-top: 8px;
         font-size: 0.8rem;
@@ -290,7 +167,7 @@ if (isset($_SESSION['error'])) {
     }
 
     .status-confirmed {
-        color: green;
+        color: #28a745;
     }
 
     .status-cancelled {
@@ -323,6 +200,26 @@ if (isset($_SESSION['error'])) {
     .status-column i {
         font-size: 0.7rem;
         margin-left: 5px;
+    }
+
+    .datepicker .day.available {
+        background-color: lime;
+        color: #fff;
+    }
+
+    .datepicker .day.not-available {
+        background-color: red;
+        color: #fff;
+    }
+
+    .datepicker .day.available:hover {
+        background-color: #28a745;
+        color: #fff;
+    }
+
+    .datepicker .day.not-available:hover {
+        background-color: crimson;
+        color: #fff;
     }
 
     .modal {
@@ -425,17 +322,14 @@ if (isset($_SESSION['error'])) {
         color: #fff;
         text-align: center;
         display: none;
-        /* Initially hidden */
     }
 
     .form-feedback.success {
         background-color: #4CAF50;
-        /* Green for success */
     }
 
     .form-feedback.error {
         background-color: #f44336;
-        /* Red for errors */
     }
 </style>
 
@@ -501,47 +395,50 @@ if (isset($_SESSION['error'])) {
                 </a>
             </div>
 
-            <!-- Insights -->
             <ul class="insights">
                 <li>
-                    <i class='bx bx-calendar-check'></i>
+                    <i class='bx bx-calendar' style="background-color: #e3f2fd; color: #007bff;"></i> <!-- Light blue background for total appointments -->
                     <span class="info">
                         <h3><?php echo $totalAppointments; ?></h3>
                         <p>Total Appointments</p>
                     </span>
                 </li>
                 <li>
-                    <i class='bx bx-loader-circle'></i>
+                    <i class='bx bx-calendar-check' style="background-color: #d4edda; color: #28a745;"></i> <!-- Light green background for confirmed appointments -->
                     <span class="info">
                         <h3><?php echo $confirmedCount; ?></h3>
                         <p>Confirmed Appointments</p>
                     </span>
                 </li>
                 <li>
-                    <i class='bx bx-time-five'></i>
+                    <i class='bx bx-time' style="background-color: #fff3cd; color: #fd7e14;"></i> <!-- Light orange background for rescheduled appointments -->
+                    <span class="info">
+                        <h3><?php echo $rescheduleCount; ?></h3>
+                        <p>Reschedule Appointments</p>
+                    </span>
+                </li>
+                <li>
+                    <i class='bx bx-loader-circle' style="background-color: #fff3cd; color: #ffc107;"></i> <!-- Light yellow background for pending appointments -->
                     <span class="info">
                         <h3><?php echo $pendingCount; ?></h3>
                         <p>Pending Appointments</p>
                     </span>
                 </li>
                 <li>
-                    <i class='bx bx-block'></i>
+                    <i class='bx bx-block' style="background-color: #f8d7da; color: #dc3545;"></i> <!-- Light red background for cancelled appointments -->
                     <span class="info">
                         <h3><?php echo $canceledCount; ?></h3>
                         <p>Cancelled Appointments</p>
                     </span>
                 </li>
+
             </ul>
-            <!-- End of Insights -->
-
-            <!-- End of Insights -->
-
             <div class="bottom-data">
                 <div class="orders">
                     <div class="header">
                         <i class='bx bx-calendar-check'></i>
                         <h3>Upcoming Appointments</h3>
-                        <input type="date" id="appointmentDate" name="date" value="<?= date('Y-m-d') ?>">
+                        <input type="text" name="date" id="appointmentDate" placeholder="Select a date" readonly>
                         <i class='bx bx-filter'></i>
                         <i class='bx bx-search'></i>
                     </div>
@@ -568,24 +465,51 @@ if (isset($_SESSION['error'])) {
                 </div>
                 <script>
                     document.addEventListener('DOMContentLoaded', function() {
-                        const savedDate = localStorage.getItem('selectedDate') || new Date().toISOString().split('T')[0];
-                        document.getElementById('appointmentDate').value = savedDate;
-                        loadAppointments(savedDate);
-                        document.getElementById('appointmentDate').addEventListener('change', function() {
-                            const selectedDate = this.value;
+                        const savedDate = localStorage.getItem('selectedDate') || toLocalDate(new Date()).toISOString().split('T')[0];
+                        $('#appointmentDate').datepicker({
+                            format: 'yyyy-mm-dd',
+                            todayHighlight: true,
+                            beforeShowDay: function(date) {
+                                const dateString = toLocalDate(date).toISOString().split('T')[0];
+                                if (window.scheduleStatuses && window.scheduleStatuses[dateString]) {
+                                    return {
+                                        classes: window.scheduleStatuses[dateString] === 'not-available' ? 'not-available' : 'available',
+                                        tooltip: 'Schedule ' + window.scheduleStatuses[dateString]
+                                    };
+                                }
+                                return;
+                            }
+                        }).on('changeDate', function(e) {
+                            const selectedDate = e.format('yyyy-mm-dd');
                             localStorage.setItem('selectedDate', selectedDate);
                             loadAppointments(selectedDate);
                         });
+
+                        loadAppointments(savedDate);
                     });
 
+                    function toLocalDate(date) {
+                        const localOffset = date.getTimezoneOffset() * 60000;
+                        const localDate = new Date(date.getTime() - localOffset);
+                        return localDate;
+                    }
+
                     function loadAppointments(date) {
-                        const tbody = document.querySelector('.orders table tbody');
                         fetch(`fetch-appointments.php?date=${date}`)
                             .then(response => response.json())
-                            .then(appointments => {
-                                tbody.innerHTML = '';
-                                if (appointments.length > 0) {
-                                    appointments.forEach(appointment => {
+                            .then(data => {
+                                if (data.error) {
+                                    console.error('Error from server:', data.error);
+                                    alert('Error: ' + data.error);
+                                    return;
+                                }
+                                window.scheduleStatuses = data.scheduleStatuses;
+                                $('#appointmentDate').datepicker('update');
+
+                                const tbody = document.querySelector('.orders table tbody');
+                                tbody.innerHTML = ''; // Clear previous entries
+                                if (data.appointments && data.appointments.length > 0) {
+                                    data.appointments.forEach(appointment => {
                                         const row = tbody.insertRow();
                                         const formattedTime = new Date('1970-01-01T' + appointment.appointment_time + 'Z').toLocaleTimeString('en-US', {
                                             hour: 'numeric',
@@ -593,12 +517,10 @@ if (isset($_SESSION['error'])) {
                                             hour12: true
                                         });
                                         const statusInfo = getStatusDetails(appointment.status);
-                                        row.innerHTML = `
-                        <td>${appointment.first_name} ${appointment.last_name}</td>
-                        <td>${appointment.date}</td>
-                        <td>${formattedTime}</td>
-                        <td class="${statusInfo.class} status-column">${appointment.status}<i class='${statusInfo.icon}'></i> </td>
-                    `;
+                                        row.innerHTML = `<td>${appointment.first_name} ${appointment.last_name}</td>
+                                     <td>${appointment.date}</td>
+                                     <td>${formattedTime}</td>
+                                     <td class="${statusInfo.class} status-column">${appointment.status}<i class='${statusInfo.icon}'></i></td>`;
                                     });
                                 } else {
                                     tbody.innerHTML = '<tr><td colspan="4" class="text-center">No appointments found for this date.</td></tr>';
@@ -606,7 +528,7 @@ if (isset($_SESSION['error'])) {
                             })
                             .catch(error => {
                                 console.error('Error loading appointments:', error);
-                                tbody.innerHTML = '<tr><td colspan="4" class="text-center">Error loading data.</td></tr>';
+                                document.querySelector('.orders table tbody').innerHTML = '<tr><td colspan="4" class="text-center">Error loading data.</td></tr>';
                             });
                     }
 
@@ -617,9 +539,8 @@ if (isset($_SESSION['error'])) {
                                 icon: 'bx bx-check-circle'
                             },
                             'Cancelled': {
-
-                                icon: 'bx bx-x-circle',
-                                class: 'status-cancelled'
+                                class: 'status-cancelled',
+                                icon: 'bx bx-x-circle'
                             },
                             'Pending': {
                                 class: 'status-pending',
@@ -633,13 +554,15 @@ if (isset($_SESSION['error'])) {
                                 class: 'status-processing',
                                 icon: 'bx bx-loader'
                             },
+                            'Unknown': {
+                                class: 'status-unknown',
+                                icon: 'bx bx-help-circle'
+                            }
                         };
-                        return statuses[status] || {
-                            class: 'status-unknown',
-                            icon: 'bx bx-help-circle'
-                        };
+                        return statuses[status] || statuses['Unknown'];
                     }
                 </script>
+
                 <!-- Reminder Modal -->
                 <dialog id="reminderModal" class="modal" style="display: none">
                     <div class="modal-content">
@@ -827,8 +750,6 @@ if (isset($_SESSION['error'])) {
                     function toggleDropdown(triggerId) {
                         var trigger = document.getElementById(triggerId);
                         var dropdown = trigger.nextElementSibling;
-
-                        // Close all other dropdowns
                         var dropdowns = document.getElementsByClassName("dropdown-content");
                         for (var i = 0; i < dropdowns.length; i++) {
                             if (dropdowns[i] !== dropdown) {
@@ -838,7 +759,6 @@ if (isset($_SESSION['error'])) {
                             }
                         }
 
-                        // Toggle the current dropdown
                         if (dropdown.style.display === 'block') {
                             dropdown.style.display = 'none';
                             dropdown.style.opacity = '0';
@@ -874,6 +794,9 @@ if (isset($_SESSION['error'])) {
     </div>
 
     <script src="scripts.js"></script>
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/js/bootstrap-datepicker.min.js"></script>
     <script>
         function openModal() {
             const modal = document.getElementById('reminderModal');
@@ -940,6 +863,14 @@ if (isset($_SESSION['error'])) {
                     });
             }
         }
+        document.addEventListener('DOMContentLoaded', function() {
+            const appointmentDateInput = document.getElementById('appointmentDate');
+
+            checkDateAndApplyStyle(appointmentDateInput.value)
+            appointmentDateInput.addEventListener('change', function() {
+                checkDateAndApplyStyle(this.value);
+            });
+        });
     </script>
 </body>
 
