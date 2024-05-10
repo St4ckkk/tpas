@@ -1,6 +1,6 @@
 <?php
 session_start();
-include_once 'assets/conn/dbconnect.php'; // Ensure this path is correct
+include_once 'conn/dbconnect.php'; 
 
 if (!isset($_SESSION['assistantSession'])) {
     header("Location: " . BASE_URL . "index.php");
@@ -11,7 +11,6 @@ $assistantId = $_SESSION['assistantSession'];
 $targetDir = "uploaded_files/";
 $fileType = strtolower(pathinfo($_FILES["profile_photo"]["name"], PATHINFO_EXTENSION));
 
-// Check if the file was uploaded
 if (!isset($_FILES["profile_photo"]) || $_FILES["profile_photo"]["error"] != UPLOAD_ERR_OK) {
     echo "<script>alert('No file was uploaded.'); window.location.href = 'profile.php';</script>";
     exit;
@@ -47,7 +46,7 @@ $result = $stmt->get_result();
 $userData = $result->fetch_assoc();
 $existingFilePath = $userData['profile_image_path'] ?? null;
 
-// Delete the existing file if it exists
+
 if ($existingFilePath && file_exists($existingFilePath)) {
     unlink($existingFilePath);
 }
