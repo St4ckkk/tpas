@@ -42,19 +42,12 @@ require_once './process/process.php';
                     <i class="fas fa-lock icon"></i>
                     <input type="password" name="password" placeholder="Enter your password" required>
                 </div>
-                  <?php if (!empty($error)) : ?>
-                <p class="error"><?php echo $error; ?></p>
-            <?php endif; ?>
-                <div class="checkbox">
-                    <label for="remember">
-                        <input type="checkbox" name="remember">
-                        Remember me
-                    </label>
-                </div>
+                <?php if (!empty($error)) : ?>
+                    <p class="error"><?php echo $error; ?></p>
+                <?php endif; ?>
                 <button type="submit" name="login"><i class="fas fa-door-open"></i> Sign in</button>
             </form>
             <a href="#">Forgot your password?</a>
-          
         </div>
         <div class="background">
             <h1><span>Welcome to </span>TPAS</h1>

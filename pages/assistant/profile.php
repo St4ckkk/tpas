@@ -229,14 +229,19 @@
                     </div>
                 </div>
                 <div class="profile-data card-content">
-                    <div class="profile-pic">
-                        <label class="-label" for="file">
-                            <span class="bx bx-camera mt-2"></span>
-                            <span style="font-size: 1rem;">Change Image</span>
+                    <form action="upload.php" method="post" enctype="multipart/form-data">
+                        <div class="profile-pic">
+                            <label class="-label" for="file">
+                                <span class="bx bx-camera mt-2"></span>
+                                <span style="font-size: 1rem;">Change Image</span>
+                            </label>
                             <input type="file" id="file" name="profile_photo" class="account-settings-fileinput" onchange="loadFile(event)">
-                        </label>
-                        <img id="output" src="<?php echo htmlspecialchars($user['profile_image_path'] ?? 'assets/img/default.png'); ?>" alt="Profile Image" width="100">
-                    </div>
+                            <img id="output" src="<?php echo htmlspecialchars($assistant['profile_image_path'] ?? 'assets/img/default.png'); ?>" alt="Profile Image" width="100">
+                        </div>
+
+                        <button type="submit" name="submit" class="btn btn-primary mt-4 mx-4">Save Changes</button>
+                    </form>
+
                     <div class="info-section">
                         <div class="info-table">
                             <table class="table table-striped">
@@ -340,7 +345,7 @@
                     })
                     .then(response => response.json())
                     .then(json => {
-                        alert(json.message); 
+                        alert(json.message);
                         if (json.status === 'success') {
                             window.location.reload();
                         } else {
@@ -350,7 +355,7 @@
                     })
                     .catch(error => {
                         console.error('Error:', error);
-                        makeEditable();
+                        makeEditable(); // Re-enable editing on error
                     });
             }
 
@@ -395,6 +400,14 @@
                 var element = document.getElementById(id);
                 element.className = isMet ? "met" : "";
                 element.children[0].className = isMet ? "bx bx-check" : "bx bx-x";
+            }
+
+            function loadFile(event) {
+                var output = document.getElementById('output');
+                output.src = URL.createObjectURL(event.target.files[0]);
+                output.onload = function() {
+                    URL.revokeObjectURL(output.src)
+                }
             }
         </script>
     </body>
