@@ -189,6 +189,31 @@ function processAdditionalInfo($con, $userId)
     <link rel="stylesheet" href="node_modules/boxicons/css/boxicons.css">
 </head>
 <style>
+    .profile-pic img {
+        position: absolute;
+        object-fit: cover;
+        width: 165px;
+        height: 165px;
+        box-shadow: 0 0 10px 0 rgba(255, 255, 255, 0.35);
+        z-index: 0;
+        border: 1px solid #ced4da;
+        padding: 10px;
+        border-radius: 5px;
+    }
+
+    .profile-pic label {
+        cursor: pointer;
+        height: 165px;
+        width: 165px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background-color: rgba(0, 0, 0, 0);
+        z-index: 1;
+        color: rgb(250, 250, 250);
+        transition: background-color 0.2s ease-in-out;
+    }
+
     .form-group {
         margin-bottom: 15px;
     }
@@ -196,13 +221,11 @@ function processAdditionalInfo($con, $userId)
     .form-label {
         display: block;
         margin-bottom: 8px;
-        /* Space between label and input */
         color: #333;
         font-weight: bold;
         font-size: 16px;
     }
 
-    /* General input and select styling */
     .form-control,
     .custom-select {
         width: 100%;
@@ -243,14 +266,12 @@ function processAdditionalInfo($con, $userId)
 
     .password-container input {
         flex: 1;
-        padding-right: 30px;
-        /* Make room for the icon */
+        padding-right: 30px
     }
 
     .password-container i {
         position: absolute;
         right: 10px;
-        /* Adjust based on your styling needs */
         cursor: pointer;
         color: #707070;
     }
@@ -340,9 +361,11 @@ function processAdditionalInfo($con, $userId)
                         </div>
 
                     </div>
+
                     <div class="col-md-9">
                         <div class="tab-content">
                             <div class="tab-pane fade active show" id="account-general">
+
                                 <form method="POST" enctype="multipart/form-data">
                                     <div class="card-body media align-items-center">
                                         <div class="profile-pic">
@@ -351,10 +374,11 @@ function processAdditionalInfo($con, $userId)
                                                 <span style="font-size: 1rem;">Change Image</span>
                                                 <input type="file" id="file" name="profile_photo" class="account-settings-fileinput" onchange="loadFile(event)">
                                             </label>
-                                            <img id="output" src="<?php echo htmlspecialchars($user['profile_image_path'] ?? 'assets/img/default.png'); ?>" alt="Profile Image" width="100">
+                                            <img id="output" src="<?php echo htmlspecialchars($user['profile_image_path'] ?? 'assets/img/default.png'); ?>" alt="Profile Image">
                                         </div>
                                     </div>
-                                    <hr class="border-light m-0">
+
+
                                     <div class="card-body">
                                         <div class="form-group">
                                             <label class="form-label">Account Number</label>
@@ -373,6 +397,7 @@ function processAdditionalInfo($con, $userId)
                                             <button type="submit" name="updateGeneral" class="btn btn-primary">Save changes</button>&nbsp;
                                             <button type="button" class="btn btn-default">Cancel</button>
                                         </div>
+
                                 </form>
                             </div>
                         </div>

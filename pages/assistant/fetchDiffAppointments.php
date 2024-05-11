@@ -9,12 +9,16 @@ if (!isset($_SESSION['assistantSession'])) {
 
 $status = $_GET['status'] ?? 'All';
 
-$queryString = "SELECT first_name, last_name, date, appointment_time, status FROM appointments";
+$queryString = "SELECT a.first_name, a.last_name, a.date, a.appointment_time, a.status, p.profile_image_path 
+                FROM appointments AS a
+                LEFT JOIN tb_patients AS p ON a.patientId = p.patientId";
+
 $params = [];
 if ($status !== 'All') {
-    $queryString .= " WHERE status = ?";
+    $queryString .= " WHERE a.status = ?";
     $params[] = $status;
 }
+
 $stmt = $con->prepare($queryString);
 if ($status !== 'All') {
     $stmt->bind_param("s", ...$params);

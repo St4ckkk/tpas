@@ -543,7 +543,7 @@ if (!$assistant) {
                                 $('#appointmentDate').datepicker('update');
 
                                 const tbody = document.querySelector('.orders table tbody');
-                                tbody.innerHTML = ''; // Clear previous entries
+                                tbody.innerHTML = ''; 
                                 if (data.appointments && data.appointments.length > 0) {
                                     data.appointments.forEach(appointment => {
                                         const row = tbody.insertRow();
@@ -554,16 +554,21 @@ if (!$assistant) {
                                             hour12: true
                                         });
 
-                                        // Get status info
+
                                         const statusInfo = getStatusDetails(appointment.status);
 
                                         const imgCell = row.insertCell();
                                         const img = document.createElement('img');
-                                        img.src = '../uploaded_files/' + appointment.profile_image_path;
+                                        if (appointment.profile_image_path) {
+                                            img.src = '../uploaded_files/' + appointment.profile_image_path;
+                                        } else {
+                                            // Use default image path
+                                            img.src = 'assets/img/default.png';
+                                        }
                                         img.alt = 'Profile Image';
                                         img.className = 'profile-image';
                                         imgCell.appendChild(img);
-                                        // Populate other cells
+
                                         row.innerHTML += `<td>${appointment.first_name} ${appointment.last_name}</td>
                         <td>${appointment.date}</td>
                         <td>${formattedTime}</td>

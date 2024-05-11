@@ -361,7 +361,7 @@
             <ul class="side-menu">
                 <li><a href="dashboard.php"><i class='bx bxs-dashboard'></i>Dashboard</a></li>
                 <li class="active"><a href="appointment.php"><i class='bx bx-calendar-check'></i>Appointments</a></li>
-                 <li><a href="profile.php"><i class='bx bx-user'></i>Profile</a></li>
+                <li><a href="profile.php"><i class='bx bx-user'></i>Profile</a></li>
             </ul>
             <ul class="side-menu">
                 <li>
@@ -433,6 +433,7 @@
                             <table>
                                 <thead>
                                     <tr>
+                                        <th>Profile</th>
                                         <th>Name</th>
                                         <th>Date</th>
                                         <th>Time</th>
@@ -567,20 +568,36 @@
             function displayAppointments(appointments) {
                 const tbody = document.querySelector('table tbody');
                 tbody.innerHTML = '';
+
                 appointments.forEach(appointment => {
                     const statusInfo = getStatusDetails(appointment.status);
                     const formattedTime = formatAMPMTime(appointment.appointment_time);
                     const row = tbody.insertRow();
-                    row.innerHTML = `
-                    <td>${appointment.first_name} ${appointment.last_name}</td>
-                    <td>${appointment.date}</td>
-                    <td>${formattedTime}</td>
-                    <td class="${statusInfo.class} status-column">
-                        ${appointment.status}<i class="${statusInfo.icon}"></i>
-                    </td>
-                `;
+
+
+                    const imgCell = row.insertCell();
+                    const img = document.createElement('img');
+                    if (appointment.profile_image_path) {
+                        img.src = '../uploaded_files/' + appointment.profile_image_path;
+                    } else {
+                        // Use default image path
+                        img.src = 'assets/img/default.png';
+                    }
+                    img.alt = 'Profile Image';
+                    img.className = 'profile-image';
+                    imgCell.appendChild(img);
+
+                    row.innerHTML += `
+            <td>${appointment.first_name} ${appointment.last_name}</td>
+            <td>${appointment.date}</td>
+            <td>${formattedTime}</td>
+            <td class="${statusInfo.class} status-column">
+                ${appointment.status}<i class="${statusInfo.icon}"></i>
+            </td>
+        `;
                 });
             }
+
 
             function getStatusDetails(status) {
                 const statuses = {
