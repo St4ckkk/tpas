@@ -1,6 +1,6 @@
     <?php
     session_start();
-    include_once 'assets/conn/dbconnect.php'; // Adjust the path as needed
+    include_once 'assets/conn/dbconnect.php';
 
     define('BASE_URL', '/TPAS/auth/admin/');
     if (!isset($_SESSION['doctorSession'])) {
@@ -10,7 +10,6 @@
 
     $doctorId = $_SESSION['doctorSession'];
 
-    // Fetch total appointments and last update time
     $query = $con->prepare("SELECT COUNT(*) AS total, MAX(updatedAt) as lastUpdated FROM appointments WHERE status='Confirmed'");
     $query->execute();
     $result = $query->get_result()->fetch_assoc();
@@ -37,7 +36,6 @@
     $lastUpdatedReminders = $result['lastUpdated'];
     $displayLastUpdatedReminders = $lastUpdatedReminders ? date("F j, Y g:i A", strtotime($lastUpdatedReminders)) : "No updates";
 
-    // Fetch admin profile using prepared statement
     $query = $con->prepare("SELECT doctorFirstName, doctorLastName FROM doctor WHERE id = ?");
     $query->bind_param("i", $doctorId);
     $query->execute();
@@ -48,7 +46,7 @@ FROM appointments
 WHERE status = 'Confirmed'");
 
 
-    // Execute the query
+
     $query->execute();
     $result = $query->get_result();
 
@@ -124,6 +122,16 @@ WHERE status = 'Confirmed'");
         </script>
     </head>
     <style>
+        .profile-image-circle {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            margin: 0 auto;
+
+        }
+
+      
+
         .status-column i {
             vertical-align: middle;
         }
@@ -235,26 +243,16 @@ WHERE status = 'Confirmed'");
         /* The Modal (background) */
         .modal {
             display: none;
-            /* Hidden by default */
             position: fixed;
-            /* Stay in place */
             z-index: 1000;
-            /* Sit on top */
             left: 0;
             top: 0;
             width: 100%;
-            /* Full width */
             height: 100%;
-            /* Full height */
             overflow: auto;
-            /* Enable scroll if needed */
-            background-color: rgba(0, 0, 0, 0.4);
-            /* Black w/ opacity */
             display: flex;
             align-items: center;
-            /* Center vertically */
             justify-content: center;
-            /* Center horizontally */
         }
 
 
@@ -312,6 +310,7 @@ WHERE status = 'Confirmed'");
         .status-processing {
             color: #007bff;
         }
+
         .status-reschedule {
             color: #0056b3;
         }
@@ -365,11 +364,12 @@ WHERE status = 'Confirmed'");
         .priority-1 {
             color: blue;
         }
+
         .priority-2 {
             color: yellow;
         }
 
-        .priority-3  {
+        .priority-3 {
             color: purple;
         }
 
@@ -428,7 +428,7 @@ WHERE status = 'Confirmed'");
             margin-top: 20px;
             background-color: #fff;
             text-align: center;
-            border: 1px solid #fff;  
+            border: 1px solid #fff;
             font-size: 16px;
             border-radius: 20px;
         }
@@ -580,6 +580,7 @@ WHERE status = 'Confirmed'");
                         <select id="statusFilter" onchange="filterAppointments()">
                             <option value="All">All</option>
                             <option value="Confirmed">Confirmed</option>
+                            <option value="Reschedule">Reschedule</option>
                             <option value="Pending">Pending</option>
                             <option value="Cancelled">Cancelled</option>
                             <option value="Denied">Denied</option>
@@ -588,6 +589,7 @@ WHERE status = 'Confirmed'");
                     <table id="recent-orders--table">
                         <thead>
                             <tr>
+                                <th>Profile</th>
                                 <th>Name</th>
                                 <th>Date</th>
                                 <th>Time</th>
@@ -632,8 +634,8 @@ WHERE status = 'Confirmed'");
                         tbody.innerHTML = '';
 
                         if (!appointments || appointments.length === 0) {
-                            table.style.display = 'none'; // Hide table
-                            message.style.display = 'block'; // Show message
+                            table.style.display = 'none';
+                            message.style.display = 'block';
                             message.textContent = 'No appointments available for this status.';
                             return;
                         }
@@ -644,18 +646,24 @@ WHERE status = 'Confirmed'");
                         appointments.forEach(appointment => {
                             const statusInfo = getStatusDetails(appointment.status);
                             const formattedTime = formatAMPMTime(appointment.appointment_time);
+
                             const row = tbody.insertRow();
                             row.innerHTML = `
-                <td>${appointment.first_name} ${appointment.last_name}</td>
-                <td>${appointment.date}</td>
-                <td>${formattedTime}</td>
-                <td class="${statusInfo.class}">
-                    ${appointment.status} <i class="${statusInfo.icon}"></i>
-                </td>
-                 <td><a href="appDetails.php?id=${appointment.appointment_id}"><i class="bx bx-show"></i></a></td>
-            `;
+            <td>
+                <img src="${appointment.profile_image_path ? '../uploaded_files/' + appointment.profile_image_path : 'assets/img/default.png'}" alt="Profile Image" class="profile-image-circle">
+            </td>
+            <td>${appointment.first_name} ${appointment.last_name}</td>
+            <td>${appointment.date}</td>
+            <td>${formattedTime}</td>
+            <td class="${statusInfo.class}">
+                ${appointment.status} <i class="${statusInfo.icon}"></i>
+            </td>
+            <td><a href="appDetails.php?id=${appointment.appointment_id}"><i class="bx bx-show"></i></a></td>
+        `;
                         });
                     }
+
+
 
                     function getStatusDetails(status) {
                         const statuses = {
@@ -737,7 +745,7 @@ WHERE status = 'Confirmed'");
                                         <i class="bx bxs-message-square-dots appointment-icon"></i>
                                     <?php endif; ?>
                                     <?= $update['type'] === 'appointment' ? "Appointment Update" : "Reminder"; ?>
-                                </h3> 
+                                </h3>
                                 <span class="update-date"><?= date("F j, Y", strtotime($update['datetime'])); ?></span>
                             </div>
 

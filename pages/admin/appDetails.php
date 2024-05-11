@@ -19,7 +19,12 @@
     }
 
     $appointmentId = $_GET['id'];
-    $query = $con->prepare("SELECT * FROM appointments WHERE appointment_id = ?");
+    $query = $con->prepare("
+    SELECT appointments.*, tb_patients.profile_image_path
+    FROM appointments
+    INNER JOIN tb_patients ON appointments.patientId = tb_patients.patientId
+    WHERE appointments.appointment_id = ?
+");
     $query->bind_param("i", $appointmentId);
     $query->execute();
     $result = $query->get_result();
@@ -28,6 +33,7 @@
     if (!$appointmentDetails) {
         die('No details found for the specified appointment.');
     }
+
     ?>
 
 
@@ -44,6 +50,16 @@
         <link rel="stylesheet" href="style.css" />
     </head>
     <style>
+        .profile-image-circle {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            margin: 0 auto;
+            margin-bottom: 5px;
+            margin-top: 5px;
+        }
+
+
         .status-column i {
             vertical-align: middle;
         }
@@ -224,9 +240,11 @@
             <main>
                 <div class="recent-orders">
                     <h2>Appointment Details</h2>
+                    
                     <table class="sched--table">
                         <thead>
                             <tr>
+                                <th>Profile</th>
                                 <th>Name</th>
                                 <th>Phone No.</th>
                                 <th>Email</th>
@@ -239,6 +257,13 @@
                         </thead>
                         <tbody>
                             <tr>
+                                <td>
+                                    <?php if (!empty($appointmentDetails['profile_image_path'])) : ?>
+                                        <img src="<?= $appointmentDetails['profile_image_path'] ?>" alt="Profile Image" class="profile-image-circle">
+                                    <?php else : ?>
+                                        <img src="assets/img/default.png" alt="Default Image" class="profile-image-circle">
+                                    <?php endif; ?>
+                                </td>
                                 <td><?= $appointmentDetails['first_name'] . ' ' . $appointmentDetails['last_name'] ?></td>
                                 <td><?= $appointmentDetails['phone_number'] ?></td>
                                 <td><?= $appointmentDetails['email'] ?></td>
@@ -313,19 +338,18 @@
             var btn = document.querySelectorAll('.status-column');
             var span = document.getElementsByClassName("close")[0];
 
-            // Display modal on clicking the status column
             btn.forEach(function(element) {
                 element.onclick = function() {
                     modal.style.display = "block";
                 }
             });
 
-            // Close the modal on clicking 'X' (close)
+           
             span.onclick = function() {
                 modal.style.display = "none";
             };
 
-            // Close the modal when clicking outside of it
+           
             window.onclick = function(event) {
                 if (event.target == modal) {
                     modal.style.display = "none";

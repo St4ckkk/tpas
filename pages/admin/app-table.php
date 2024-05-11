@@ -9,45 +9,43 @@ if (!isset($_SESSION['doctorSession'])) {
 
 $status = $_GET['status'] ?? 'All';
 
-// Define the base query string
-$queryString = "SELECT a.appointment_id, a.first_name, a.last_name, a.date, a.appointment_time, a.status, p.profile_image_path
-                FROM appointments a
-                LEFT JOIN tb_patients p ON a.patientId = p.patientId";
 
-// Array to store parameters for prepared statement
+$queryString = "SELECT a.appointment_id, a.scheduleId, a.patientId, a.first_name, a.last_name, a.phone_number, a.email, 
+                a.date, a.appointment_time, a.endTime, a.appointment_type, a.message, a.status, p.profile_image_path 
+                FROM appointments AS a
+                LEFT JOIN tb_patients AS p ON a.patientId = p.patientId";
+
+
 $params = [];
 
-// Check if filtering by status is required
+
 if ($status !== 'All') {
     $queryString .= " WHERE a.status = ?";
     $params[] = $status;
 }
 
-// Prepare the SQL statement
 if ($stmt = $con->prepare($queryString)) {
-    // Bind parameters if needed
+
     if ($status !== 'All' && !empty($params)) {
         $stmt->bind_param("s", ...$params);
     }
 
-    // Execute the query
+ 
     $stmt->execute();
 
-    // Get the result set
     $result = $stmt->get_result();
 
-    // Array to store appointments
+    
     $appointments = [];
 
-    // Fetch each row and store in the appointments array
     while ($row = $result->fetch_assoc()) {
         $appointments[] = $row;
     }
 
-    // Output the JSON representation of appointments
+
     echo json_encode($appointments);
 } else {
-    // If query preparation failed, return error response
+    
     header('HTTP/1.1 500 Internal Server Error');
     echo json_encode(["error" => "Failed to prepare the query."]);
     exit;

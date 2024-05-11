@@ -1,6 +1,6 @@
     <?php
     session_start();
-    include_once 'assets/conn/dbconnect.php'; // Adjust the path as needed
+    include_once 'assets/conn/dbconnect.php';
 
     define('BASE_URL', '/TPAS/auth/admin/');
     if (!isset($_SESSION['doctorSession'])) {
@@ -9,18 +9,59 @@
     }
 
     $doctorId = $_SESSION['doctorSession'];
-    $query = $con->prepare("SELECT doctorLastName FROM doctor WHERE id = ?");
+
+
+    $query = $con->prepare("SELECT doctorFirstName, doctorLastName FROM doctor WHERE id = ?");
     $query->bind_param("i", $doctorId);
     $query->execute();
     $profile = $query->get_result()->fetch_assoc();
+    // Fetch recent appointments
+    $query = $con->prepare("SELECT appointment_id, first_name, last_name, date, appointment_time, status 
+FROM appointments 
+WHERE status = 'Confirmed'");
 
-    $query = $con->prepare("SELECT * FROM appointments ORDER BY date DESC");
+
+
     $query->execute();
     $result = $query->get_result();
-    $appointments = [];
-    while ($row = $result->fetch_assoc()) {
-        $appointments[] = $row;
+
+    $updatesQuery = $con->prepare("
+    SELECT 
+        a.appointment_id, 
+        a.first_name, 
+        a.last_name, 
+        a.date AS datetime,
+        a.status,
+        a.updatedAt AS updatedAt,
+        '' AS title, 
+        '' AS description,
+        'appointment' AS type
+    FROM 
+        appointments a
+    JOIN 
+        schedule s ON a.scheduleId = s.scheduleId
+    WHERE 
+        a.status IN ('Cancelled') AND s.doctorId = ?
+    ORDER BY 
+        datetime DESC
+    LIMIT 10
+");
+
+
+
+    if ($updatesQuery === false) {
+        die('MySQL prepare error: ' . $con->error);
     }
+    $updatesQuery->bind_param("i", $doctorId);
+    $updatesQuery->execute();
+    $updatesResult = $updatesQuery->get_result();
+    $updates = [];
+    while ($update = $updatesResult->fetch_assoc()) {
+        $updates[] = $update;
+    }
+    $updatesQuery->close();
+
+
     ?>
 
 
@@ -31,13 +72,27 @@
         <meta charset="UTF-8" />
         <meta http-equiv="X-UA-Compatible" content="IE=edge" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>Users</title>
+        <title>Dashboard - Admin</title>
         <link rel="stylesheet" href="node_modules/boxicons/css/boxicons.min.css" />
         <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Sharp" rel="stylesheet" />
-        <link rel="stylesheet" href="style.css" />
         <link rel="shortcut icon" href="assets/favicon/tpasss.ico" type="image/x-icon">
+        <link rel="stylesheet" href="style.css" />
+        <script>
+            // Define your updates array globally if it's static or loaded on page load
+            var updates = <?= json_encode($updates); ?>;
+        </script>
     </head>
     <style>
+        .profile-image-circle {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            margin: 0 auto;
+
+        }
+
+
+
         .status-column i {
             vertical-align: middle;
         }
@@ -50,78 +105,203 @@
             color: limegreen;
         }
 
-        .status-column.status-cancelled {
+        .status-column.status-denied {
             color: #dc3545;
+        }
+
+        .status-column.status-cancelled {
+            color: red;
         }
 
         .status-column.status-processing {
             color: #007bff;
         }
 
-        .status-column.status-completed {
-            color: limegreen;
+        /* Notifications Styles */
+        .recent-updates {
+            padding: var(--padding-1);
+            margin-top: 20px;
         }
 
-        .status-column.status-reschedule {
-            color: #007bff;
+        .recent-updates h2 {
+            color: var(--color-dark);
+            margin-bottom: 10px;
         }
 
-        th {
-            font-weight: bold;
+        .update {
+            background: var(--color-white);
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: var(--border-radius-2);
         }
 
-
-        .icon-link {
-            text-decoration: none;
-        }
-
-        .icon-link i {
-            color: coral;
-            vertical-align: middle;
+        .update .detail h4 {
             font-size: 1rem;
+            color: var(--color-primary);
         }
 
-        .container {
-            display: flex;
-            flex-direction: row;
+        .update .detail p {
+            font-size: 0.875rem;
+            color: var(--color-info-dark);
+            margin: 5px 0;
         }
 
-        .aside {
-            flex: 0 0 250px;
+        .update .detail small {
+            font-size: 0.75rem;
+            color: var(--color-info-light);
         }
 
-        main {
-            flex-grow: 2;
+        #appDetails {
+            cursor: pointer;
+            color: var(--color-primary-dark);
         }
 
-        .recent-orders {
-            width: 100%;
+        #appDetails:hover {
+            color: var(--color-primary);
+        }
+
+        .recent-updates {
+            margin-top: 20px;
+            padding: 20px;
+        }
+
+        .updates-title {
+            color: #333;
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+
+        .update-item {
+            padding: 15px;
+            background-color: white;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            transition: box-shadow 0.3s;
+            cursor: pointer;
+        }
+
+        .update-item:hover {
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .update-title {
+            font-size: 18px;
+            color: #0056b3;
+        }
+
+        .update-summary {
+            font-size: 14px;
+            color: #666;
+        }
+
+        .update-date {
+            font-size: 12px;
+            color: #999;
+            display: block;
+            margin-top: 5px;
         }
 
         .modal {
             display: none;
             position: fixed;
-            z-index: 1;
+            z-index: 1000;
             left: 0;
             top: 0;
             width: 100%;
             height: 100%;
             overflow: auto;
-            background-color: rgb(0, 0, 0);
             background-color: rgba(0, 0, 0, 0.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .modal-content {
             background-color: #fefefe;
-            margin: 15% auto;
+            margin: auto;
             padding: 20px;
             border: 1px solid #888;
             width: 20%;
+            box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.3), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+            border-radius: 5px;
         }
+
+        .modal-title {
+            font-weight: bold;
+            font-size: 24px;
+            /* Larger and bolder */
+            color: #333;
+            margin-bottom: 8px
+        }
+
+        .modal-description {
+            font-size: 16px;
+            color: #555;
+            margin-top: 5px;
+            margin-bottom: 10px;
+        }
+
+        .modal-priority {
+            font-weight: bold;
+            /* Make priority noticeable */
+            margin-bottom: 5px;
+        }
+
+        .modal-date {
+            font-size: 12px;
+            color: #666;
+            text-align: right;
+            margin-top: auto;
+        }
+
+
+        .status-pending {
+            color: orange;
+        }
+
+        .status-confirmed {
+            color: limegreen;
+        }
+
+        .status-cancelled {
+            color: red;
+        }
+
+        .status-processing {
+            color: #007bff;
+        }
+
+        .status-reschedule {
+            color: #0056b3;
+        }
+
+        .status-completed {
+            color: #28a745;
+        }
+
+        .low,
+        .medium,
+        .high {
+            font-weight: bold;
+        }
+
+        .low {
+            color: green;
+        }
+
+        .medium {
+            color: orange;
+        }
+
+        .high {
+            color: red;
+        }
+
 
         .close {
             color: #aaa;
             float: right;
+            top: 100px;
             font-size: 28px;
             font-weight: bold;
         }
@@ -133,52 +313,152 @@
             cursor: pointer;
         }
 
-        .modal {
-            display: none;
+        .modal-priority-icon {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            display: inline-block;
+            font-size: 20px;
+            font-weight: bold;
+            margin-right: 10px;
+            vertical-align: middle;
+        }
+
+        /* Priority Color Classes */
+        .priority-1 {
+            color: blue;
+        }
+
+        .priority-2 {
+            color: yellow;
+        }
+
+        .priority-3 {
+            color: purple;
+        }
+
+        .priority-4 {
+            color: red;
+        }
+
+        .recipients {
+            font-size: 12px;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .reminder-title {
+            color: orange;
+        }
+
+        main .insights>div.appointments span {
+            background-color: #0056b3;
+        }
+
+        main .insights>div.users span {
+            background-color: limegreen;
+        }
+
+        main .insights>div.reminders span {
+            background-color: orange;
+        }
+
+        .bx-show {
+            font-size: 16px;
+        }
+
+        .bx-show:hover {
+            color: #0056b3;
+        }
+
+        .header-wrapper {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 5px;
+        }
+
+        #statusFilter {
+            padding: 5px 10px;
+            font-size: 16px;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+
+
+        .no-appointments-message {
+            padding: 20px;
+            margin-top: 20px;
+            background-color: #fff;
+            text-align: center;
+            border: 1px solid #fff;
+            font-size: 16px;
+            border-radius: 20px;
+        }
+
+        .bx {
+            vertical-align: middle;
+            margin-right: 10px;
+        }
+
+        .reminder-title {
+            color: orange;
+            display: flex;
+            align-items: center;
+        }
+
+        .reminder-icon {
+            display: inline-block;
+            margin-right: 5px;
+            font-size: 20px;
+        }
+
+        .update-title {
+            display: flex;
+            align-items: center;
+        }
+
+        .reminder-icon,
+        .appointment-icon {
+            display: inline-block;
+            margin-right: 5px;
+            font-size: 20px;
+        }
+
+        .modal-status-confirmed {
+            color: limegreen;
+        }
+
+        .modal-status-cancelled {
+            color: red;
+        }
+
+        .modal-status-pending {
+            color: orange;
+        }
+
+        .modal-status-denied {
+            color: #dc3545;
+        }
+
+        .modal-status-unknown {
+            color: grey;
+        }
+
+        #statusModal {
             position: fixed;
-            z-index: 1;
-            left: 0;
             top: 0;
+            left: 0;
             width: 100%;
             height: 100%;
-            overflow: auto;
-            background-color: rgb(0, 0, 0);
-            background-color: rgba(0, 0, 0, 0.4);
-        }
-
-        .modal-content {
-            background-color: #fefefe;
-            margin: 15% auto;
-            padding: 20px;
-            border: 1px solid #888;
-            width: 30%;
-        }
-
-        .close {
-            color: #aaa;
-            float: right;
-            font-size: 28px;
-            font-weight: bold;
-        }
-
-        .close:hover,
-        .close:focus {
-            color: black;
-            text-decoration: none;
-            cursor: pointer;
-        }
-
-        .bx-trash {
-            color: red;
-            cursor: pointer;
-        }
-
-        .bx-trash:hover {
-            font-size: 1.5rem;
-            transition: 0.3s ease-in-out;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
         }
     </style>
-
 
     <body>
         <div class="container">
@@ -194,7 +474,7 @@
                 </div>
 
                 <div class="sidebar">
-                    <a href="dashboard.php" class="">
+                    <a href="dashboard.php">
                         <span class="material-icons-sharp"> dashboard </span>
                         <h3>Dashboard</h3>
                     </a>
@@ -202,15 +482,15 @@
                         <span class="material-icons-sharp"> person_outline </span>
                         <h3>Users</h3>
                     </a>
-                    <a href="assistant.php">
+                    <a href="assistant.php ">
                         <span class="material-icons-sharp"> person </span>
                         <h3>Staffs</h3>
                     </a>
                     <a href="appointments.php" class="active">
-                        <span class="material-icons-sharp"> event_available</span>
+                        <span class="material-icons-sharp"> event_available </span>
                         <h3>Appointments</h3>
                     </a>
-                    <a href="reminders.php">
+                    <a href="#">
                         <span class="material-icons-sharp">notifications </span>
                         <h3>Reminders</h3>
                         <span class="message-count"></span>
@@ -229,74 +509,226 @@
                     </a>
                 </div>
             </aside>
+
             <main>
                 <div class="recent-orders">
-                    <h2>All Appointments</h2>
-                    <table class="sched--table">
+                    <div class="header-wrapper">
+                        <h1 id="statusHeading">All Appointments</h1>
+                        <select id="statusFilter" onchange="filterAppointments()">
+                            <option value="All">All</option>
+                            <option value="Confirmed">Confirmed</option>
+                            <option value="Reschedule">Reschedule</option>
+                            <option value="Pending">Pending</option>
+                            <option value="Cancelled">Cancelled</option>
+                            <option value="Denied">Denied</option>
+                        </select>
+                    </div>
+                    <table id="recent-orders--table">
                         <thead>
                             <tr>
+                                <th>Profile</th>
                                 <th>Name</th>
-                                <th>Phone No.</th>
+                                <th>Phone</th>
                                 <th>Email</th>
                                 <th>Date</th>
                                 <th>Time</th>
                                 <th>Reason</th>
+                                <th>Message</th>
                                 <th>Status</th>
-                                <th>Action</th>
+                                <th></th>
                             </tr>
                         </thead>
                         <tbody>
-                            <?php foreach ($appointments as $appointment) : ?>
-                                <tr>
-                                    <td><?= htmlspecialchars($appointment['first_name'] . ' ' . $appointment['last_name']); ?></td>
-                                    <td><?= htmlspecialchars($appointment['phone_number']); ?></td>
-                                    <td><?= htmlspecialchars($appointment['email']); ?></td>
-                                    <td><?= date("F j, Y", strtotime($appointment['date'])); ?></td>
-                                    <td><?= date("g:i A", strtotime($appointment['appointment_time'])); ?></td>
-                                    <td><?= htmlspecialchars($appointment['appointment_type']); ?></td>
-                                    <td class="status-column <?= $appointment['status'] === 'Pending' ? 'status-pending' : ($appointment['status'] === 'Processing' ? 'status-processing' : ($appointment['status'] === 'Confirmed' ? 'status-confirmed' : ($appointment['status'] === 'Denied' ? 'status-denied' : ($appointment['status'] === 'Cancelled' ? 'status-cancelled' : ($appointment['status'] === 'Completed' ? 'status-completed' : ($appointment['status'] === 'Reschedule' ? 'status-reschedule' : '')))))) ?>">
-                                        <?= htmlspecialchars($appointment['status']) ?>
-                                        <?php if ($appointment['status'] === 'Confirmed') : ?>
-                                            <i class="bx bx-check-circle"></i>
-                                        <?php elseif ($appointment['status'] === 'Denied') : ?>
-                                            <i class="bx bx-block"></i>
-                                        <?php elseif ($appointment['status'] === 'Pending') : ?>
-                                            <i class="bx bx-time-five"></i>
-                                        <?php elseif ($appointment['status'] === 'Processing') : ?>
-                                            <i class="bx bx-cog"></i>
-                                        <?php elseif ($appointment['status'] === 'Cancelled') : ?>
-                                            <i class="bx bx-x-circle"></i>
-                                        <?php elseif ($appointment['status'] === 'Completed') : ?>
-                                            <i class="bx bx-badge-check"></i>
-                                        <?php elseif ($appointment['status'] === 'Reschedule') : ?>
-                                            <i class="bx bx-calendar"></i>
-                                        <?php endif; ?>
-                                    </td>
-                                    <td>
-                                        <i class="bx bx-trash" onclick="confirmDelete('<?= $appointment['appointment_id']; ?>');"></i>
-                                    </td>
-                                </tr>
-                            <?php endforeach; ?>
                         </tbody>
                     </table>
+                    <div id="no-appointments-message" class="no-appointments-message" style="display: none;">
+                        <i class="bx bx-info-circle"></i> No appointments available for this status.
+                    </div>
                 </div>
-            </main>
-            <div id="statusModal" class="modal">
-                <div class="modal-content">
-                    <span class="close">&times;</span>
-                    <h2>Update Status</h2>
-                    <form id="statusForm">
-                        <input type="hidden" name="appointment_id" value="<?= $appointmentDetails['appointment_id']; ?>">
-                        <select name="new_status">
-                            <option value="Confirmed">Confirmed</option>
-                            <option value="Processing">Cancelled</option>
-                            <option value="Completed">Completed</option>
-                        </select>
-                        <button type="submit">Update</button>
-                    </form>
-                </div>
-            </div>
+                <dialog id="statusModal" class="modal" style="display: none">
+                    <div class="modal-content">
+                        <span class="close">&times;</span>
+                        <h2>Update Status</h2>
+                        <form id="statusForm">
+                            <input type="hidden" id="appointmentId" name="appointment_id" value="">
+                            <select name="new_status">
+                                <option value="Confirmed">Confirmed</option>
+                                <option value="Cancelled">Cancelled</option>
+                                <option value="Completed">Completed</option>
+                            </select>
+                            <button type="submit">Update</button>
+                        </form>
+                    </div>
+                </dialog>
+                <script>
+                    document.addEventListener('DOMContentLoaded', function() {
+                        const table = document.getElementById('recent-orders--table');
+                        const modal = document.getElementById('statusModal');
+                        const statusForm = document.getElementById('statusForm');
+                        const appointmentIdInput = document.getElementById('appointmentId');
 
+                        table.addEventListener('click', function(event) {
+                            const target = event.target.closest('tr');
+                            if (!target) return;
+
+                            const appointmentId = target.querySelector('.status-column').getAttribute('data-appointment-id');
+                            console.log('Clicked status with appointment ID:', appointmentId);
+                            appointmentIdInput.value = appointmentId;
+                            modal.style.display = "block";
+                            centerModal()
+                        });
+
+                        modal.addEventListener('click', function(event) {
+                            if (event.target === modal || event.target.classList.contains('close')) {
+                                modal.style.display = "none";
+                            }
+                        });
+
+                        function centerModal() {
+                            modal.style.display = "flex";
+                            modal.style.alignItems = "center";
+                            modal.style.justifyContent = "center";
+                        }
+
+
+                        statusForm.addEventListener('submit', function(event) {
+                            event.preventDefault();
+                            var formData = new FormData(this);
+
+                            if (confirm("Are you sure you want to update the status?")) {
+                                fetch('update-app-status.php', {
+                                        method: 'POST',
+                                        body: formData
+                                    })
+                                    .then(response => response.json())
+                                    .then(data => {
+                                        if (data.success) {
+                                            alert('Status updated successfully!');
+                                        } else {
+                                            alert('Error: ' + data.error);
+                                        }
+                                        location.reload();
+                                    })
+                                    .catch(error => {
+                                        console.error('Error:', error);
+                                        alert('Failed to update status due to an error.');
+                                    });
+                            }
+                        });
+                    });
+
+                    document.addEventListener('DOMContentLoaded', function() {
+                        const savedStatus = localStorage.getItem('selectedStatus') || 'All';
+                        document.getElementById('statusFilter').value = savedStatus;
+                        updateStatusHeadingAndTable(savedStatus);
+                    });
+
+                    function filterAppointments() {
+                        const status = document.getElementById('statusFilter').value;
+                        localStorage.setItem('selectedStatus', status);
+                        updateStatusHeadingAndTable(status);
+                    }
+
+                    function updateStatusHeadingAndTable(status) {
+                        const statusHeading = document.getElementById('statusHeading');
+                        statusHeading.textContent = `${status} Appointments`;
+                        fetch(`app-table.php?status=${status}`)
+                            .then(response => response.json())
+                            .then(data => displayAppointments(data))
+                            .catch(error => console.error('Error:', error));
+                    }
+
+                    function displayAppointments(appointments) {
+                        const table = document.getElementById('recent-orders--table');
+                        const message = document.getElementById('no-appointments-message');
+                        const tbody = table.querySelector('tbody');
+                        tbody.innerHTML = '';
+
+                        if (!appointments || appointments.length === 0) {
+                            table.style.display = 'none';
+                            message.style.display = 'block';
+                            message.textContent = 'No appointments available for this status.';
+                            return;
+                        }
+
+                        table.style.display = '';
+                        message.style.display = 'none';
+
+                        appointments.forEach(appointment => {
+                            const statusInfo = getStatusDetails(appointment.status);
+                            const formattedTime = formatAMPMTime(appointment.appointment_time);
+
+                            const row = tbody.insertRow();
+                            row.innerHTML = `
+            <td>
+                <img src="${appointment.profile_image_path ? '../uploaded_files/' + appointment.profile_image_path : 'assets/img/default.png'}" alt="Profile Image" class="profile-image-circle">
+            </td>
+            <td>${appointment['first_name']} ${appointment['last_name']}</td>
+            <td>${appointment['phone_number']}</td>
+            <td>${appointment['email']}</td>
+            <td>${appointment['date']}</td>
+            <td>${formattedTime}</td>
+            <td>${appointment['appointment_type']}</td>
+            <td>${appointment['message']}</td>
+            <td class="${statusInfo.class} status-column" data-appointment-id="${appointment.appointment_id}">
+                ${appointment['status']}<i class="${statusInfo.icon}"></i>
+            </td>
+            <td><a href="appDetails.php?id=${appointment.appointment_id}"><i class="bx bx-show"></i></a></td>
+        `;
+                        });
+                    }
+
+                    function getStatusDetails(status) {
+                        const statuses = {
+                            'All': {
+                                class: 'status-all',
+                                icon: 'bx bx-list-ul'
+                            },
+                            'Confirmed': {
+                                class: 'status-confirmed',
+                                icon: 'bx bx-check-circle'
+                            },
+                            'Cancelled': {
+                                class: 'status-cancelled',
+                                icon: 'bx bx-x-circle'
+                            },
+                            'Pending': {
+                                class: 'status-pending',
+                                icon: 'bx bx-time-five'
+                            },
+                            'Denied': {
+                                class: 'status-denied',
+                                icon: 'bx bx-block'
+                            },
+                            'Processing': {
+                                class: 'status-processing',
+                                icon: 'bx bx-loader'
+                            },
+                            'Reschedule': {
+                                class: 'status-reschedule',
+                                icon: 'bx bx-calendar'
+                            },
+                            'Completed': {
+                                class: 'status-completed',
+                                icon: 'bx bx-check'
+                            },
+                            'Unknown': {
+                                class: 'status-comlete',
+                                icon: 'bx bx-help-circle'
+                            }
+                        };
+                        return statuses[status] || statuses['Unknown'];
+                    }
+
+                    function formatAMPMTime(time) {
+                        const [hours, minutes] = time.split(':');
+                        let hour = parseInt(hours);
+                        const isPM = hour >= 12;
+                        hour = hour % 12 || 12;
+                        return `${hour}:${minutes.padStart(2, '0')} ${isPM ? 'PM' : 'AM'}`;
+                    }
+                </script>
+            </main>
             <div class="right">
                 <div class="top">
                     <button id="menu-btn">
@@ -308,90 +740,105 @@
                     </div>
                     <div class="profile">
                         <div class="info">
-                            <p>Hey, <b name="admin-name"><?= $profile['doctorLastName'] ?></b></p>
+                            <p>Hey, <b name="admin-name"><?= $profile['doctorFirstName'] . " " . $profile['doctorLastName'] ?></b></p>
                             <small class="text-muted user-role">Admin</small>
                         </div>
                         <div class="profile-photo">
                         </div>
                     </div>
                 </div>
+                <div class="recent-updates">
+                    <h2 class="updates-title">Appointment Updates</h2>
+                    <div class="updates-list">
+                        <?php foreach ($updates as $index => $update) : ?>
+                            <div class="update-item" data-index="<?= $index ?>" onclick="showUpdateModal(this.getAttribute('data-index'));">
+                                <h3 class="update-title <?= $update['type'] === 'reminder' ? 'reminder-title' : ''; ?>">
+                                    <?php if ($update['type'] === 'reminder') : ?>
+                                        <i class="bx bxs-bell reminder-icon"></i>
+                                    <?php elseif ($update['type'] === 'appointment') : ?>
+                                        <i class="bx bxs-message-square-dots appointment-icon"></i>
+                                    <?php endif; ?>
+                                    <?= $update['type'] === 'appointment' ? "Appointment Update" : "Reminder"; ?>
+                                </h3>
+                                <span class="update-date"><?= date("F j, Y", strtotime($update['datetime'])); ?></span>
+                            </div>
+
+                        <?php endforeach; ?>
+                    </div>
+                </div>
+                <div id="updateModal" class="modal" style="display: none;">
+                    <div class="modal-content">
+                        <span class="close" onclick="closeModal()">&times;</span>
+                        <div id="modalContent"></div>
+                    </div>
+                </div>
             </div>
         </div>
-        <script src="assets/js/script.js"></script>
+
+        </div>
         <script>
-            var modal = document.getElementById('statusModal');
-            var btn = document.querySelectorAll('.status-column');
-            var span = document.getElementsByClassName("close")[0];
+            function showUpdateModal(index) {
+                var updateData = updates[index];
+                console.log("Selected update data:", updateData);
 
-            // Display modal on clicking the status column
-            btn.forEach(function(element) {
-                element.onclick = function() {
-                    modal.style.display = "block";
+                var modal = document.getElementById('updateModal');
+                var modalContent = document.getElementById('modalContent');
+
+                modalContent.innerHTML = '';
+                var formattedDate = new Date(updateData.datetime).toLocaleDateString('en-GB', {
+                    day: 'numeric',
+                    month: 'long',
+                    year: 'numeric'
+                });
+                var formattedTime = new Date(updateData.datetime).toLocaleTimeString([], {
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    hour12: true
+                });
+
+                if (updateData.type === 'appointment') {
+                    const statusClass = updateData.status ? `modal-status-${updateData.status.toLowerCase()}` : 'modal-status-unknown';
+                    modalContent.innerHTML = `
+        <h3>Appointment Details</h3>
+        <div class="${statusClass} modal-title">${updateData.status || 'No status'}</div>
+        <div class="recipients">${updateData.first_name} ${updateData.last_name}</div>
+        <div class="modal-date">${formattedDate} : ${formattedTime}</div>
+    `;
+                } else if (updateData.type === 'reminder') {
+                    const priorityClass = updateData.status ? `priority-${updateData.status.toLowerCase()}` : '';
+                    modalContent.innerHTML = `
+            <h3>Reminder Details</h3>
+            <div class="modal-priority-icon ${priorityClass}"><i class="bx bxs-flag-alt"></i></div>
+            <div class="modal-title">${updateData.title || 'No Title'}</div>
+            <div class="modal-description">${updateData.description || 'No Description'}</div>
+            <div class="modal-date">${formattedDate} : ${formattedTime}</div>
+        `;
                 }
-            });
 
-            // Close the modal on clicking 'X' (close)
-            span.onclick = function() {
+                modal.style.display = "flex";
+            }
+
+
+            function closeModal() {
+                var modal = document.getElementById('updateModal');
                 modal.style.display = "none";
-            };
-
-            // Close the modal when clicking outside of it
+            }
             window.onclick = function(event) {
+                var modal = document.getElementById('updateModal');
                 if (event.target == modal) {
                     modal.style.display = "none";
                 }
-            };
-
-            // Handle form submission with confirmation
-            document.getElementById('statusForm').onsubmit = function(event) {
-                event.preventDefault();
-                var formData = new FormData(this);
-
-                // Confirmation dialog
-                if (confirm("Are you sure you want to update the status?")) {
-                    fetch('update-app-status.php', {
-                            method: 'POST',
-                            body: formData
-                        })
-                        .then(response => response.json())
-                        .then(data => {
-                            if (data.success) {
-                                alert('Status updated successfully!');
-                            } else {
-                                alert('Error: ' + data.error);
-                            }
-                            location.reload(); // Reload the page to update the data displayed
-                        })
-                        .catch(error => {
-                            console.error('Error:', error);
-                            alert('Failed to update status due to an error.');
-                        });
-                }
-            };
-
-            function confirmDelete(appointmentId) {
-                if (confirm("Are you sure you want to delete this appointment?")) {
-                    // AJAX call to delete the appointment
-                    fetch('delete-appointment.php', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/x-www-form-urlencoded',
-                            },
-                            body: 'appointment_id=' + appointmentId
-                        })
-                        .then(response => response.json())
-                        .then(data => {
-                            alert('Appointment deleted successfully!');
-                            location.reload(); // Reload the page to update the data displayed
-                        })
-                        .catch(error => {
-                            console.error('Error:', error);
-                            alert('Failed to delete the appointment.');
-                        });
-                }
             }
+            console.log("Updates Data:", updates);
         </script>
+        <script>
 
+        </script>
+        <script src="./constants/recent-order-data.js"></script>
+        <script src="assets/js/update-data.js"></script>
+        <script src="./constants/sales-analytics-data.js"></script>
+        <script src="assets/js/script.js"></script>
     </body>
+
 
     </html>
