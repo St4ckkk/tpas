@@ -1,5 +1,12 @@
 <?php
+
+
 include_once 'conn/dbconnect.php';
+define('BASE_URL1', '/tpas/');
+include_once $_SERVER['DOCUMENT_ROOT'] . BASE_URL1 . 'data-encryption.php';
+
+
+
 
 session_start();
 
@@ -21,6 +28,8 @@ $currentDateTime = date('Y-m-d g:i A');
 $login_error = '';
 $errors = [];
 date_default_timezone_set('Asia/Manila');
+
+
 
 function log_action($con, $accountNumber, $actionDescription, $userType)
 {
@@ -65,7 +74,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     $login_error = 'Your account is not approved yet. Please <a href="contact.html">contact support</a> for more information.';
                     log_action($con, $row['account_num'], "Attempted to log in but account is not verified on $currentDateTime", "user");
                 } else {
-                    // If account is verified and not locked, proceed to check the password
+
                     if (password_verify($password, $row['password'])) {
                         $currentDateTime = date('Y-m-d g:i A');
                         $con->query("UPDATE tb_patients SET login_attempts = 0, lock_until = NULL WHERE patientId = {$row['patientId']}");
@@ -75,7 +84,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                         header("Location: " . BASE_URL . "userpage.php");
                         exit();
                     } else {
-             
+
                         $failedAttempts = $row['login_attempts'] + 1;
                         if ($failedAttempts >= 5) {
 
@@ -136,8 +145,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         if (count($errors) === 0) {
             $accountNumber = sprintf("%06d", mt_rand(1, 999999));
             $hashed_password = password_hash($password, PASSWORD_DEFAULT);
+            $encryptedAccountNumber = encryptData($accountNumber, $encryptionKey);
             $insertQuery = $con->prepare("INSERT INTO tb_patients (firstname, lastname, philhealthId, email, phoneno, password, account_num) VALUES (?, ?, ?, ?, ?, ?, ?)");
-            $insertQuery->bind_param("sssssss", $firstname, $lastname, $philhealthId, $email, $phoneno, $hashed_password, $accountNumber);
+            $insertQuery->bind_param("sssssss", $firstname, $lastname, $philhealthId, $email, $phoneno, $hashed_password, $encryptedAccountNumber);
             if ($insertQuery->execute()) {
                 // Prepare and send email using PHPMailer
                 $mail = new PHPMailer(true);

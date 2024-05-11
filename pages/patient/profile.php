@@ -1,14 +1,21 @@
 <?php
 session_start();
 require_once 'assets/conn/dbconnect.php'; // Ensure the path is correct
+define('BASE_URL1', '/tpas/');
+include_once $_SERVER['DOCUMENT_ROOT'] . BASE_URL1 . 'data-encryption.php';
+
+
 
 if (!isset($_SESSION['patientSession'])) {
     header("Location: /TPAS/auth/patient/index.php");
     exit;
 }
 
+
+
 $userId = $_SESSION['patientSession'];
-$user = fetchUserData($con, $userId);
+
+
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     if (isset($_POST['updateGeneral'])) {
@@ -24,14 +31,19 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     header("Location: profile.php");
     exit;
 }
-function fetchUserData($con, $userId)
+
+function fetchUserData($con, $userId, $encryptionKey)
 {
     $stmt = $con->prepare("SELECT * FROM tb_patients WHERE patientId = ?");
     $stmt->bind_param("i", $userId);
     $stmt->execute();
-    return $stmt->get_result()->fetch_assoc();
-}
+    $user = $stmt->get_result()->fetch_assoc();
 
+    $user['account_num'] = decryptData($user['account_num'], $encryptionKey);
+
+    return $user;
+}
+$user = fetchUserData($con, $userId, $encryptionKey);
 
 function processGeneralInfo($con, $userId, $user)
 {
@@ -384,7 +396,6 @@ function processAdditionalInfo($con, $userId)
                                             <label class="form-label">Account Number</label>
                                             <input type="text" class="form-control" value="<?php echo htmlspecialchars($user['account_num']); ?>" readonly>
                                         </div>
-
                                         <div class="form-group">
                                             <label class="form-label">Firstname</label>
                                             <input type="text" name="fname" class="form-control" value="<?php echo htmlspecialchars($user['firstname']); ?>">
