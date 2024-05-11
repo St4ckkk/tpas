@@ -1,5 +1,18 @@
 <?php
 include_once('includes/dashboard.php');
+$assistantId = $_SESSION['assistantSession'];
+$query = $con->prepare("SELECT * FROM assistants WHERE assistantId = ?");
+$query->bind_param("i", $assistantId);
+$query->execute();
+$result = $query->get_result();
+$assistant = $result->fetch_assoc();
+
+if (!$assistant) {
+    echo 'Error fetching assistant details.';
+    exit;
+}
+
+
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -22,14 +35,28 @@ include_once('includes/dashboard.php');
         overflow-x: hidden;
     }
 
+    .profile {
+        display: flex;
+        align-items: center;
+    }
+
+    .profile-image {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        margin-right: 10px;
+        cursor: pointer;
+    }
+
     .breadcrumb {
         background: var(--grey);
     }
-    .slash{
-        color:var(--dark);
+
+    .slash {
+        color: var(--dark);
     }
 
-   
+
 
     .sidebar li a {
         text-decoration: none;
@@ -201,9 +228,8 @@ include_once('includes/dashboard.php');
 
     /* General style for status columns */
     .status-column {
-        display: flex;
         align-items: center;
-        font-size: 0.7rem;
+        font-size: 0.9rem;
     }
 
     .status-column i {
@@ -380,12 +406,15 @@ include_once('includes/dashboard.php');
             <input type="checkbox" id="theme-toggle" hidden>
             <label for="theme-toggle" class="theme-toggle"></label>
             <div class="profile">
-                <p>Hey, <b name="admin-name"><?= htmlspecialchars($assistant['firstName'] . " " . $assistant['lastName']) ?></b></p>
-                <small class="text-muted user-role">Assistant</small>
+                <a href="profile.php"> <img src="<?php echo htmlspecialchars($assistant['profile_image_path'] ?? 'assets/img/default.png'); ?>" alt="Profile Image" class="profile-image"></a>
+                <div class="profile-info">
+                    <p>Hey, <b name="admin-name"><?= htmlspecialchars($assistant['firstName'] . " " . $assistant['lastName']) ?></b></p>
+                    <small class="text-muted user-role">Assistant</small>
+                </div>
             </div>
+
         </nav>
 
-        <!-- End of Navbar -->
 
         <main>
             <div class="header">
@@ -395,47 +424,43 @@ include_once('includes/dashboard.php');
                         <li><a href="#">
                                 Home
                             </a></li>
-                        <span class="slash">/</span>
+                        <span class="slash">></span>
                         <li><a href="#" class="active">Dashboard</a></li>
                     </ul>
                 </div>
-                <a href="#" class="report">
-                    <i class='bx bx-cloud-download'></i>
-                    <span>Download Reports</span>
-                </a>
             </div>
 
             <ul class="insights">
                 <li>
-                    <i class='bx bx-calendar' style="background-color: #e3f2fd; color: #007bff;"></i> <!-- Light blue background for total appointments -->
+                    <i class='bx bx-calendar' style="background-color: #e3f2fd; color: #007bff;"></i>
                     <span class="info">
                         <h3><?php echo $totalAppointments; ?></h3>
                         <p>Total Appointments</p>
                     </span>
                 </li>
                 <li>
-                    <i class='bx bx-calendar-check' style="background-color: #d4edda; color: #28a745;"></i> <!-- Light green background for confirmed appointments -->
+                    <i class='bx bx-calendar-check' style="background-color: #d4edda; color: #28a745;"></i>
                     <span class="info">
                         <h3><?php echo $confirmedCount; ?></h3>
                         <p>Confirmed Appointments</p>
                     </span>
                 </li>
                 <li>
-                    <i class='bx bx-time' style="background-color: #fff3cd; color: #fd7e14;"></i> <!-- Light orange background for rescheduled appointments -->
+                    <i class='bx bx-time' style="background-color: #fff3cd; color: #fd7e14;"></i>
                     <span class="info">
                         <h3><?php echo $rescheduleCount; ?></h3>
                         <p>Reschedule Appointments</p>
                     </span>
                 </li>
                 <li>
-                    <i class='bx bx-loader-circle' style="background-color: #fff3cd; color: #ffc107;"></i> <!-- Light yellow background for pending appointments -->
+                    <i class='bx bx-loader-circle' style="background-color: #fff3cd; color: #ffc107;"></i>
                     <span class="info">
                         <h3><?php echo $pendingCount; ?></h3>
                         <p>Pending Appointments</p>
                     </span>
                 </li>
                 <li>
-                    <i class='bx bx-block' style="background-color: #f8d7da; color: #dc3545;"></i> <!-- Light red background for cancelled appointments -->
+                    <i class='bx bx-block' style="background-color: #f8d7da; color: #dc3545;"></i>
                     <span class="info">
                         <h3><?php echo $canceledCount; ?></h3>
                         <p>Cancelled Appointments</p>
@@ -457,6 +482,7 @@ include_once('includes/dashboard.php');
                         <table>
                             <thead>
                                 <tr>
+                                    <th>Profile</th>
                                     <th>Name</th>
                                     <th>Date</th>
                                     <th>Time</th>
@@ -521,16 +547,27 @@ include_once('includes/dashboard.php');
                                 if (data.appointments && data.appointments.length > 0) {
                                     data.appointments.forEach(appointment => {
                                         const row = tbody.insertRow();
+
                                         const formattedTime = new Date('1970-01-01T' + appointment.appointment_time + 'Z').toLocaleTimeString('en-US', {
                                             hour: 'numeric',
                                             minute: 'numeric',
                                             hour12: true
                                         });
+
+                                        // Get status info
                                         const statusInfo = getStatusDetails(appointment.status);
-                                        row.innerHTML = `<td>${appointment.first_name} ${appointment.last_name}</td>
-                                     <td>${appointment.date}</td>
-                                     <td>${formattedTime}</td>
-                                     <td class="${statusInfo.class} status-column">${appointment.status}<i class='${statusInfo.icon}'></i></td>`;
+
+                                        const imgCell = row.insertCell();
+                                        const img = document.createElement('img');
+                                        img.src = '../uploaded_files/' + appointment.profile_image_path;
+                                        img.alt = 'Profile Image';
+                                        img.className = 'profile-image';
+                                        imgCell.appendChild(img);
+                                        // Populate other cells
+                                        row.innerHTML += `<td>${appointment.first_name} ${appointment.last_name}</td>
+                        <td>${appointment.date}</td>
+                        <td>${formattedTime}</td>
+                        <td class="${statusInfo.class} status-column">${appointment.status}<i class='${statusInfo.icon}'></i></td>`;
                                     });
                                 } else {
                                     tbody.innerHTML = '<tr><td colspan="4" class="text-center">No appointments found for this date.</td></tr>';
@@ -541,6 +578,9 @@ include_once('includes/dashboard.php');
                                 document.querySelector('.orders table tbody').innerHTML = '<tr><td colspan="4" class="text-center">Error loading data.</td></tr>';
                             });
                     }
+
+
+
 
                     function getStatusDetails(status) {
                         const statuses = {

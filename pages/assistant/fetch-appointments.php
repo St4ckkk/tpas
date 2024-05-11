@@ -8,12 +8,14 @@ if (!isset($_SESSION['assistantSession'])) {
     exit;
 }
 
-
-
 $date = $_GET['date'] ?? date('Y-m-d');
 
 try {
-    $appointmentQuery = $con->prepare("SELECT appointment_id, first_name, last_name, date, appointment_time, status FROM appointments WHERE date = ? ORDER BY appointment_time ASC");
+    $appointmentQuery = $con->prepare("SELECT a.appointment_id, a.first_name, a.last_name, a.date, a.appointment_time, a.status, p.profile_image_path 
+                                        FROM appointments a 
+                                        JOIN tb_patients p ON a.patientId = p.patientId
+                                        WHERE a.date = ? 
+                                        ORDER BY a.appointment_time ASC");
     $appointmentQuery->bind_param("s", $date);
     $appointmentQuery->execute();
     $result = $appointmentQuery->get_result();
@@ -41,3 +43,4 @@ try {
     header('Content-Type: application/json');
     echo json_encode(['error' => 'Server error: ' . $e->getMessage()]);
 }
+ 

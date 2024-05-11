@@ -31,7 +31,7 @@
         <link rel="shortcut icon" href="assets/favicon/tpass.ico" type="image/x-icon">
         <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
         <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/css/bootstrap-datepicker.min.css" rel="stylesheet">
-        <title>Dashboard</title>
+        <title>Create your profile</title>
     </head>
     <style>
         .profile-pic {
@@ -42,6 +42,20 @@
             width: 150px;
             height: 150px;
         }
+
+        .profile {
+            display: flex;
+            align-items: center;
+        }
+
+        .profile-image {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            margin-right: 10px;
+            cursor: pointer;
+        }
+
 
         .profile-pic input {
             display: none;
@@ -210,9 +224,13 @@
                 <input type="checkbox" id="theme-toggle" hidden>
                 <label for="theme-toggle" class="theme-toggle"></label>
                 <div class="profile">
-                    <p>Hey, <b name="admin-name"><?= htmlspecialchars($assistant['firstName'] . " " . $assistant['lastName']) ?></b></p>
-                    <small class="text-muted user-role">Assistant</small>
+                    <img src="<?php echo htmlspecialchars($assistant['profile_image_path'] ?? 'assets/img/default.png'); ?>" alt="Profile Image" class="profile-image">
+                    <div class="profile-info">
+                        <p>Hey, <b name="admin-name"><?= htmlspecialchars($assistant['firstName'] . " " . $assistant['lastName']) ?></b></p>
+                        <small class="text-muted user-role">Assistant</small>
+                    </div>
                 </div>
+
             </nav>
 
             <main>
@@ -228,7 +246,8 @@
                         </ul>
                     </div>
                 </div>
-                <div class="profile-data card-content">
+                <!-- Profile Pic and Settings -->
+                <div class="profile-data">
                     <form action="upload.php" method="post" enctype="multipart/form-data">
                         <div class="profile-pic">
                             <label class="-label" for="file">
@@ -241,8 +260,15 @@
 
                         <button type="submit" name="submit" class="btn btn-primary mt-4 mx-4">Save Changes</button>
                     </form>
+                </div>
 
-                    <div class="info-section">
+                <!-- Account Info Section -->
+                <div class="card mt-4">
+                    <div class="card-header">
+                        <span class="bx bx-user"></span> Account Info
+                    </div>
+                    <div class="card-body">
+                        <!-- Info Table -->
                         <div class="info-table">
                             <table class="table table-striped">
                                 <tbody>
@@ -287,7 +313,6 @@
                             <button class="cancel-btn" style="display:none;" onclick="cancel()">Cancel</button>
                         </div>
                     </div>
-
                 </div>
             </main>
         </div>
@@ -326,6 +351,7 @@
                 document.querySelector('.edit-btn').textContent = 'Edit';
                 document.querySelector('.cancel-btn').style.display = 'none';
             }
+
 
             function saveEdits(elements) {
                 var data = {};

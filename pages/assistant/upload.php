@@ -8,7 +8,7 @@ if (!isset($_SESSION['assistantSession'])) {
 }
 
 $assistantId = $_SESSION['assistantSession'];
-$targetDir = "uploaded_files/";
+$targetDir = "../uploaded_files/";
 $fileType = strtolower(pathinfo($_FILES["profile_photo"]["name"], PATHINFO_EXTENSION));
 
 if (!isset($_FILES["profile_photo"]) || $_FILES["profile_photo"]["error"] != UPLOAD_ERR_OK) {
@@ -18,7 +18,7 @@ if (!isset($_FILES["profile_photo"]) || $_FILES["profile_photo"]["error"] != UPL
 
 $fileName = basename($_FILES["profile_photo"]["name"]);
 $hashedFileName = md5(time() . $targetDir . $fileName) . '.' . $fileType; 
-$targetFilePath =  $hashedFileName;
+$targetFilePath =  $targetDir . $hashedFileName;
 
 if (isset($_POST["submit"])) {
     $check = getimagesize($_FILES["profile_photo"]["tmp_name"]);

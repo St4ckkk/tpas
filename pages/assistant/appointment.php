@@ -9,7 +9,7 @@
     }
 
     $assistantId = $_SESSION['assistantSession'];
-    $query = $con->prepare("SELECT firstName, lastName FROM assistants WHERE assistantId = ?");
+    $query = $con->prepare("SELECT * FROM assistants WHERE assistantId = ?");
     $query->bind_param("i", $assistantId);
     $query->execute();
     $result = $query->get_result();
@@ -31,9 +31,22 @@
         <link rel="shortcut icon" href="assets/favicon/tpass.ico" type="image/x-icon">
         <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
         <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/css/bootstrap-datepicker.min.css" rel="stylesheet">
-        <title>Dashboard</title>
+        <title>Appointment Page</title>
     </head>
     <style>
+        .profile {
+            display: flex;
+            align-items: center;
+        }
+
+        .profile-image {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            margin-right: 10px;
+            cursor: pointer;
+        }
+
         .reminder-info {
             margin-top: 8px;
             font-size: 0.8rem;
@@ -348,6 +361,7 @@
             <ul class="side-menu">
                 <li><a href="dashboard.php"><i class='bx bxs-dashboard'></i>Dashboard</a></li>
                 <li class="active"><a href="appointment.php"><i class='bx bx-calendar-check'></i>Appointments</a></li>
+                 <li><a href="profile.php"><i class='bx bx-user'></i>Profile</a></li>
             </ul>
             <ul class="side-menu">
                 <li>
@@ -374,8 +388,11 @@
                 <input type="checkbox" id="theme-toggle" hidden>
                 <label for="theme-toggle" class="theme-toggle"></label>
                 <div class="profile">
-                    <p>Hey, <b name="admin-name"><?= htmlspecialchars($assistant['firstName'] . " " . $assistant['lastName']) ?></b></p>
-                    <small class="text-muted user-role">Assistant</small>
+                    <img src="<?php echo htmlspecialchars($assistant['profile_image_path'] ?? 'assets/img/default.png'); ?>" alt="Profile Image" class="profile-image">
+                    <div class="profile-info">
+                        <p>Hey, <b name="admin-name"><?= htmlspecialchars($assistant['firstName'] . " " . $assistant['lastName']) ?></b></p>
+                        <small class="text-muted user-role">Assistant</small>
+                    </div>
                 </div>
             </nav>
 

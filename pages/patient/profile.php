@@ -76,8 +76,9 @@ function handleImageUpload($userId)
             return false;
         }
 
-        $newFileName = "profile_" . $userId . "." . $ext;
-        $uploadPath = 'uploaded_files/' . $newFileName;
+        // Generate a hashed filename
+        $newFileName = "profile_" . $userId . "_" . md5(uniqid()) . "." . $ext;
+        $uploadPath = '../uploaded_files/' . $newFileName;
 
         if (!move_uploaded_file($fileTmp, $uploadPath)) {
             $_SESSION['profile_error'] = "Failed to move uploaded file.";
