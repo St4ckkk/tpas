@@ -182,10 +182,19 @@
             font-size: 1.5rem;
             transition: 0.3s ease-in-out;
         }
+
+
+
+        #logType {
+            padding: 5px 10px;
+            font-size: 16px;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
     </style>
 
 
-    <body>
+    <main>
         <div class="container">
             <aside>
                 <div class="top">
@@ -236,29 +245,106 @@
             </aside>
             <main>
                 <div class="recent-orders">
-                    <h1>System Logs</h1>
                     <div class="logs-container">
-                        <table class="logs-table">
-                            <thead>
-                                <tr>
-                                    <th>Account Number</th>
-                                    <th>Action</th>
-                                    <th>User Type</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <?php foreach ($logs as $log) : ?>
-                                    <tr>
-                                        <td><?= htmlspecialchars($log['accountNumber']); ?></td>
-                                        <td><?= htmlspecialchars($log['actionDescription']); ?></td>
-                                        <td><?= htmlspecialchars($log['userType']); ?></td>
-                                    </tr>
-                                <?php endforeach; ?>
-                            </tbody>
-                        </table>
+                        <h1 class="logs-heading">System Logs</h1>
                     </div>
+                    <div class="logs-container">
+                        <select id="logType">
+                            <option value="" selected>Select Log Types</option>
+                            <option value="all">All Logs</option>
+                            <option value="assistant">Assistant Logs</option>
+                            <option value="user">User Logs</option>
+                        </select>
+                    </div>
+                    <table class="logs-table">
+                        <thead>
+                            <tr>
+                                <th>Account Number</th>
+                                <th>Action</th>
+                                <th>User Type</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        </tbody>
+                    </table>
                 </div>
+
+
+                <script>
+                    document.addEventListener('DOMContentLoaded', function() {
+                        const logTypeDropdown = document.getElementById('logType');
+                        const logsHeading = document.querySelector('.logs-heading');
+                        const logsTableBody = document.querySelector('.logs-table tbody');
+
+                        // Check sessionStorage for the previously selected log type
+                        const selectedLogType = sessionStorage.getItem('selectedLogType') || '';
+                        if (selectedLogType) {
+                            // Set the dropdown value and update the logs table
+                            logTypeDropdown.value = selectedLogType;
+                            updateLogs(selectedLogType);
+                        }
+
+                        // Event listener for log type dropdown change
+                        logTypeDropdown.addEventListener('change', function() {
+                            const selectedLogType = this.value;
+                            updateLogs(selectedLogType);
+                        });
+
+                        function updateLogs(logType) {
+                            // Store the selected log type in sessionStorage
+                            sessionStorage.setItem('selectedLogType', logType);
+
+                            let logTypeHeading = '';
+                            switch (logType) {
+                                case 'assistant':
+                                    logTypeHeading = 'Assistant Logs';
+                                    break;
+                                case 'user':
+                                    logTypeHeading = 'User Logs';
+                                    break;
+                                default:
+                                    logTypeHeading = 'System Logs';
+                            }
+                            logsHeading.textContent = logTypeHeading;
+                            fetchLogs(logType)
+                                .then(logs => renderLogs(logs))
+                                .catch(error => console.error('Error fetching logs:', error));
+                        }
+
+                        function fetchLogs(logType) {
+                            return new Promise((resolve, reject) => {
+                                const xhr = new XMLHttpRequest();
+                                xhr.onreadystatechange = function() {
+                                    if (xhr.readyState === XMLHttpRequest.DONE) {
+                                        if (xhr.status === 200) {
+                                            resolve(JSON.parse(xhr.responseText));
+                                        } else {
+                                            reject(xhr.statusText);
+                                        }
+                                    }
+                                };
+                                xhr.open('GET', `fetch-logs.php?logType=${logType}`);
+                                xhr.send();
+                            });
+                        }
+
+                        function renderLogs(logs) {
+                            logsTableBody.innerHTML = '';
+                            logs.forEach(log => {
+                                const row = document.createElement('tr');
+                                row.innerHTML = `
+                    <td>${log.accountNumber}</td>
+                    <td>${log.action}</td>
+                    <td>${log.userType}</td>
+                `;
+                                logsTableBody.appendChild(row);
+                            });
+                        }
+                    });
+                </script>
             </main>
+
+
             <div id="statusModal" class="modal">
                 <div class="modal-content">
                     <span class="close">&times;</span>
@@ -301,26 +387,26 @@
             var btn = document.querySelectorAll('.status-column');
             var span = document.getElementsByClassName("close")[0];
 
-            // Display modal on clicking the status column
+
             btn.forEach(function(element) {
                 element.onclick = function() {
                     modal.style.display = "block";
                 }
             });
 
-            // Close the modal on clicking 'X' (close)
+
             span.onclick = function() {
                 modal.style.display = "none";
             };
 
-            // Close the modal when clicking outside of it
+
             window.onclick = function(event) {
                 if (event.target == modal) {
                     modal.style.display = "none";
                 }
             };
 
-            // Handle form submission with confirmation
+
             document.getElementById('statusForm').onsubmit = function(event) {
                 event.preventDefault();
                 var formData = new FormData(this);
@@ -360,7 +446,7 @@
                         .then(response => response.json())
                         .then(data => {
                             alert('Appointment deleted successfully!');
-                            location.reload(); // Reload the page to update the data displayed
+                            location.reload();
                         })
                         .catch(error => {
                             console.error('Error:', error);
@@ -370,6 +456,6 @@
             }
         </script>
 
-    </body>
+        </body>
 
     </html>

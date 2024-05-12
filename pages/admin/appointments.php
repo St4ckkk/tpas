@@ -173,7 +173,7 @@ WHERE status = 'Confirmed'");
 
         .update-item {
             padding: 15px;
-            background-color: white;
+            background-color: var(--color-white);
             border-radius: 5px;
             margin-bottom: 10px;
             transition: box-shadow 0.3s;
@@ -210,19 +210,19 @@ WHERE status = 'Confirmed'");
             width: 100%;
             height: 100%;
             overflow: auto;
-            background-color: rgba(0, 0, 0, 0.4);
             display: flex;
             align-items: center;
             justify-content: center;
+
         }
 
         .modal-content {
-            background-color: #fefefe;
+            background-color: var(--color-white);
             margin: auto;
             padding: 20px;
-            border: 1px solid #888;
+            border: 1px solid #fff;
             width: 20%;
-            box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.3), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+            box-shadow: var(--box-shadow);
             border-radius: 5px;
         }
 
@@ -775,7 +775,6 @@ WHERE status = 'Confirmed'");
             </div>
         </div>
 
-        </div>
         <script>
             function showUpdateModal(index) {
                 var updateData = updates[index];
@@ -785,10 +784,10 @@ WHERE status = 'Confirmed'");
                 var modalContent = document.getElementById('modalContent');
 
                 modalContent.innerHTML = '';
-                var formattedDate = new Date(updateData.datetime).toLocaleDateString('en-GB', {
-                    day: 'numeric',
+                var formattedDate = new Date(updateData.datetime).toLocaleDateString('en-US', {
+                    year: 'numeric',
                     month: 'long',
-                    year: 'numeric'
+                    day: 'numeric'
                 });
                 var formattedTime = new Date(updateData.datetime).toLocaleTimeString([], {
                     hour: '2-digit',
@@ -799,20 +798,20 @@ WHERE status = 'Confirmed'");
                 if (updateData.type === 'appointment') {
                     const statusClass = updateData.status ? `modal-status-${updateData.status.toLowerCase()}` : 'modal-status-unknown';
                     modalContent.innerHTML = `
-        <h3>Appointment Details</h3>
-        <div class="${statusClass} modal-title">${updateData.status || 'No status'}</div>
-        <div class="recipients">${updateData.first_name} ${updateData.last_name}</div>
-        <div class="modal-date">${formattedDate} : ${formattedTime}</div>
-    `;
+    <h3>Appointment Details</h3>
+    <div class="${statusClass} modal-title">${updateData.status || 'No status'}</div>
+    <div class="recipients">${updateData.first_name} ${updateData.last_name}</div>
+    <div class="modal-date">${formattedDate} : ${formattedTime}</div>
+`;
                 } else if (updateData.type === 'reminder') {
                     const priorityClass = updateData.status ? `priority-${updateData.status.toLowerCase()}` : '';
                     modalContent.innerHTML = `
-            <h3>Reminder Details</h3>
-            <div class="modal-priority-icon ${priorityClass}"><i class="bx bxs-flag-alt"></i></div>
-            <div class="modal-title">${updateData.title || 'No Title'}</div>
-            <div class="modal-description">${updateData.description || 'No Description'}</div>
-            <div class="modal-date">${formattedDate} : ${formattedTime}</div>
-        `;
+        <h3>Reminder Details</h3>
+        <div class="modal-priority-icon ${priorityClass}"><i class="bx bxs-flag-alt"></i></div>
+        <div class="modal-title">${updateData.title || 'No Title'}</div>
+        <div class="modal-description">${updateData.description || 'No Description'}</div>
+        <div class="modal-date">${formattedDate} : ${formattedTime}</div>
+    `;
                 }
 
                 modal.style.display = "flex";
@@ -831,6 +830,7 @@ WHERE status = 'Confirmed'");
             }
             console.log("Updates Data:", updates);
         </script>
+
         <script>
 
         </script>

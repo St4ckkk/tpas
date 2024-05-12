@@ -130,7 +130,7 @@ WHERE status = 'Confirmed'");
 
         }
 
-      
+
 
         .status-column i {
             vertical-align: middle;
@@ -212,7 +212,7 @@ WHERE status = 'Confirmed'");
 
         .update-item {
             padding: 15px;
-            background-color: white;
+            background-color: var(--color-white);
             border-radius: 5px;
             margin-bottom: 10px;
             transition: box-shadow 0.3s;
@@ -230,7 +230,7 @@ WHERE status = 'Confirmed'");
 
         .update-summary {
             font-size: 14px;
-            color: #666;
+       
         }
 
         .update-date {
@@ -240,7 +240,6 @@ WHERE status = 'Confirmed'");
             margin-top: 5px;
         }
 
-        /* The Modal (background) */
         .modal {
             display: none;
             position: fixed;
@@ -257,39 +256,35 @@ WHERE status = 'Confirmed'");
 
 
         .modal-content {
-            background-color: #fefefe;
+            background-color: var(--color-white);
             margin: auto;
             padding: 20px;
-            border: 1px solid #888;
+            border: 1px solid #fff;
             width: 20%;
-            box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.3), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+            box-shadow: var(--box-shadow);
             border-radius: 5px;
+            color: var(---color-white);
         }
 
         .modal-title {
             font-weight: bold;
             font-size: 24px;
-            /* Larger and bolder */
-            color: #333;
             margin-bottom: 8px
         }
 
         .modal-description {
             font-size: 16px;
-            color: #555;
             margin-top: 5px;
             margin-bottom: 10px;
         }
 
         .modal-priority {
             font-weight: bold;
-            /* Make priority noticeable */
             margin-bottom: 5px;
         }
 
         .modal-date {
             font-size: 12px;
-            color: #666;
             text-align: right;
             margin-top: auto;
         }
@@ -426,7 +421,7 @@ WHERE status = 'Confirmed'");
         .no-appointments-message {
             padding: 20px;
             margin-top: 20px;
-            background-color: #fff;
+            background-color: var(--color-white);
             text-align: center;
             border: 1px solid #fff;
             font-size: 16px;
@@ -480,6 +475,39 @@ WHERE status = 'Confirmed'");
 
         .modal-status-unknown {
             color: grey;
+        }
+
+        .card {
+            background-color: var(--color-white);
+            border-radius: 50px;
+            box-shadow: var(--box-shadow);
+            margin-top: 20px;
+            margin-bottom: 10px;
+            padding: 20px;
+        }
+
+        .card:hover {
+            cursor: pointer;
+            box-shadow: none;
+        }
+
+        .card .middle {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .card .left {
+            flex-grow: 1;
+        }
+
+        .card h3 {
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+
+        .card h3 span {
+            font-weight: bold;
         }
     </style>
 
@@ -536,6 +564,14 @@ WHERE status = 'Confirmed'");
             <main>
 
                 <h1>Dashboard</h1>
+                <div class="card">
+                    <div class="middle">
+                        <div class="left">
+                            <h2>Welcome Back, Dr. <span id="doctorNameCard"><?= $profile['doctorFirstName'] . " " . $profile['doctorLastName'] ?></span></h2>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="insights">
                     <div class="appointments">
                         <span class="material-icons-sharp">event_available</span>
@@ -761,60 +797,61 @@ WHERE status = 'Confirmed'");
             </div>
         </div>
         <script>
-            function showUpdateModal(index) {
-                var updateData = updates[index];
-                console.log("Selected update data:", updateData);
+    function showUpdateModal(index) {
+        var updateData = updates[index];
+        console.log("Selected update data:", updateData);
 
-                var modal = document.getElementById('updateModal');
-                var modalContent = document.getElementById('modalContent');
+        var modal = document.getElementById('updateModal');
+        var modalContent = document.getElementById('modalContent');
 
-                modalContent.innerHTML = '';
-                var formattedDate = new Date(updateData.datetime).toLocaleDateString('en-GB', {
-                    day: 'numeric',
-                    month: 'long',
-                    year: 'numeric'
-                });
-                var formattedTime = new Date(updateData.datetime).toLocaleTimeString([], {
-                    hour: '2-digit',
-                    minute: '2-digit',
-                    hour12: true
-                });
+        modalContent.innerHTML = '';
+        var formattedDate = new Date(updateData.datetime).toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+        });
+        var formattedTime = new Date(updateData.datetime).toLocaleTimeString([], {
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: true
+        });
 
-                if (updateData.type === 'appointment') {
-                    const statusClass = updateData.status ? `modal-status-${updateData.status.toLowerCase()}` : 'modal-status-unknown';
-                    modalContent.innerHTML = `
-        <h3>Appointment Details</h3>
-        <div class="${statusClass} modal-title">${updateData.status || 'No status'}</div>
-        <div class="recipients">${updateData.first_name} ${updateData.last_name}</div>
+        if (updateData.type === 'appointment') {
+            const statusClass = updateData.status ? `modal-status-${updateData.status.toLowerCase()}` : 'modal-status-unknown';
+            modalContent.innerHTML = `
+    <h3>Appointment Details</h3>
+    <div class="${statusClass} modal-title">${updateData.status || 'No status'}</div>
+    <div class="recipients">${updateData.first_name} ${updateData.last_name}</div>
+    <div class="modal-date">${formattedDate} : ${formattedTime}</div>
+`;
+        } else if (updateData.type === 'reminder') {
+            const priorityClass = updateData.status ? `priority-${updateData.status.toLowerCase()}` : '';
+            modalContent.innerHTML = `
+        <h3>Reminder Details</h3>
+        <div class="modal-priority-icon ${priorityClass}"><i class="bx bxs-flag-alt"></i></div>
+        <div class="modal-title">${updateData.title || 'No Title'}</div>
+        <div class="modal-description">${updateData.description || 'No Description'}</div>
         <div class="modal-date">${formattedDate} : ${formattedTime}</div>
     `;
-                } else if (updateData.type === 'reminder') {
-                    const priorityClass = updateData.status ? `priority-${updateData.status.toLowerCase()}` : '';
-                    modalContent.innerHTML = `
-            <h3>Reminder Details</h3>
-            <div class="modal-priority-icon ${priorityClass}"><i class="bx bxs-flag-alt"></i></div>
-            <div class="modal-title">${updateData.title || 'No Title'}</div>
-            <div class="modal-description">${updateData.description || 'No Description'}</div>
-            <div class="modal-date">${formattedDate} : ${formattedTime}</div>
-        `;
-                }
+        }
 
-                modal.style.display = "flex";
-            }
+        modal.style.display = "flex";
+    }
 
 
-            function closeModal() {
-                var modal = document.getElementById('updateModal');
-                modal.style.display = "none";
-            }
-            window.onclick = function(event) {
-                var modal = document.getElementById('updateModal');
-                if (event.target == modal) {
-                    modal.style.display = "none";
-                }
-            }
-            console.log("Updates Data:", updates);
-        </script>
+    function closeModal() {
+        var modal = document.getElementById('updateModal');
+        modal.style.display = "none";
+    }
+    window.onclick = function(event) {
+        var modal = document.getElementById('updateModal');
+        if (event.target == modal) {
+            modal.style.display = "none";
+        }
+    }
+    console.log("Updates Data:", updates);
+</script>
+
         <script src="./constants/recent-order-data.js"></script>
         <script src="assets/js/update-data.js"></script>
         <script src="./constants/sales-analytics-data.js"></script>

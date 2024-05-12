@@ -22,15 +22,12 @@ $query = $con->prepare("SELECT accountNumber, firstName, lastName, email, phoneN
 $query->bind_param("ii", $recordsPerPage, $offset);
 $query->execute();
 $result = $query->get_result();
-$logQuery = $con->prepare("SELECT id, accountNumber, actionDescription, userType, dateTime FROM logs WHERE userType = ? ORDER BY dateTime DESC");
-
-// Bind the 'assistant' string to the userType parameter
+$logQuery = $con->prepare("SELECT id, accountNumber, actionDescription, userType, dateTime FROM logs WHERE userType = ? ORDER BY dateTime DESC LIMIT ? OFFSET ?");
 $userType = 'assistant';
-$logQuery->bind_param("s", $userType);
-
-// Execute the query
+$logQuery->bind_param("sii", $userType, $recordsPerPage, $offset);
 $logQuery->execute();
 $logResult = $logQuery->get_result();
+
 ?>
 
 
@@ -252,11 +249,19 @@ $logResult = $logQuery->get_result();
                                 <td><?= htmlspecialchars($row['lastName']) ?></td>
                                 <td><?= htmlspecialchars($row['email']) ?></td>
                                 <td><?= htmlspecialchars($row['phoneNumber']) ?></td>
-                                <td><?= htmlspecialchars(date("m-d-Y  g:i A", strtotime($row['createdAt']))) ?></td>
+                                <td><?= htmlspecialchars(date("F j, Y g:i A", strtotime($row['createdAt']))) ?></td>
                             </tr>
                         <?php endwhile; ?>
                     </tbody>
                 </table>
+                <div class="pagination">
+                    <?php
+                    $totalPages = ceil($logQuery->num_rows / $recordsPerPage);
+                    for ($i = 1; $i <= $totalPages; $i++) {
+                        echo '<a href="?page=' . $i . '">' . $i . '</a>';
+                    }
+                    ?>
+                </div>
             </div>
         </main>
 
@@ -298,7 +303,15 @@ $logResult = $logQuery->get_result();
                         </tbody>
                     </table>
                 </div>
-
+                <div class="pagination">
+                    <?php
+                    $totalLogs = $logQuery->num_rows;
+                    $totalPages = ceil($totalLogs / $recordsPerPage);
+                    for ($i = 1; $i <= $totalPages; $i++) {
+                        echo '<a href="?page=' . $i . '">' . $i . '</a>';
+                    }
+                    ?>
+                </div>
             </div>
 
         </div>
