@@ -184,6 +184,12 @@
         }
 
 
+        .logs-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
 
         #logType {
             padding: 5px 10px;
@@ -247,8 +253,6 @@
                 <div class="recent-orders">
                     <div class="logs-container">
                         <h1 class="logs-heading">System Logs</h1>
-                    </div>
-                    <div class="logs-container">
                         <select id="logType">
                             <option value="" selected>Select Log Types</option>
                             <option value="all">All Logs</option>
