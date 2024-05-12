@@ -91,9 +91,7 @@
             flex-direction: row;
         }
 
-        .aside {
-            flex: 0 0 250px;
-        }
+     
 
         main {
             flex-grow: 2;
@@ -182,15 +180,12 @@
             font-size: 1.5rem;
             transition: 0.3s ease-in-out;
         }
-
-
         .logs-container {
             display: flex;
             justify-content: space-between;
             align-items: center;
             margin-bottom: 10px;
         }
-
         #logType {
             padding: 5px 10px;
             font-size: 16px;
@@ -200,7 +195,6 @@
     </style>
 
 
-    <main>
         <div class="container">
             <aside>
                 <div class="top">
@@ -439,7 +433,6 @@
 
             function confirmDelete(appointmentId) {
                 if (confirm("Are you sure you want to delete this appointment?")) {
-                    // AJAX call to delete the appointment
                     fetch('delete-appointment.php', {
                             method: 'POST',
                             headers: {

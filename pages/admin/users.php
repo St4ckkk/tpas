@@ -1,6 +1,6 @@
 <?php
 session_start();
-include_once 'assets/conn/dbconnect.php'; // Adjust the path as needed
+include_once 'assets/conn/dbconnect.php';
 
 define('BASE_URL', '/TPAS/auth/admin/');
 if (!isset($_SESSION['doctorSession'])) {
@@ -49,7 +49,6 @@ $profile = $query->get_result()->fetch_assoc();
     th {
         font-weight: bold;
     }
-
 
     .icon-link {
         text-decoration: none;
@@ -196,17 +195,21 @@ $profile = $query->get_result()->fetch_assoc();
                     </thead>
                     <tbody>
                         <?php
+                        define('BASE_URL1', '/tpas/');
+                        include_once $_SERVER['DOCUMENT_ROOT'] . BASE_URL1 . 'data-encryption.php';
                         $query = $con->prepare("SELECT account_num, firstname, lastname, email, phoneno, accountStatus, createdAt FROM tb_patients ORDER BY createdAt DESC");
+
                         $query->execute();
                         $result = $query->get_result();
                         while ($row = $result->fetch_assoc()) :
+                            $account_num = decryptData($row['account_num'], $encryptionKey);
                         ?>
                             <tr>
-                                <td><?= htmlspecialchars($row['account_num']) ?></td>
+                                <td><?= htmlspecialchars($account_num) ?></td>
                                 <td><?= htmlspecialchars($row['firstname'] . ' ' . $row['lastname']) ?></td>
                                 <td><?= htmlspecialchars($row['email']) ?></td>
                                 <td><?= htmlspecialchars($row['phoneno']) ?></td>
-                                <td><?= htmlspecialchars(date("m/d/Y  g:i A", strtotime($row['createdAt']))) ?></td>
+                                <td><?= htmlspecialchars(date("F j, Y g:i A", strtotime($row['createdAt']))) ?></td>
                                 <td class="status-column  <?= $row['accountStatus'] === 'Pending' ? 'status-pending' : ($row['accountStatus'] === 'Verified' ? 'status-approved' : 'status-denied') ?> " data-patient-id="<?= $row['account_num'] ?>">
                                     <?= htmlspecialchars($row['accountStatus']) ?>
                                     <?php if ($row['accountStatus'] === 'Verified') : ?>

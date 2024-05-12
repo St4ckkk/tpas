@@ -100,7 +100,21 @@ WHERE status = 'Confirmed'");
     }
     $updatesQuery->close();
 
+    $systemName = '';
+    $logoPath = '';
 
+    $query = $con->prepare("SELECT system_name, logo_path FROM system_settings WHERE id = 1");
+    $query->execute();
+    $result = $query->get_result();
+
+
+    if ($result->num_rows > 0) {
+        $settings = $result->fetch_assoc();
+        $systemName = $settings['system_name'];
+        $logoPath = $settings['logo_path'];
+    }
+
+    $query->close();
     ?>
 
 
@@ -230,7 +244,7 @@ WHERE status = 'Confirmed'");
 
         .update-summary {
             font-size: 14px;
-       
+
         }
 
         .update-date {
@@ -554,15 +568,17 @@ WHERE status = 'Confirmed'");
                         <span class="material-icons-sharp"> add </span>
                         <h3>Add Schedule</h3>
                     </a>
+                    <a href="systems.php">
+                        <span class="material-icons-sharp"> settings </span>
+                        <h3>System Settings</h3>
+                    </a>
                     <a href="logout.php?logout">
                         <span class="material-icons-sharp"> logout </span>
                         <h3>Logout</h3>
                     </a>
                 </div>
             </aside>
-
             <main>
-
                 <h1>Dashboard</h1>
                 <div class="card">
                     <div class="middle">
@@ -797,60 +813,60 @@ WHERE status = 'Confirmed'");
             </div>
         </div>
         <script>
-    function showUpdateModal(index) {
-        var updateData = updates[index];
-        console.log("Selected update data:", updateData);
+            function showUpdateModal(index) {
+                var updateData = updates[index];
+                console.log("Selected update data:", updateData);
 
-        var modal = document.getElementById('updateModal');
-        var modalContent = document.getElementById('modalContent');
+                var modal = document.getElementById('updateModal');
+                var modalContent = document.getElementById('modalContent');
 
-        modalContent.innerHTML = '';
-        var formattedDate = new Date(updateData.datetime).toLocaleDateString('en-US', {
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric'
-        });
-        var formattedTime = new Date(updateData.datetime).toLocaleTimeString([], {
-            hour: '2-digit',
-            minute: '2-digit',
-            hour12: true
-        });
+                modalContent.innerHTML = '';
+                var formattedDate = new Date(updateData.datetime).toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                });
+                var formattedTime = new Date(updateData.datetime).toLocaleTimeString([], {
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    hour12: true
+                });
 
-        if (updateData.type === 'appointment') {
-            const statusClass = updateData.status ? `modal-status-${updateData.status.toLowerCase()}` : 'modal-status-unknown';
-            modalContent.innerHTML = `
+                if (updateData.type === 'appointment') {
+                    const statusClass = updateData.status ? `modal-status-${updateData.status.toLowerCase()}` : 'modal-status-unknown';
+                    modalContent.innerHTML = `
     <h3>Appointment Details</h3>
     <div class="${statusClass} modal-title">${updateData.status || 'No status'}</div>
     <div class="recipients">${updateData.first_name} ${updateData.last_name}</div>
     <div class="modal-date">${formattedDate} : ${formattedTime}</div>
 `;
-        } else if (updateData.type === 'reminder') {
-            const priorityClass = updateData.status ? `priority-${updateData.status.toLowerCase()}` : '';
-            modalContent.innerHTML = `
+                } else if (updateData.type === 'reminder') {
+                    const priorityClass = updateData.status ? `priority-${updateData.status.toLowerCase()}` : '';
+                    modalContent.innerHTML = `
         <h3>Reminder Details</h3>
         <div class="modal-priority-icon ${priorityClass}"><i class="bx bxs-flag-alt"></i></div>
         <div class="modal-title">${updateData.title || 'No Title'}</div>
         <div class="modal-description">${updateData.description || 'No Description'}</div>
         <div class="modal-date">${formattedDate} : ${formattedTime}</div>
     `;
-        }
+                }
 
-        modal.style.display = "flex";
-    }
+                modal.style.display = "flex";
+            }
 
 
-    function closeModal() {
-        var modal = document.getElementById('updateModal');
-        modal.style.display = "none";
-    }
-    window.onclick = function(event) {
-        var modal = document.getElementById('updateModal');
-        if (event.target == modal) {
-            modal.style.display = "none";
-        }
-    }
-    console.log("Updates Data:", updates);
-</script>
+            function closeModal() {
+                var modal = document.getElementById('updateModal');
+                modal.style.display = "none";
+            }
+            window.onclick = function(event) {
+                var modal = document.getElementById('updateModal');
+                if (event.target == modal) {
+                    modal.style.display = "none";
+                }
+            }
+            console.log("Updates Data:", updates);
+        </script>
 
         <script src="./constants/recent-order-data.js"></script>
         <script src="assets/js/update-data.js"></script>
