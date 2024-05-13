@@ -72,7 +72,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 if ($row['accountStatus'] != 'Verified') {
                     $currentDateTime = date('Y-m-d g:i A');
                     $login_error = 'Your account is not approved yet. Please <a href="contact.html">contact support</a> for more information.';
-                    log_action($con, $row['account_num'], "Attempted to log in but account is not verified on $currentDateTime", "user");
+                    $encryptedAccountNumber = encryptData($accountNumber, $encryptionKey);
+                    log_action($con, $encryptedAccountNumber, "Attempted to log in but account is not verified on $currentDateTime", "user");
                 } else {
 
                     if (password_verify($password, $row['password'])) {
@@ -80,7 +81,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                         $con->query("UPDATE tb_patients SET login_attempts = 0, lock_until = NULL WHERE patientId = {$row['patientId']}");
                         $_SESSION['patientSession'] = $row['patientId'];
                         $_SESSION['patientAccountNumber'] = $row['account_num'];
-                        log_action($con, $row['account_num'], "Successfully logged in on $currentDateTime", "user");
+                        $encryptedAccountNumber = encryptData($accountNumber, $encryptionKey);
+                        log_action($con,    $encryptedAccountNumber, "Successfully logged in on $currentDateTime", "user");
                         header("Location: " . BASE_URL . "userpage.php");
                         exit();
                     } else {
@@ -97,7 +99,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                             $login_error = 'Incorrect password. Please try again.';
                         }
                         $currentDateTime = date('Y-m-d g:i A');
-                        log_action($con, $row['account_num'], "Failed login attempt due to incorrect password on $currentDateTime", "user");
+                        $encryptedAccountNumber = encryptData($accountNumber, $encryptionKey);
+                        log_action($con, $encryptedAccountNumber, "Failed login attempt due to incorrect password on $currentDateTime", "user");
                     }
                 }
             }
@@ -140,7 +143,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         if ($emailExists) {
             $currentDateTime = date('Y-m-d g:i: A');
             $errors[] = "The email address is already in use. Please use a different email.";
-            log_action($con, NULL, "user tried to register but email is already in use $currentDateTime", "unknown");
+            log_action($con, "No account number", "user tried to register but email is already in use $currentDateTime", "unknown");
         }
         if (count($errors) === 0) {
             $accountNumber = sprintf("%06d", mt_rand(1, 999999));
@@ -149,7 +152,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $insertQuery = $con->prepare("INSERT INTO tb_patients (firstname, lastname, philhealthId, email, phoneno, password, account_num) VALUES (?, ?, ?, ?, ?, ?, ?)");
             $insertQuery->bind_param("sssssss", $firstname, $lastname, $philhealthId, $email, $phoneno, $hashed_password, $encryptedAccountNumber);
             if ($insertQuery->execute()) {
-                // Prepare and send email using PHPMailer
                 $mail = new PHPMailer(true);
                 try {
                     $mail->isSMTP();
@@ -169,13 +171,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     $mail->AltBody = "Hello $firstname $lastname,\n\nThank you for registering with us.\nWe will send you another email once your account has been approved.\n\nBest regards,\nTPAS";
 
                     $mail->send();
-                    echo "<script>alert('Registration successful! An email with your account number has been sent.'); window.location.href='index.php';</script>";
+                    echo "<script>alert('Registration successful! An email has been sent.'); window.location.href='index.php';</script>";
                     $currentDateTime = date('Y-m-d g:i: A');
-                    log_action($con, $row['account_num'], "registered on $currentDateTime", "user");
+                    log_action($con, $encryptedAccountNumber, "registered on $currentDateTime", "user");
                 } catch (Exception $e) {
                     echo "<script>alert('Message could not be sent. Mailer Error: {$mail->ErrorInfo}'); window.location.href='index.php';</script>";
                     $currentDateTime = date('Y-m-d g:i: A');
-                    log_action($con, $row['account_num'], "registered on $currentDateTime", "user");
+                    log_action($con, $encryptedAccountNumber, "registered on $currentDateTime", "user");
                 }
             } else {
                 $errors[] = "Error in registration: " . $con->error;

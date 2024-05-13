@@ -40,10 +40,16 @@
     $query->bind_param("i", $doctorId);
     $query->execute();
     $profile = $query->get_result()->fetch_assoc();
-    // Fetch recent appointments
     $query = $con->prepare("SELECT appointment_id, first_name, last_name, date, appointment_time, status 
-FROM appointments 
-WHERE status = 'Confirmed'");
+    FROM appointments 
+    WHERE status = 'Confirmed'");
+    $query = $con->prepare("SELECT COUNT(*) AS total, MAX(updatedAt) AS lastUpdated FROM assistants");
+    $query->execute();
+    $result = $query->get_result()->fetch_assoc();
+    $totalAssistants = $result['total'];
+    $lastUpdatedAssistants = $result['lastUpdated'];
+    $displayLastUpdatedAssistants = $lastUpdatedAssistants ? date("F j, Y g:i A", strtotime($lastUpdatedAssistants)) : "No updates";
+
 
 
 
@@ -131,7 +137,6 @@ WHERE status = 'Confirmed'");
         <link rel="shortcut icon" href="assets/favicon/tpasss.ico" type="image/x-icon">
         <link rel="stylesheet" href="style.css" />
         <script>
-            // Define your updates array globally if it's static or loaded on page load
             var updates = <?= json_encode($updates); ?>;
         </script>
     </head>
@@ -556,10 +561,11 @@ WHERE status = 'Confirmed'");
                         <h3>Appointments</h3>
                     </a>
                     <a href="#">
-                        <span class="material-icons-sharp">notifications </span>
+                        <span class="material-icons-sharp">notifications</span>
                         <h3>Reminders</h3>
-                        <span class="message-count"></span>
+                        <span class="message-count"><?= $totalReminders ?></span>
                     </a>
+
                     <a href="logs.php">
                         <span class="material-icons-sharp">description</span>
                         <h3>Logs</h3>
@@ -612,16 +618,14 @@ WHERE status = 'Confirmed'");
                         </div>
                         <small class="text-muted">Last updated at: <?= $displayLastUpdatedUsers ?></small>
                     </div>
-
-                    <div class="reminders">
-                        <span class="material-icons-sharp">notifications</span>
+                    <div class="staff">
+                        <span class="material-icons-sharp">group</span>
                         <div class="middle">
                             <div class="left">
-                                <h3>Reminders</h3>
-                                <h1><?= $totalReminders ?></h1>
+                                <h3>Total Staff</h3>
+                                <h1><?= $totalAssistants ?></h1>
                             </div>
                         </div>
-                        <small class="text-muted">Last updated at: <?= $displayLastUpdatedReminders ?></small>
                     </div>
                 </div>
 
@@ -787,23 +791,27 @@ WHERE status = 'Confirmed'");
                 </div>
                 <div class="recent-updates">
                     <h2 class="updates-title">Updates</h2>
-                    <div class="updates-list">
-                        <?php foreach ($updates as $index => $update) : ?>
-                            <div class="update-item" data-index="<?= $index ?>" onclick="showUpdateModal(this.getAttribute('data-index'));">
-                                <h3 class="update-title <?= $update['type'] === 'reminder' ? 'reminder-title' : ''; ?>">
-                                    <?php if ($update['type'] === 'reminder') : ?>
-                                        <i class="bx bxs-bell reminder-icon"></i>
-                                    <?php elseif ($update['type'] === 'appointment') : ?>
-                                        <i class="bx bxs-message-square-dots appointment-icon"></i>
-                                    <?php endif; ?>
-                                    <?= $update['type'] === 'appointment' ? "Appointment Update" : "Reminder"; ?>
-                                </h3>
-                                <span class="update-date"><?= date("F j, Y", strtotime($update['datetime'])); ?></span>
-                            </div>
-
-                        <?php endforeach; ?>
-                    </div>
+                    <?php if (empty($updates)) : ?>
+                        <p>No updates available</p>
+                    <?php else : ?>
+                        <div class="updates-list">
+                            <?php foreach ($updates as $index => $update) : ?>
+                                <div class="update-item" data-index="<?= $index ?>" onclick="showUpdateModal(this.getAttribute('data-index'));">
+                                    <h3 class="update-title <?= $update['type'] === 'reminder' ? 'reminder-title' : ''; ?>">
+                                        <?php if ($update['type'] === 'reminder') : ?>
+                                            <i class="bx bxs-bell reminder-icon"></i>
+                                        <?php elseif ($update['type'] === 'appointment') : ?>
+                                            <i class="bx bxs-message-square-dots appointment-icon"></i>
+                                        <?php endif; ?>
+                                        <?= $update['type'] === 'appointment' ? "Appointment Update" : "Reminder"; ?>
+                                    </h3>
+                                    <span class="update-date"><?= date("F j, Y", strtotime($update['datetime'])); ?></span>
+                                </div>
+                            <?php endforeach; ?>
+                        </div>
+                    <?php endif; ?>
                 </div>
+
                 <div id="updateModal" class="modal" style="display: none;">
                     <div class="modal-content">
                         <span class="close" onclick="closeModal()">&times;</span>

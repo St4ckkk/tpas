@@ -1,12 +1,8 @@
     <?php
     session_start();
-    include_once 'assets/conn/dbconnect.php'; // Adjust the path as needed
-
-    define('BASE_URL', '/TPAS/auth/admin/');
-    if (!isset($_SESSION['doctorSession'])) {
-        header("Location: " . BASE_URL . "index.php");
-        exit();
-    }
+    define('BASE_URL1', '/tpas/');
+    include_once $_SERVER['DOCUMENT_ROOT'] . BASE_URL1 . 'data-encryption.php';
+    include_once 'assets/conn/dbconnect.php';
 
     $doctorId = $_SESSION['doctorSession'];
     $query = $con->prepare("SELECT doctorLastName FROM doctor WHERE id = ?");
@@ -21,14 +17,7 @@
     while ($row = $result->fetch_assoc()) {
         $appointments[] = $row;
     }
-    // Fetch logs
-    $query = $con->prepare("SELECT accountNumber, actionDescription, userType, dateTime FROM logs ORDER BY dateTime DESC");
-    $query->execute();
-    $logsResult = $query->get_result();
-    $logs = [];
-    while ($log = $logsResult->fetch_assoc()) {
-        $logs[] = $log;
-    }
+
 
     ?>
 
@@ -91,7 +80,7 @@
             flex-direction: row;
         }
 
-     
+
 
         main {
             flex-grow: 2;
@@ -180,12 +169,14 @@
             font-size: 1.5rem;
             transition: 0.3s ease-in-out;
         }
+
         .logs-container {
             display: flex;
             justify-content: space-between;
             align-items: center;
             margin-bottom: 10px;
         }
+
         #logType {
             padding: 5px 10px;
             font-size: 16px;
@@ -195,264 +186,261 @@
     </style>
 
 
-        <div class="container">
-            <aside>
-                <div class="top">
-                    <div class="logo">
-                        <img src="assets/img/cd-logoo.png" alt="Logo" />
-                        <h2>TPA<span class="danger">S</span></h2>
-                    </div>
-                    <div class="close" id="close-btn">
-                        <span class="material-icons-sharp"> close </span>
-                    </div>
+    <div class="container">
+        <aside>
+            <div class="top">
+                <div class="logo">
+                    <img src="assets/img/cd-logoo.png" alt="Logo" />
+                    <h2>TPA<span class="danger">S</span></h2>
                 </div>
-
-                <div class="sidebar">
-                    <a href="dashboard.php" class="">
-                        <span class="material-icons-sharp"> dashboard </span>
-                        <h3>Dashboard</h3>
-                    </a>
-                    <a href="users.php">
-                        <span class="material-icons-sharp"> person_outline </span>
-                        <h3>Users</h3>
-                    </a>
-                    <a href="assistant.php">
-                        <span class="material-icons-sharp"> person </span>
-                        <h3>Staffs</h3>
-                    </a>
-                    <a href="appointments.php">
-                        <span class="material-icons-sharp"> event_available</span>
-                        <h3>Appointments</h3>
-                    </a>
-                    <a href="reminders.php">
-                        <span class="material-icons-sharp">notifications </span>
-                        <h3>Reminders</h3>
-                        <span class="message-count"></span>
-                    </a>
-                    <a href="logs.php" class="active">
-                        <span class="material-icons-sharp">description</span>
-                        <h3>Logs</h3>
-                    </a>
-                    <a href="sched.php">
-                        <span class="material-icons-sharp"> add </span>
-                        <h3>Add Schedule</h3>
-                    </a>
-                    <a href="logout.php?logout">
-                        <span class="material-icons-sharp"> logout </span>
-                        <h3>Logout</h3>
-                    </a>
-                </div>
-            </aside>
-            <main>
-                <div class="recent-orders">
-                    <div class="logs-container">
-                        <h1 class="logs-heading">System Logs</h1>
-                        <select id="logType">
-                            <option value="" selected>Select Log Types</option>
-                            <option value="all">All Logs</option>
-                            <option value="assistant">Assistant Logs</option>
-                            <option value="user">User Logs</option>
-                        </select>
-                    </div>
-                    <table class="logs-table">
-                        <thead>
-                            <tr>
-                                <th>Account Number</th>
-                                <th>Action</th>
-                                <th>User Type</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                        </tbody>
-                    </table>
-                </div>
-
-
-                <script>
-                    document.addEventListener('DOMContentLoaded', function() {
-                        const logTypeDropdown = document.getElementById('logType');
-                        const logsHeading = document.querySelector('.logs-heading');
-                        const logsTableBody = document.querySelector('.logs-table tbody');
-
-                        // Check sessionStorage for the previously selected log type
-                        const selectedLogType = sessionStorage.getItem('selectedLogType') || '';
-                        if (selectedLogType) {
-                            // Set the dropdown value and update the logs table
-                            logTypeDropdown.value = selectedLogType;
-                            updateLogs(selectedLogType);
-                        }
-
-                        // Event listener for log type dropdown change
-                        logTypeDropdown.addEventListener('change', function() {
-                            const selectedLogType = this.value;
-                            updateLogs(selectedLogType);
-                        });
-
-                        function updateLogs(logType) {
-                            // Store the selected log type in sessionStorage
-                            sessionStorage.setItem('selectedLogType', logType);
-
-                            let logTypeHeading = '';
-                            switch (logType) {
-                                case 'assistant':
-                                    logTypeHeading = 'Assistant Logs';
-                                    break;
-                                case 'user':
-                                    logTypeHeading = 'User Logs';
-                                    break;
-                                default:
-                                    logTypeHeading = 'System Logs';
-                            }
-                            logsHeading.textContent = logTypeHeading;
-                            fetchLogs(logType)
-                                .then(logs => renderLogs(logs))
-                                .catch(error => console.error('Error fetching logs:', error));
-                        }
-
-                        function fetchLogs(logType) {
-                            return new Promise((resolve, reject) => {
-                                const xhr = new XMLHttpRequest();
-                                xhr.onreadystatechange = function() {
-                                    if (xhr.readyState === XMLHttpRequest.DONE) {
-                                        if (xhr.status === 200) {
-                                            resolve(JSON.parse(xhr.responseText));
-                                        } else {
-                                            reject(xhr.statusText);
-                                        }
-                                    }
-                                };
-                                xhr.open('GET', `fetch-logs.php?logType=${logType}`);
-                                xhr.send();
-                            });
-                        }
-
-                        function renderLogs(logs) {
-                            logsTableBody.innerHTML = '';
-                            logs.forEach(log => {
-                                const row = document.createElement('tr');
-                                row.innerHTML = `
-                    <td>${log.accountNumber}</td>
-                    <td>${log.action}</td>
-                    <td>${log.userType}</td>
-                `;
-                                logsTableBody.appendChild(row);
-                            });
-                        }
-                    });
-                </script>
-            </main>
-
-
-            <div id="statusModal" class="modal">
-                <div class="modal-content">
-                    <span class="close">&times;</span>
-                    <h2>Update Status</h2>
-                    <form id="statusForm">
-                        <input type="hidden" name="appointment_id" value="<?= $appointmentDetails['appointment_id']; ?>">
-                        <select name="new_status">
-                            <option value="Confirmed">Confirmed</option>
-                            <option value="Processing">Cancelled</option>
-                            <option value="Completed">Completed</option>
-                        </select>
-                        <button type="submit">Update</button>
-                    </form>
+                <div class="close" id="close-btn">
+                    <span class="material-icons-sharp"> close </span>
                 </div>
             </div>
 
-            <div class="right">
-                <div class="top">
-                    <button id="menu-btn">
-                        <span class="material-icons-sharp"> menu </span>
-                    </button>
-                    <div class="theme-toggler">
-                        <span class="material-icons-sharp active"> light_mode </span>
-                        <span class="material-icons-sharp"> dark_mode </span>
+            <div class="sidebar">
+                <a href="dashboard.php" class="">
+                    <span class="material-icons-sharp"> dashboard </span>
+                    <h3>Dashboard</h3>
+                </a>
+                <a href="users.php">
+                    <span class="material-icons-sharp"> person_outline </span>
+                    <h3>Users</h3>
+                </a>
+                <a href="assistant.php">
+                    <span class="material-icons-sharp"> person </span>
+                    <h3>Staffs</h3>
+                </a>
+                <a href="appointments.php">
+                    <span class="material-icons-sharp"> event_available</span>
+                    <h3>Appointments</h3>
+                </a>
+                <a href="reminders.php">
+                    <span class="material-icons-sharp">notifications </span>
+                    <h3>Reminders</h3>
+                    <span class="message-count"></span>
+                </a>
+                <a href="logs.php" class="active">
+                    <span class="material-icons-sharp">description</span>
+                    <h3>Logs</h3>
+                </a>
+                <a href="sched.php">
+                    <span class="material-icons-sharp"> add </span>
+                    <h3>Add Schedule</h3>
+                </a>
+                <a href="logout.php?logout">
+                    <span class="material-icons-sharp"> logout </span>
+                    <h3>Logout</h3>
+                </a>
+            </div>
+        </aside>
+        <main>
+            <div class="recent-orders">
+                <div class="logs-container">
+                    <h1 class="logs-heading">System Logs</h1>
+                    <select id="logType">
+                        <option value="" selected>Select Log Types</option>
+                        <option value="all">All Logs</option>
+                        <option value="assistant">Assistant Logs</option>
+                        <option value="user">User Logs</option>
+                    </select>
+                </div>
+                <table class="sched--table ">
+                    <thead>
+                        <tr>
+                            <th>Account Number</th>
+                            <th>Action</th>
+                            <th>User Type</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                </table>
+            </div>
+
+
+            <script>
+                document.addEventListener('DOMContentLoaded', function() {
+                    const logTypeDropdown = document.getElementById('logType');
+                    const logsHeading = document.querySelector('.logs-heading');
+                    const logsTableBody = document.querySelector('.sched--table tbody');
+
+                    const selectedLogType = sessionStorage.getItem('selectedLogType') || '';
+                    if (selectedLogType) {
+                        logTypeDropdown.value = selectedLogType;
+                        updateLogs(selectedLogType);
+                    }
+
+                    logTypeDropdown.addEventListener('change', function() {
+                        const selectedLogType = this.value;
+                        updateLogs(selectedLogType);
+                    });
+
+                    function updateLogs(logType) {
+                        // Store the selected log type in sessionStorage
+                        sessionStorage.setItem('selectedLogType', logType);
+
+                        let logTypeHeading = '';
+                        switch (logType) {
+                            case 'assistant':
+                                logTypeHeading = 'Assistant Logs';
+                                break;
+                            case 'user':
+                                logTypeHeading = 'User Logs';
+                                break;
+                            default:
+                                logTypeHeading = 'System Logs';
+                        }
+                        logsHeading.textContent = logTypeHeading;
+                        fetchLogs(logType)
+                            .then(logs => renderLogs(logs))
+                            .catch(error => console.error('Error fetching logs:', error));
+                    }
+
+                    function fetchLogs(logType) {
+                        return new Promise((resolve, reject) => {
+                            const xhr = new XMLHttpRequest();
+                            xhr.onreadystatechange = function() {
+                                if (xhr.readyState === XMLHttpRequest.DONE) {
+                                    if (xhr.status === 200) {
+                                        resolve(JSON.parse(xhr.responseText));
+                                    } else {
+                                        reject(xhr.statusText);
+                                    }
+                                }
+                            };
+                            xhr.open('GET', `fetch-logs.php?logType=${logType}`);
+                            xhr.send();
+                        });
+                    }
+
+                    function renderLogs(logs) {
+                        logsTableBody.innerHTML = '';
+                        logs.forEach(log => {
+                            const row = document.createElement('tr');
+                            row.innerHTML = `
+                    <td>${log.accountNumber}</td>
+                    <td>${log.actionDescription}</td>
+                    <td>${log.userType}</td>
+                `;
+                            logsTableBody.appendChild(row);
+                        });
+                    }
+                });
+            </script>
+        </main>
+
+
+        <div id="statusModal" class="modal">
+            <div class="modal-content">
+                <span class="close">&times;</span>
+                <h2>Update Status</h2>
+                <form id="statusForm">
+                    <input type="hidden" name="appointment_id" value="<?= $appointmentDetails['appointment_id']; ?>">
+                    <select name="new_status">
+                        <option value="Confirmed">Confirmed</option>
+                        <option value="Processing">Cancelled</option>
+                        <option value="Completed">Completed</option>
+                    </select>
+                    <button type="submit">Update</button>
+                </form>
+            </div>
+        </div>
+
+        <div class="right">
+            <div class="top">
+                <button id="menu-btn">
+                    <span class="material-icons-sharp"> menu </span>
+                </button>
+                <div class="theme-toggler">
+                    <span class="material-icons-sharp active"> light_mode </span>
+                    <span class="material-icons-sharp"> dark_mode </span>
+                </div>
+                <div class="profile">
+                    <div class="info">
+                        <p>Hey, <b name="admin-name"><?= $profile['doctorLastName'] ?></b></p>
+                        <small class="text-muted user-role">Admin</small>
                     </div>
-                    <div class="profile">
-                        <div class="info">
-                            <p>Hey, <b name="admin-name"><?= $profile['doctorLastName'] ?></b></p>
-                            <small class="text-muted user-role">Admin</small>
-                        </div>
-                        <div class="profile-photo">
-                        </div>
+                    <div class="profile-photo">
                     </div>
                 </div>
             </div>
         </div>
-        <script src="assets/js/script.js"></script>
-        <script>
-            var modal = document.getElementById('statusModal');
-            var btn = document.querySelectorAll('.status-column');
-            var span = document.getElementsByClassName("close")[0];
+    </div>
+    <script src="assets/js/script.js"></script>
+    <script>
+        var modal = document.getElementById('statusModal');
+        var btn = document.querySelectorAll('.status-column');
+        var span = document.getElementsByClassName("close")[0];
 
 
-            btn.forEach(function(element) {
-                element.onclick = function() {
-                    modal.style.display = "block";
-                }
-            });
-
-
-            span.onclick = function() {
-                modal.style.display = "none";
-            };
-
-
-            window.onclick = function(event) {
-                if (event.target == modal) {
-                    modal.style.display = "none";
-                }
-            };
-
-
-            document.getElementById('statusForm').onsubmit = function(event) {
-                event.preventDefault();
-                var formData = new FormData(this);
-
-                // Confirmation dialog
-                if (confirm("Are you sure you want to update the status?")) {
-                    fetch('update-app-status.php', {
-                            method: 'POST',
-                            body: formData
-                        })
-                        .then(response => response.json())
-                        .then(data => {
-                            if (data.success) {
-                                alert('Status updated successfully!');
-                            } else {
-                                alert('Error: ' + data.error);
-                            }
-                            location.reload(); // Reload the page to update the data displayed
-                        })
-                        .catch(error => {
-                            console.error('Error:', error);
-                            alert('Failed to update status due to an error.');
-                        });
-                }
-            };
-
-            function confirmDelete(appointmentId) {
-                if (confirm("Are you sure you want to delete this appointment?")) {
-                    fetch('delete-appointment.php', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/x-www-form-urlencoded',
-                            },
-                            body: 'appointment_id=' + appointmentId
-                        })
-                        .then(response => response.json())
-                        .then(data => {
-                            alert('Appointment deleted successfully!');
-                            location.reload();
-                        })
-                        .catch(error => {
-                            console.error('Error:', error);
-                            alert('Failed to delete the appointment.');
-                        });
-                }
+        btn.forEach(function(element) {
+            element.onclick = function() {
+                modal.style.display = "block";
             }
-        </script>
+        });
 
-        </body>
+
+        span.onclick = function() {
+            modal.style.display = "none";
+        };
+
+
+        window.onclick = function(event) {
+            if (event.target == modal) {
+                modal.style.display = "none";
+            }
+        };
+
+
+        document.getElementById('statusForm').onsubmit = function(event) {
+            event.preventDefault();
+            var formData = new FormData(this);
+
+            // Confirmation dialog
+            if (confirm("Are you sure you want to update the status?")) {
+                fetch('update-app-status.php', {
+                        method: 'POST',
+                        body: formData
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            alert('Status updated successfully!');
+                        } else {
+                            alert('Error: ' + data.error);
+                        }
+                        location.reload();
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('Failed to update status due to an error.');
+                    });
+            }
+        };
+
+        function confirmDelete(appointmentId) {
+            if (confirm("Are you sure you want to delete this appointment?")) {
+                fetch('delete-appointment.php', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded',
+                        },
+                        body: 'appointment_id=' + appointmentId
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        alert('Appointment deleted successfully!');
+                        location.reload();
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('Failed to delete the appointment.');
+                    });
+            }
+        }
+    </script>
+
+    </body>
 
     </html>

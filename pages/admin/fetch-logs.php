@@ -1,6 +1,8 @@
 <?php
 session_start();
 include_once 'assets/conn/dbconnect.php';
+define('BASE_URL1', '/tpas/');
+include_once $_SERVER['DOCUMENT_ROOT'] . BASE_URL1 . 'data-encryption.php';
 
 if (!isset($_SESSION['doctorSession'])) {
     echo json_encode([]);
@@ -27,6 +29,7 @@ $result = $stmt->get_result();
 $logs = [];
 
 while ($row = $result->fetch_assoc()) {
+    $row['accountNumber'] = decryptData($row['accountNumber'], $encryptionKey);
     $logs[] = $row;
 }
 

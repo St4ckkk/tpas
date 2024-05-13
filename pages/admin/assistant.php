@@ -1,6 +1,8 @@
 <?php
 session_start();
 include_once 'assets/conn/dbconnect.php'; // Adjust the path as needed
+define('BASE_URL1', '/tpas/');
+include_once $_SERVER['DOCUMENT_ROOT'] . BASE_URL1 . 'data-encryption.php';
 
 define('BASE_URL', '/TPAS/auth/admin/');
 if (!isset($_SESSION['doctorSession'])) {
@@ -244,7 +246,7 @@ $logResult = $logQuery->get_result();
                     <tbody>
                         <?php while ($row = $result->fetch_assoc()) : ?>
                             <tr>
-                                <td><?= htmlspecialchars($row['accountNumber']) ?></td>
+                                <td><?= htmlspecialchars(decryptData($row['accountNumber'], $encryptionKey)) ?></td>
                                 <td><?= htmlspecialchars($row['firstName']) ?></td>
                                 <td><?= htmlspecialchars($row['lastName']) ?></td>
                                 <td><?= htmlspecialchars($row['email']) ?></td>
@@ -252,6 +254,7 @@ $logResult = $logQuery->get_result();
                                 <td><?= htmlspecialchars(date("F j, Y g:i A", strtotime($row['createdAt']))) ?></td>
                             </tr>
                         <?php endwhile; ?>
+
                     </tbody>
                 </table>
                 <div class="pagination">

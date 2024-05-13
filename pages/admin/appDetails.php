@@ -356,12 +356,12 @@
                 }
             };
 
-            // Handle form submission with confirmation
+        
             document.getElementById('statusForm').onsubmit = function(event) {
                 event.preventDefault();
                 var formData = new FormData(this);
 
-                // Confirmation dialog
+             
                 if (confirm("Are you sure you want to update the status?")) {
                     fetch('update-app-status.php', {
                             method: 'POST',

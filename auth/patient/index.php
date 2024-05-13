@@ -52,6 +52,10 @@ require_once './process/process.php';
                 </div>
 
                 <button type="submit" name="register">Sign Up</button>
+                <?php if (!empty($error)) : ?>
+                    <div class="error"><?php echo $error; ?></div>
+                <?php endif; ?>
+
             </form>
 
         </div>

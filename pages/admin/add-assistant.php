@@ -1,6 +1,9 @@
 <?php
 session_start();
-include_once 'assets/conn/dbconnect.php'; // Database connection
+include_once 'assets/conn/dbconnect.php';
+define('BASE_URL1', '/tpas/');
+include_once $_SERVER['DOCUMENT_ROOT'] . BASE_URL1 . 'data-encryption.php';
+
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 use PHPMailer\PHPMailer\SMTP;
@@ -46,11 +49,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $checkQuery->execute();
         $result = $checkQuery->get_result();
     } while ($result->num_rows > 0);
-
-    $password = password_hash($accountNumber, PASSWORD_DEFAULT); // Hash the default password
+    $encryptedAccountNumber = encryptData($accountNumber, $encryptionKey);
+    $password = password_hash($accountNumber, PASSWORD_DEFAULT);
 
     $query = $con->prepare("INSERT INTO assistants (firstName, lastName, email, accountNumber, password) VALUES (?, ?, ?, ?, ?)");
-    $query->bind_param("sssss", $firstName, $lastName, $email, $accountNumber, $password);
+    $query->bind_param("sssss", $firstName, $lastName, $email, $encryptedAccountNumber, $password);
     if ($query->execute()) {
         $mail = new PHPMailer(true);
         try {
@@ -67,10 +70,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
             $mail->isHTML(true);
             $mail->Subject = 'Welcome to Our Team';
-            $mail->Body    = 'Hi ' . $firstName . ',<br>Welcome to our team! Your new account number is ' . $accountNumber . '.<br>Your default password is your account number. Please change it upon your first login.<br><br>You can now log in using your account number through our assistant portal: <a href="http://yourdomain.com/login">Login Here</a>.';
-
+            $decryptedAccountNumber = decryptData($encryptedAccountNumber, $encryptionKey);
+            $mail->Body    = 'Hi ' . $firstName . ',<br>Welcome to our team! Your new account number is ' . $decryptedAccountNumber . '.Your default password is your account number. Please change it upon your first login.<br><br>You can now log in using your account number through our assistant portal: <a href="http://yourdomain.com/login">Login Here</a>.';
             $mail->send();
-            echo "<script>alert('New assistant added successfully and email sent. Account Number: $accountNumber'); window.location.href='assistant.php';</script>";
+            echo "<script>alert('New assistant added successfully and email sent. Account Number: $decryptedAccountNumber'); window.location.href='assistant.php';</script>";
         } catch (Exception $e) {
             echo "<script>alert('Assistant added but email could not be sent. Error: " . $mail->ErrorInfo . "'); window.location.href='assistant.php';</script>";
         }
