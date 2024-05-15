@@ -301,6 +301,10 @@
                     <span class="material-icons-sharp"> dashboard </span>
                     <h3>Dashboard</h3>
                 </a>
+                <a href="profile.php">
+                    <span class="material-icons-sharp"> account_circle </span>
+                    <h3>Profile</h3>
+                </a>
                 <a href="users.php">
                     <span class="material-icons-sharp"> person_outline </span>
                     <h3>Users</h3>
@@ -325,6 +329,10 @@
                 <a href="sched.php">
                     <span class="material-icons-sharp"> add </span>
                     <h3>Add Schedule</h3>
+                </a>
+                <a href="systems.php">
+                    <span class="material-icons-sharp"> settings </span>
+                    <h3>System Settings</h3>
                 </a>
                 <a href="logout.php?logout">
                     <span class="material-icons-sharp"> logout </span>

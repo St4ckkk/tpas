@@ -52,10 +52,6 @@ if (!$userRow) {
         margin: 0 auto;
         margin-top: 10px;
     }
-
-
-
-
     .fc-day-grid-event .fc-content {
         color: black;
         width: 500px;

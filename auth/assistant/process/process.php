@@ -1,3 +1,4 @@
+
 <?php
 session_start();
 include_once 'conn/dbconnect.php';
@@ -56,25 +57,24 @@ function handleFailedLogin($con, $accountNum, $loginAttempts, $assistantId)
 }
 
 if (isset($_POST['login'])) {
-    $accountNum = mysqli_real_escape_string($con, trim($_POST['accountnum']));
     $email = mysqli_real_escape_string($con, trim($_POST['email']));
     $password = $_POST['password'];
 
-    $query = "SELECT assistantId, password, login_attempts, lock_until FROM assistants WHERE accountNumber = ? AND email = ?";
+    $query = "SELECT assistantId, accountNumber, password, login_attempts, lock_until FROM assistants WHERE email = ?";
     $stmt = mysqli_prepare($con, $query);
 
     if ($stmt) {
-        mysqli_stmt_bind_param($stmt, "ss", $accountNum, $email);
+        mysqli_stmt_bind_param($stmt, "s", $email);
         mysqli_stmt_execute($stmt);
         mysqli_stmt_store_result($stmt);
-        mysqli_stmt_bind_result($stmt, $assistantId, $hashedPassword, $loginAttempts, $lockUntil);
+        mysqli_stmt_bind_result($stmt, $assistantId, $accountNum, $hashedPassword, $loginAttempts, $lockUntil);
 
         if (mysqli_stmt_fetch($stmt)) {
             $currentDateTime = new DateTime();
             $lockUntilTime = $lockUntil ? new DateTime($lockUntil) : null;
 
             if ($lockUntilTime && $currentDateTime < $lockUntilTime) {
-                $error = "Your account is locked until " . $lockUntilTime->format('g:i A') . ". Please try again later.";
+                $error = "Your account is locked due to many failed attempts until " . $lockUntilTime->format('g:i A') . ". Please try again later.";
                 log_action($con, $accountNum, "Failed login attempt (account locked)", "assistant");
             } else {
                 if ($lockUntilTime && $currentDateTime > $lockUntilTime) {

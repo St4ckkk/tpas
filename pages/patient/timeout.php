@@ -1,5 +1,5 @@
 <?php
-$inactive = 600;
+$inactive = 100;
 if (isset($_SESSION['timeout'])) {
     $session_life = time() - $_SESSION['timeout'];
     if ($session_life > $inactive) {

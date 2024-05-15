@@ -1,3 +1,4 @@
+
 <?php
 
 
@@ -63,17 +64,17 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $row = $result->fetch_assoc();
 
         if ($row) {
+            $accountNumber = $row['account_num'];
             $currentDateTime = date('Y-m-d H:i:s');
             if (!is_null($row['lock_until']) && strtotime($row['lock_until']) > strtotime($currentDateTime)) {
                 $currentDateTime = date('Y-m-d g:i A');
                 $login_error = 'Your account is currently locked until ' . date('g:i A', strtotime($row['lock_until'])) . '. Please try again after the lock period has expired.';
-                log_action($con, $row['account_num'], "Attempted login while locked out on $currentDateTime", "user");
+                log_action($con, $accountNumber, "Attempted login while locked out on $currentDateTime", "user");
             } else {
                 if ($row['accountStatus'] != 'Verified') {
                     $currentDateTime = date('Y-m-d g:i A');
                     $login_error = 'Your account is not approved yet. Please <a href="contact.html">contact support</a> for more information.';
-                    $encryptedAccountNumber = encryptData($accountNumber, $encryptionKey);
-                    log_action($con, $encryptedAccountNumber, "Attempted to log in but account is not verified on $currentDateTime", "user");
+                    log_action($con, $accountNumber, "Attempted to log in but account is not verified on $currentDateTime", "user");
                 } else {
 
                     if (password_verify($password, $row['password'])) {
@@ -81,16 +82,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                         $con->query("UPDATE tb_patients SET login_attempts = 0, lock_until = NULL WHERE patientId = {$row['patientId']}");
                         $_SESSION['patientSession'] = $row['patientId'];
                         $_SESSION['patientAccountNumber'] = $row['account_num'];
-                        $encryptedAccountNumber = encryptData($accountNumber, $encryptionKey);
-                        log_action($con,    $encryptedAccountNumber, "Successfully logged in on $currentDateTime", "user");
+                        log_action($con, $accountNumber, "Successfully logged in on $currentDateTime", "user");
                         header("Location: " . BASE_URL . "userpage.php");
                         exit();
                     } else {
 
                         $failedAttempts = $row['login_attempts'] + 1;
-                        if ($failedAttempts >= 5) {
-
-                            $lockoutTime = date('Y-m-d H:i:s', strtotime("+5 minutes"));
+                        if ($failedAttempts >= 3) {
+                            $lockoutTime = date('Y-m-d H:i:s', strtotime("+1 minutes"));
                             $con->query("UPDATE tb_patients SET login_attempts = $failedAttempts, lock_until = '$lockoutTime' WHERE patientId = {$row['patientId']}");
                             $login_error = 'Your account has been locked due to too many failed attempts. Please try again in 5 minutes.';
                         } else {
@@ -99,8 +98,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                             $login_error = 'Incorrect password. Please try again.';
                         }
                         $currentDateTime = date('Y-m-d g:i A');
-                        $encryptedAccountNumber = encryptData($accountNumber, $encryptionKey);
-                        log_action($con, $encryptedAccountNumber, "Failed login attempt due to incorrect password on $currentDateTime", "user");
+
+                        log_action($con, $accountNumber, "Failed login attempt due to incorrect password on $currentDateTime", "user");
                     }
                 }
             }

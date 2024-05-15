@@ -163,21 +163,7 @@ $profile = $query->get_result()->fetch_assoc();
                 </a>
             </div>
         </aside>
-        <div id="statusModal" class="modal">
-            <div class="modal-content">
-                <span class="close">&times;</span>
-                <h2>Change Status</h2>
-                <form action="update-account-status.php" method="POST">
-                    <input type="hidden" name="account_num" id="account_num" value="">
-                    <select name="newStatus" id="newStatus" required>
-                        <option value="" disabled selected>Please select a status</option>
-                        <option value="Verified">Verified</option>
-                        <option value="Denied">Denied</option>
-                    </select>
-                    <button type="submit">Update Status</button>
-                </form>
-            </div>
-        </div>
+
 
         <main>
             <div class="recent-orders">
@@ -219,8 +205,26 @@ $profile = $query->get_result()->fetch_assoc();
                                     <?php elseif ($row['accountStatus'] === 'Pending') : ?>
                                         <i class="bx bx-time-five"></i>
                                     <?php endif; ?>
+                                </td>
                                 <td>
+                                    <input type="hidden" name="account_num" id="account_num" value="<?= htmlspecialchars($account_num) ?>">
+                                </td>
                             </tr>
+                            <div id="statusModal" class="modal">
+                                <div class="modal-content">
+                                    <span class="close">&times;</span>
+                                    <h2>Change Status</h2>
+                                    <form action="update-account-status.php" method="POST">
+                                        <input type="hidden" name="account_num" id="account_num" value="<?= htmlspecialchars($account_num) ?>">
+                                        <select name="newStatus" id="newStatus" required>
+                                            <option value="" disabled selected>Please select a status</option>
+                                            <option value="Verified">Verified</option>
+                                            <option value="Denied">Denied</option>
+                                        </select>
+                                        <button type="submit">Update Status</button>
+                                    </form>
+                                </div>
+                            </div>
                         <?php endwhile; ?>
                     </tbody>
 
@@ -262,18 +266,17 @@ $profile = $query->get_result()->fetch_assoc();
             element.onclick = function() {
                 var modal = document.getElementById('statusModal');
                 var patientIdInput = document.getElementById('account_num');
-                patientIdInput.value = this.getAttribute('data-patient-id'); // Set patient ID
+                patientIdInput.value = this.getAttribute('data-patient-id');
                 modal.style.display = "block";
             };
         });
 
-        // When the user clicks on <span> (x), close the modal
+
         document.getElementsByClassName('close')[0].onclick = function() {
             var modal = document.getElementById('statusModal');
             modal.style.display = "none";
         }
 
-        // When the user clicks anywhere outside of the modal, close it
         window.onclick = function(event) {
             var modal = document.getElementById('statusModal');
             if (event.target == modal) {

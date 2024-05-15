@@ -29,6 +29,7 @@ $result = $stmt->get_result();
 $logs = [];
 
 while ($row = $result->fetch_assoc()) {
+    // Decrypt the accountNumber column
     $row['accountNumber'] = decryptData($row['accountNumber'], $encryptionKey);
     $logs[] = $row;
 }

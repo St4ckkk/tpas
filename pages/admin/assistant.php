@@ -299,7 +299,7 @@ $logResult = $logQuery->get_result();
                         <tbody>
                             <?php while ($log = $logResult->fetch_assoc()) : ?>
                                 <tr>
-                                    <td><?= htmlspecialchars($log['accountNumber']) ?></td>
+                                    <td><?= htmlspecialchars(decryptData($log['accountNumber'], $encryptionKey)) ?></td>
                                     <td><?= htmlspecialchars($log['actionDescription']) ?></td>
                                 </tr>
                             <?php endwhile; ?>

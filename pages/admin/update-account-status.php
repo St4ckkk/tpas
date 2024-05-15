@@ -28,10 +28,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $statusResult = $statusQuery->get_result();
     $user = $statusResult->fetch_assoc();
 
-    if ($user['accountStatus'] === $newStatus) {
+    if ($user['accountStatus'] !== $newStatus && $user['accountStatus'] !== 'Verified' && $user['accountStatus'] !== 'Denied') {
         echo "<script>alert('Status is already set to {$newStatus}.'); window.location.href='users.php';</script>";
     } else {
-        // Update the status as it has changed
         $query = $con->prepare("UPDATE tb_patients SET accountStatus = ? WHERE account_num = ?");
         $query->bind_param("si", $newStatus, $accountNum);
         $query->execute();

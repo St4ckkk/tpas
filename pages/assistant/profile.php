@@ -1,7 +1,8 @@
     <?php
     session_start();
     include_once 'assets/conn/dbconnect.php';
-    // Initialize counts
+    define('BASE_URL1', '/tpas/');
+    include_once $_SERVER['DOCUMENT_ROOT'] . BASE_URL1 . 'data-encryption.php';
     define('BASE_URL', '/TPAS/auth/assistant/');
     if (!isset($_SESSION['assistantSession'])) {
         header("Location: " . BASE_URL . "index.php");
@@ -12,13 +13,17 @@
     $query = $con->prepare("SELECT * FROM assistants WHERE assistantId = ?");
     $query->bind_param("i", $assistantId);
     $query->execute();
+
     $result = $query->get_result();
+
     $assistant = $result->fetch_assoc();
+
 
     if (!$assistant) {
         echo 'Error fetching assistant details.';
         exit;
     }
+    $assistant['accountNumber'] = decryptData($assistant['accountNumber'], $encryptionKey);
     ?>
     <!DOCTYPE html>
     <html lang="en">
@@ -346,7 +351,7 @@
                 elements.forEach(function(elementId) {
                     var element = document.getElementById(elementId);
                     element.contentEditable = false;
-                    element.style.backgroundColor = ""; // Remove highlight
+                    element.style.backgroundColor = "";
                 });
                 document.querySelector('.edit-btn').textContent = 'Edit';
                 document.querySelector('.cancel-btn').style.display = 'none';
@@ -381,7 +386,7 @@
                     })
                     .catch(error => {
                         console.error('Error:', error);
-                        makeEditable(); // Re-enable editing on error
+                        makeEditable(); 
                     });
             }
 

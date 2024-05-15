@@ -72,7 +72,7 @@
     JOIN 
         schedule s ON a.scheduleId = s.scheduleId
     WHERE 
-        a.status IN ('Cancelled') AND s.doctorId = ?
+        a.status IN ('Cancelled', 'Reschedule') AND s.doctorId = ?
     UNION ALL
     SELECT 
         r.id AS appointment_id,
@@ -93,10 +93,11 @@
     LIMIT 10
 ");
 
-
     if ($updatesQuery === false) {
         die('MySQL prepare error: ' . $con->error);
     }
+
+    // Binding the doctor ID only once
     $updatesQuery->bind_param("ii", $doctorId, $doctorId);
     $updatesQuery->execute();
     $updatesResult = $updatesQuery->get_result();
@@ -106,21 +107,6 @@
     }
     $updatesQuery->close();
 
-    $systemName = '';
-    $logoPath = '';
-
-    $query = $con->prepare("SELECT system_name, logo_path FROM system_settings WHERE id = 1");
-    $query->execute();
-    $result = $query->get_result();
-
-
-    if ($result->num_rows > 0) {
-        $settings = $result->fetch_assoc();
-        $systemName = $settings['system_name'];
-        $logoPath = $settings['logo_path'];
-    }
-
-    $query->close();
     ?>
 
 
@@ -149,8 +135,6 @@
 
         }
 
-
-
         .status-column i {
             vertical-align: middle;
         }
@@ -175,7 +159,6 @@
             color: #007bff;
         }
 
-        /* Notifications Styles */
         .recent-updates {
             padding: var(--padding-1);
             margin-top: 20px;
@@ -273,7 +256,6 @@
             justify-content: center;
         }
 
-
         .modal-content {
             background-color: var(--color-white);
             margin: auto;
@@ -284,7 +266,6 @@
             border-radius: 5px;
             color: var(---color-white);
         }
-
         .modal-title {
             font-weight: bold;
             font-size: 24px;
@@ -334,11 +315,9 @@
         .high {
             font-weight: bold;
         }
-
         .low {
             color: green;
         }
-
         .medium {
             color: orange;
         }
@@ -346,7 +325,6 @@
         .high {
             color: red;
         }
-
 
         .close {
             color: #aaa;
@@ -373,8 +351,6 @@
             margin-right: 10px;
             vertical-align: middle;
         }
-
-        /* Priority Color Classes */
         .priority-1 {
             color: blue;
         }
@@ -484,6 +460,10 @@
             color: red;
         }
 
+        .modal-status-reschedule {
+            color: #0056b3;
+        }
+
         .modal-status-pending {
             color: orange;
         }
@@ -544,10 +524,15 @@
                 </div>
 
                 <div class="sidebar">
-                    <a href="#" class="active">
+                    <a href="dashboard.php" class="active">
                         <span class="material-icons-sharp"> dashboard </span>
                         <h3>Dashboard</h3>
                     </a>
+                    <a href="profile.php">
+                        <span class="material-icons-sharp">account_circle</span>
+                        <h3>Profile</h3>
+                    </a>
+
                     <a href="users.php">
                         <span class="material-icons-sharp"> person_outline </span>
                         <h3>Users</h3>

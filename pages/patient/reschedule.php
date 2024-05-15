@@ -1,6 +1,6 @@
 <?php
 session_start();
-require_once 'assets/conn/dbconnect.php'; 
+require_once 'assets/conn/dbconnect.php';
 
 if (!isset($_SESSION['patientSession'])) {
     header("Location: index.php");
@@ -68,8 +68,6 @@ if ($result->num_rows > 0) {
     exit;
 }
 $stmt->close();
-// Handling form submission
-// Handling form submission
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['submit'])) {
     $firstName = trim($_POST['firstName']);
     $lastName = trim($_POST['lastName']);
@@ -79,7 +77,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['submit'])) {
     $appointmentTime = trim($_POST['appointmentTime']);
     $appointmentType = trim($_POST['appointmentType']);
     $message = trim($_POST['message']);
-    $newStatus = 'Reschedule';  // Default status for new and rescheduled appointments
+    $newStatus = 'Reschedule';
 
     if ($isReschedule) {
         // Update existing appointment
@@ -128,7 +126,7 @@ $con->close();
 </head>
 <style>
     .datepicker .highlighted {
-        background-color: lime;
+        background-color: lime !important;
         color: white;
     }
 </style>
@@ -216,8 +214,8 @@ $con->close();
 
                 var listContainer = document.getElementById('bookedTimesList');
                 bookedAppointments.forEach(function(appointment) {
-                    var startTime = appointment.startTime; // Already formatted in PHP
-                    var endTime = appointment.endTime; // Already formatted in PHP
+                    var startTime = appointment.startTime;
+                    var endTime = appointment.endTime;
                     var doctorName = appointment.doctorLastName;
 
                     var listItem = document.createElement('a');
@@ -245,10 +243,11 @@ $con->close();
                         return false;
                     }
                 });
+                $('head').append('<style>.highlighted a { background-color: limegreen !important; }</style>');
             });
         </script>
+
         <script src="assets/js/bootstrap.min.js"></script>
-        <!-- Correct order of scripts at the end of your body tag -->
 
         <script src="assets/js/jquery.js"></script>
         <script src="assets/js/date/bootstrap-datepicker.js"></script>

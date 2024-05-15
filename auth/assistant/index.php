@@ -27,11 +27,6 @@ require_once './process/process.php';
             <h2 class="login-title">Login</h2>
             <p class="notice">Please login to access the system</p>
             <form class="form-login" method="POST">
-                <label for="doctor">Account Number</label>
-                <div class="input-email">
-                    <i class="fas fa-authentication icon"></i>
-                    <input type="text" name="accountnum" placeholder="Enter your account number" required>
-                </div>
                 <label for="email">E-mail</label>
                 <div class="input-email">
                     <i class="fas fa-envelope icon"></i>
