@@ -36,10 +36,11 @@
     $lastUpdatedReminders = $result['lastUpdated'];
     $displayLastUpdatedReminders = $lastUpdatedReminders ? date("F j, Y g:i A", strtotime($lastUpdatedReminders)) : "No updates";
 
-    $query = $con->prepare("SELECT doctorFirstName, doctorLastName FROM doctor WHERE id = ?");
+    $query = $con->prepare("SELECT * FROM doctor WHERE id = ?");
     $query->bind_param("i", $doctorId);
     $query->execute();
     $profile = $query->get_result()->fetch_assoc();
+
     $query = $con->prepare("SELECT appointment_id, first_name, last_name, date, appointment_time, status 
     FROM appointments 
     WHERE status = 'Confirmed'");
@@ -135,9 +136,18 @@
 
         }
 
+        .profile-image {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            margin: 0 auto;
+        }
+
+
         .status-column i {
             vertical-align: middle;
         }
+
 
         .status-column.status-pending {
             color: orange;
@@ -266,6 +276,7 @@
             border-radius: 5px;
             color: var(---color-white);
         }
+
         .modal-title {
             font-weight: bold;
             font-size: 24px;
@@ -289,25 +300,65 @@
             margin-top: auto;
         }
 
-
-        .status-pending {
-            color: orange;
+        .status-confirmed,
+        .status-completed {
+            color: var(--color-white);
+            background-color: limegreen;
+            padding: 2px 10px;
+            border-radius: 50px;
+            display: inline-block;
+            text-align: center;
+            font-weight: bold;
+            min-width: 100px;
+            height: 30px;
+            line-height: 30px;
+            vertical-align: middle;
+            margin-top: 5px;
         }
 
-        .status-confirmed {
-            color: limegreen;
+        .status-pending {
+            color: var(--color-white);
+            background-color: orange;
+            padding: 2px 10px;
+            border-radius: 50px;
+            display: inline-block;
+            text-align: center;
+            font-weight: bold;
+            min-width: 100px;
+            height: 30px;
+            line-height: 30px;
+            vertical-align: middle;
+            margin-top: 5px;
         }
 
         .status-cancelled {
-            color: red;
-        }
-
-        .status-processing {
-            color: #007bff;
+            color: var(--color-white);
+            background-color: red;
+            padding: 2px 10px;
+            border-radius: 50px;
+            display: inline-block;
+            text-align: center;
+            font-weight: bold;
+            min-width: 100px;
+            height: 30px;
+            line-height: 30px;
+            vertical-align: middle;
+            margin-top: 5px;
         }
 
         .status-reschedule {
-            color: #0056b3;
+            color: var(--color-white);
+            background-color: #0056b3;
+            padding: 2px 10px;
+            border-radius: 50px;
+            display: inline-block;
+            text-align: center;
+            font-weight: bold;
+            min-width: 100px;
+            height: 30px;
+            line-height: 30px;
+            vertical-align: middle;
+            margin-top: 5px;
         }
 
         .low,
@@ -315,9 +366,11 @@
         .high {
             font-weight: bold;
         }
+
         .low {
             color: green;
         }
+
         .medium {
             color: orange;
         }
@@ -351,6 +404,7 @@
             margin-right: 10px;
             vertical-align: middle;
         }
+
         .priority-1 {
             color: blue;
         }
@@ -478,35 +532,51 @@
 
         .card {
             background-color: var(--color-white);
-            border-radius: 50px;
+            border-radius: 30px;
             box-shadow: var(--box-shadow);
-            margin-top: 20px;
-            margin-bottom: 10px;
             padding: 20px;
-        }
-
-        .card:hover {
-            cursor: pointer;
-            box-shadow: none;
+            display: flex;
+            align-items: center;
+            margin: 20px 0;
         }
 
         .card .middle {
             display: flex;
             justify-content: space-between;
             align-items: center;
+            width: 100%;
         }
 
         .card .left {
-            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
         }
 
-        .card h3 {
+        .card .right {
+            display: flex;
+            align-items: center;
+        }
+
+        .card .welcome-image {
+            width: 150px;
+            height: auto;
+            margin-left: 10px;
+        }
+
+        .card h2 {
             font-size: 24px;
-            margin-bottom: 10px;
+            color: #333;
+            margin: 0;
         }
 
-        .card h3 span {
-            font-weight: bold;
+        .card h2 span {
+            color: #007bff;
+        }
+
+        .bx-show {
+            text-align: center;
         }
     </style>
 
@@ -576,8 +646,13 @@
                         <div class="left">
                             <h2>Welcome Back, Dr. <span id="doctorNameCard"><?= $profile['doctorFirstName'] . " " . $profile['doctorLastName'] ?></span></h2>
                         </div>
+                        <div class="right">
+                            <img src="<?= $profile['profile_image_path'] ?>" alt="Welcome Image" class="welcome-image">
+                        </div>
                     </div>
                 </div>
+
+
 
                 <div class="insights">
                     <div class="appointments">
@@ -635,7 +710,7 @@
                                 <th>Date</th>
                                 <th>Time</th>
                                 <th>Status</th>
-                                <th></th>
+                                <th>Action</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -696,15 +771,13 @@
             <td>${appointment.first_name} ${appointment.last_name}</td>
             <td>${appointment.date}</td>
             <td>${formattedTime}</td>
-            <td class="${statusInfo.class}">
-                ${appointment.status} <i class="${statusInfo.icon}"></i>
-            </td>
+         <td class="${statusInfo.class}">
+    ${appointment.status} <i class="${statusInfo.icon}"></i>
+</td>
             <td><a href="appDetails.php?id=${appointment.appointment_id}"><i class="bx bx-show"></i></a></td>
         `;
                         });
                     }
-
-
 
                     function getStatusDetails(status) {
                         const statuses = {
@@ -771,6 +844,7 @@
                             <small class="text-muted user-role">Admin</small>
                         </div>
                         <div class="profile-photo">
+                            <a href="profile.php"> <img src="<?php echo htmlspecialchars($profile['profile_image_path'] ?? 'assets/img/default.png'); ?>" alt="Profile Image" class="profile-image"></a>
                         </div>
                     </div>
                 </div>

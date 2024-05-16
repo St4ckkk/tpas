@@ -9,7 +9,7 @@
     }
 
     $doctorId = $_SESSION['doctorSession'];
-    $query = $con->prepare("SELECT doctorLastName FROM doctor WHERE id = ?");
+    $query = $con->prepare("SELECT * FROM doctor WHERE id = ?");
     $query->bind_param("i", $doctorId);
     $query->execute();
     $profile = $query->get_result()->fetch_assoc();
@@ -322,7 +322,7 @@
                     <h3>Reminders</h3>
                     <span class="message-count"></span>
                 </a>
-                <a href="logs.php" class="active">
+                <a href="logs.php">
                     <span class="material-icons-sharp">description</span>
                     <h3>Logs</h3>
                 </a>
@@ -330,7 +330,7 @@
                     <span class="material-icons-sharp"> add </span>
                     <h3>Add Schedule</h3>
                 </a>
-                <a href="systems.php">
+                <a href="systems.php" class="active">
                     <span class="material-icons-sharp"> settings </span>
                     <h3>System Settings</h3>
                 </a>
@@ -387,10 +387,11 @@
                 </div>
                 <div class="profile">
                     <div class="info">
-                        <p>Hey, <b name="admin-name"><?= $profile['doctorLastName'] ?></b></p>
+                        <p>Hey, <b name="admin-name"><?= $profile['doctorFirstName'] . " " . $profile['doctorLastName'] ?></b></p>
                         <small class="text-muted user-role">Admin</small>
                     </div>
                     <div class="profile-photo">
+                        <a href="profile.php"> <img src="<?php echo htmlspecialchars($profile['profile_image_path'] ?? 'assets/img/default.png'); ?>" alt="Profile Image" class="profile-image"></a>
                     </div>
                 </div>
             </div>

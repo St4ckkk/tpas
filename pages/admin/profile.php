@@ -22,7 +22,7 @@
         exit;
     }
 
-    // Fetch recent appointments
+    
     $query = $con->prepare("SELECT COUNT(*) AS total, MAX(updated_at) as lastUpdated FROM reminders WHERE recipient_type = 'doctor'");
     $query->execute();
     $result = $query->get_result()->fetch_assoc();
@@ -683,7 +683,7 @@
                         <span class="material-icons-sharp"> dashboard </span>
                         <h3>Dashboard</h3>
                     </a>
-                    <a href="profile.php">
+                    <a href="profile.php" class="active">
                         <span class="material-icons-sharp"> account_circle </span>
                         <h3>Profile</h3>
                     </a>
@@ -863,10 +863,11 @@
                     </div>
                     <div class="profile">
                         <div class="info">
-                            <p>Hey, <b name="admin-name"><?= $profile['doctorFirstName'] . " " . $profile['doctorLastName'] ?></b></p>
+                            <p>Hey, <b name="admin-name"><?= $doctor['doctorFirstName'] . " " . $doctor['doctorLastName'] ?></b></p>
                             <small class="text-muted user-role">Admin</small>
                         </div>
                         <div class="profile-photo">
+                            <a href="profile.php"> <img src="<?php echo htmlspecialchars($doctor['profile_image_path'] ?? 'assets/img/default.png'); ?>" alt="Profile Image" class="profile-image"></a>
                         </div>
                     </div>
                 </div>

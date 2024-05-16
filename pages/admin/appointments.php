@@ -11,7 +11,7 @@
     $doctorId = $_SESSION['doctorSession'];
 
 
-    $query = $con->prepare("SELECT doctorFirstName, doctorLastName FROM doctor WHERE id = ?");
+    $query = $con->prepare("SELECT * FROM doctor WHERE id = ?");
     $query->bind_param("i", $doctorId);
     $query->execute();
     $profile = $query->get_result()->fetch_assoc();
@@ -478,6 +478,11 @@ WHERE status = 'Confirmed'");
                         <span class="material-icons-sharp"> dashboard </span>
                         <h3>Dashboard</h3>
                     </a>
+                    <a href="profile.php">
+                        <span class="material-icons-sharp">account_circle</span>
+                        <h3>Profile</h3>
+                    </a>
+
                     <a href="users.php">
                         <span class="material-icons-sharp"> person_outline </span>
                         <h3>Users</h3>
@@ -491,10 +496,11 @@ WHERE status = 'Confirmed'");
                         <h3>Appointments</h3>
                     </a>
                     <a href="#">
-                        <span class="material-icons-sharp">notifications </span>
+                        <span class="material-icons-sharp">notifications</span>
                         <h3>Reminders</h3>
-                        <span class="message-count"></span>
+                        <span class="message-count"><?= $totalReminders ?></span>
                     </a>
+
                     <a href="logs.php">
                         <span class="material-icons-sharp">description</span>
                         <h3>Logs</h3>
@@ -503,13 +509,16 @@ WHERE status = 'Confirmed'");
                         <span class="material-icons-sharp"> add </span>
                         <h3>Add Schedule</h3>
                     </a>
+                    <a href="systems.php">
+                        <span class="material-icons-sharp"> settings </span>
+                        <h3>System Settings</h3>
+                    </a>
                     <a href="logout.php?logout">
                         <span class="material-icons-sharp"> logout </span>
                         <h3>Logout</h3>
                     </a>
                 </div>
             </aside>
-
             <main>
                 <div class="recent-orders">
                     <div class="header-wrapper">
@@ -744,6 +753,7 @@ WHERE status = 'Confirmed'");
                             <small class="text-muted user-role">Admin</small>
                         </div>
                         <div class="profile-photo">
+                            <a href="profile.php"> <img src="<?php echo htmlspecialchars($profile['profile_image_path'] ?? 'assets/img/default.png'); ?>" alt="Profile Image" class="profile-image"></a>
                         </div>
                     </div>
                 </div>

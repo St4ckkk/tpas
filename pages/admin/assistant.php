@@ -11,7 +11,7 @@ if (!isset($_SESSION['doctorSession'])) {
 }
 
 $doctorId = $_SESSION['doctorSession'];
-$query = $con->prepare("SELECT doctorLastName FROM doctor WHERE id = ?");
+$query = $con->prepare("SELECT * FROM doctor WHERE id = ?");
 $query->bind_param("i", $doctorId);
 $query->execute();
 $profile = $query->get_result()->fetch_assoc();
@@ -181,10 +181,15 @@ $logResult = $logQuery->get_result();
             </div>
 
             <div class="sidebar">
-                <a href="dashboard.php" class="">
+                <a href="dashboard.php">
                     <span class="material-icons-sharp"> dashboard </span>
                     <h3>Dashboard</h3>
                 </a>
+                <a href="profile.php">
+                    <span class="material-icons-sharp">account_circle</span>
+                    <h3>Profile</h3>
+                </a>
+
                 <a href="users.php">
                     <span class="material-icons-sharp"> person_outline </span>
                     <h3>Users</h3>
@@ -197,11 +202,12 @@ $logResult = $logQuery->get_result();
                     <span class="material-icons-sharp"> event_available </span>
                     <h3>Appointments</h3>
                 </a>
-                <a href="reminders.php">
-                    <span class="material-icons-sharp">notifications </span>
+                <a href="#">
+                    <span class="material-icons-sharp">notifications</span>
                     <h3>Reminders</h3>
-                    <span class="message-count"></span>
+                    <span class="message-count"><?= $totalReminders ?></span>
                 </a>
+
                 <a href="logs.php">
                     <span class="material-icons-sharp">description</span>
                     <h3>Logs</h3>
@@ -209,6 +215,10 @@ $logResult = $logQuery->get_result();
                 <a href="sched.php">
                     <span class="material-icons-sharp"> add </span>
                     <h3>Add Schedule</h3>
+                </a>
+                <a href="systems.php">
+                    <span class="material-icons-sharp"> settings </span>
+                    <h3>System Settings</h3>
                 </a>
                 <a href="logout.php?logout">
                     <span class="material-icons-sharp"> logout </span>
@@ -279,10 +289,11 @@ $logResult = $logQuery->get_result();
                 </div>
                 <div class="profile">
                     <div class="info">
-                        <p>Hey, <b name="admin-name"><?= $profile['doctorLastName'] ?></b></p>
+                        <p>Hey, <b name="admin-name"><?= $profile['doctorFirstName'] . " " . $profile['doctorLastName'] ?></b></p>
                         <small class="text-muted user-role">Admin</small>
                     </div>
                     <div class="profile-photo">
+                        <a href="profile.php"> <img src="<?php echo htmlspecialchars($profile['profile_image_path'] ?? 'assets/img/default.png'); ?>" alt="Profile Image" class="profile-image"></a>
                     </div>
                 </div>
             </div>

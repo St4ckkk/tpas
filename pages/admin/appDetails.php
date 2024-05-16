@@ -9,7 +9,7 @@
     }
 
     $doctorId = $_SESSION['doctorSession'];
-    $query = $con->prepare("SELECT doctorLastName FROM doctor WHERE id = ?");
+    $query = $con->prepare("SELECT * FROM doctor WHERE id = ?");
     $query->bind_param("i", $doctorId);
     $query->execute();
     $profile = $query->get_result()->fetch_assoc();
@@ -64,28 +64,62 @@
             vertical-align: middle;
         }
 
-        .status-column.status-pending {
-            color: orange;
+        .status-confirmed,
+        .status-completed {
+            color: var(--color-white);
+            background-color: limegreen;
+            padding: 2px 10px;
+            border-radius: 50px;
+            display: inline-block;
+            text-align: center;
+            font-weight: bold;
+            min-width: 100px;
+            height: 30px;
+            line-height: 30px;
+            margin-top: 10px;
         }
 
-        .status-column.status-confirmed {
-            color: limegreen;
+        .status-pending {
+            color: var(--color-white);
+            background-color: orange;
+            padding: 2px 10px;
+            border-radius: 50px;
+            display: inline-block;
+            text-align: center;
+            font-weight: bold;
+            min-width: 100px;
+            height: 30px;
+            line-height: 30px;
+            vertical-align: middle;
+            margin-top: 10px;
         }
 
-        .status-column.status-cancelled {
-            color: #dc3545;
+        .status-cancelled {
+            color: var(--color-white);
+            background-color: red;
+            padding: 2px 10px;
+            border-radius: 50px;
+            display: inline-block;
+            text-align: center;
+            font-weight: bold;
+            min-width: 100px;
+            height: 30px;
+            line-height: 30px;
+            margin-top: 10px;
         }
 
-        .status-column.status-processing {
-            color: #007bff;
-        }
-
-        .status-column.status-completed {
-            color: limegreen;
-        }
-
-        .status-column.status-reschedule {
-            color: #007bff;
+        .status-reschedule {
+            color: var(--color-white);
+            background-color: #0056b3;
+            padding: 2px 10px;
+            border-radius: 50px;
+            display: inline-block;
+            text-align: center;
+            font-weight: bold;
+            min-width: 100px;
+            height: 30px;
+            line-height: 30px;
+            vertical-align: middle;
         }
 
         th {
@@ -206,10 +240,15 @@
                 </div>
 
                 <div class="sidebar">
-                    <a href="dashboard.php" class="">
+                    <a href="dashboard.php">
                         <span class="material-icons-sharp"> dashboard </span>
                         <h3>Dashboard</h3>
                     </a>
+                    <a href="profile.php">
+                        <span class="material-icons-sharp">account_circle</span>
+                        <h3>Profile</h3>
+                    </a>
+
                     <a href="users.php">
                         <span class="material-icons-sharp"> person_outline </span>
                         <h3>Users</h3>
@@ -222,14 +261,23 @@
                         <span class="material-icons-sharp"> event_available </span>
                         <h3>Appointments</h3>
                     </a>
-                    <a href="reminders.php">
-                        <span class="material-icons-sharp">notifications </span>
+                    <a href="#">
+                        <span class="material-icons-sharp">notifications</span>
                         <h3>Reminders</h3>
-                        <span class="message-count"></span>
+                        <span class="message-count"><?= $totalReminders ?></span>
+                    </a>
+
+                    <a href="logs.php">
+                        <span class="material-icons-sharp">description</span>
+                        <h3>Logs</h3>
                     </a>
                     <a href="sched.php">
                         <span class="material-icons-sharp"> add </span>
                         <h3>Add Schedule</h3>
+                    </a>
+                    <a href="systems.php">
+                        <span class="material-icons-sharp"> settings </span>
+                        <h3>System Settings</h3>
                     </a>
                     <a href="logout.php?logout">
                         <span class="material-icons-sharp"> logout </span>
@@ -240,7 +288,7 @@
             <main>
                 <div class="recent-orders">
                     <h2>Appointment Details</h2>
-                    
+
                     <table class="sched--table">
                         <thead>
                             <tr>
@@ -252,7 +300,7 @@
                                 <th>Time</th>
                                 <th>Reason</th>
                                 <th>Message</th>
-                                <th></th>
+                                <th>Status</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -323,10 +371,11 @@
                     </div>
                     <div class="profile">
                         <div class="info">
-                            <p>Hey, <b name="admin-name"><?= $profile['doctorLastName'] ?></b></p>
+                            <p>Hey, <b name="admin-name"><?= $profile['doctorFirstName'] . " " . $profile['doctorLastName'] ?></b></p>
                             <small class="text-muted user-role">Admin</small>
                         </div>
                         <div class="profile-photo">
+                            <a href="profile.php"> <img src="<?php echo htmlspecialchars($profile['profile_image_path'] ?? 'assets/img/default.png'); ?>" alt="Profile Image" class="profile-image"></a>
                         </div>
                     </div>
                 </div>
@@ -344,24 +393,24 @@
                 }
             });
 
-           
+
             span.onclick = function() {
                 modal.style.display = "none";
             };
 
-           
+
             window.onclick = function(event) {
                 if (event.target == modal) {
                     modal.style.display = "none";
                 }
             };
 
-        
+
             document.getElementById('statusForm').onsubmit = function(event) {
                 event.preventDefault();
                 var formData = new FormData(this);
 
-             
+
                 if (confirm("Are you sure you want to update the status?")) {
                     fetch('update-app-status.php', {
                             method: 'POST',
