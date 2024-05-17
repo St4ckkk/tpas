@@ -39,7 +39,18 @@ if (isset($_POST['login'])) {
 
             if ($row && $row['login_attempts'] < 5 && $row['password'] == $password) {
                 $_SESSION['doctorSession'] = $row['id'];
-                // Reset login attempts
+                /*                 $_SESSION['profile_image'] = $_SERVER['DOCUMENT_ROOT'] . '/TPAS/pages/uploaded_files/' . $row['profile_image_path'];
+ */
+                $_SESSION['profile_image'] = $row['profile_image_path'];
+                $_SESSION['doctorFirstName'] = $row['doctorFirstName'];
+                $_SESSION['doctorLastName'] = $row['doctorLastName'];
+                if (isset($_POST['rememberMe']) && $_POST['rememberMe'] == 'on') {
+                    setcookie('loginID', $loginID, time() + (86400 * 30), "/");
+                    setcookie('profile_image_path', $row['profile_image_path'], time() + (86400 * 30), "/");
+                    setcookie('doctorFirstName', $row['doctorFirstName'], time() + (86400 * 30), "/");
+                    setcookie('doctorLastName', $row['doctorLastName'], time() + (86400 * 30), "/");
+                }
+
                 $resetAttemptsQuery = "UPDATE doctor SET login_attempts = 0 WHERE id = ?";
                 $resetStmt = mysqli_prepare($con, $resetAttemptsQuery);
                 mysqli_stmt_bind_param($resetStmt, "i", $row['id']);
@@ -89,8 +100,6 @@ if (isset($_POST['login']) && $lockRow && strtotime($lockRow['lock_until']) > ti
 ?>
 
 
-
-
 <!DOCTYPE html>
 <html lang="en">
 
@@ -109,6 +118,45 @@ if (isset($_POST['login']) && $lockRow && strtotime($lockRow['lock_until']) > ti
         font-size: 14px;
         margin-bottom: 10px;
     }
+
+    #rememberMe {
+        margin-right: 5px;
+    }
+
+    .profile-image-card {
+        box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.1);
+        max-width: 150px;
+        margin: auto;
+        text-align: center;
+        padding: 20px;
+    }
+
+    .profile-image {
+        width: 100%;
+        border-radius: 10px 10px 0 0;
+        cursor: pointer;
+        transition: transform 0.3s ease;
+    }
+
+    .profile-image:hover {
+        transform: scale(1.05);
+    }
+
+    .profile-name {
+        font-size: 1rem;
+        font-weight: bold;
+        margin-top: 10px;
+    }
+    .title {
+        color: #333;
+        text-align: center;
+    }
+
+
+    .one-tap-login {
+        color: grey;
+        font-size: 0.6rem;
+    }
 </style>
 
 <body>
@@ -116,7 +164,23 @@ if (isset($_POST['login']) && $lockRow && strtotime($lockRow['lock_until']) > ti
         <div class="login">
             <img src="assets/img/cd-logoo.png" alt="logo">
             <h2 class="login-title">Login</h2>
-            <p class="notice">Please login to access the system</p>
+            <?php
+            if (isset($_COOKIE['profile_image_path']) && isset($_COOKIE['loginID']) && isset($_COOKIE['doctorFirstName']) && isset($_COOKIE['doctorLastName'])) {
+                $profileImagePath = $_COOKIE['profile_image_path'];
+                $fullImagePath = '/TPAS/pages/uploaded_files/' . $profileImagePath;
+                $doctorFirstName = htmlspecialchars($_COOKIE['doctorFirstName'], ENT_QUOTES, 'UTF-8');
+                $doctorLastName = htmlspecialchars($_COOKIE['doctorLastName'], ENT_QUOTES, 'UTF-8');
+                echo '<div class="profile-image-card">';
+                echo '<img src="' . htmlspecialchars($fullImagePath, ENT_QUOTES, 'UTF-8') . '" alt="Profile Image" class="profile-image" onclick="quickLogin(\'' . htmlspecialchars($_COOKIE['loginID'], ENT_QUOTES, 'UTF-8') . '\')">';
+
+                echo '<div class="title">';
+                echo '<div class="profile-name">' . $doctorFirstName . ' ' . $doctorLastName . '</div>';
+                echo '<small class="one-tap-login">Tap the image to login</small>';
+                echo '</div>';
+                echo '</div>';
+                // Add this line for one-tap login
+            }
+            ?>
             <form class="form-login" method="POST">
                 <label for="doctor">ID</label>
                 <div class="input-email">
@@ -133,6 +197,8 @@ if (isset($_POST['login']) && $lockRow && strtotime($lockRow['lock_until']) > ti
                     <i class="fas fa-lock icon"></i>
                     <input type="password" name="password" placeholder="Enter your password" required>
                 </div>
+                <input type="checkbox" id="rememberMe" name="rememberMe">
+                <small>Remember Me</small>
                 <?php if (!empty($error)) : ?>
                     <p class="error"><?php echo $error; ?></p>
                 <?php endif; ?>
@@ -145,6 +211,25 @@ if (isset($_POST['login']) && $lockRow && strtotime($lockRow['lock_until']) > ti
             <p>Secure and efficient access for doctors and nurses to manage appointments and patient care.</p>
         </div>
     </div>
+    <script>
+        function quickLogin(loginID) {
+            var xhr = new XMLHttpRequest();
+            xhr.open("POST", "quick-login.php", true);
+            xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+            xhr.onreadystatechange = function() {
+                if (xhr.readyState === 4 && xhr.status === 200) {
+                    var response = JSON.parse(xhr.responseText);
+                    if (response.success) {
+                        window.location.href = "<?php echo BASE_URL; ?>dashboard.php";
+                    } else {
+                        alert(response.error);
+                    }
+                }
+            };
+            xhr.send("loginID=" + encodeURIComponent(loginID));
+        }
+    </script>
+
 </body>
 
 </html>

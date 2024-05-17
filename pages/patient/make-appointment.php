@@ -123,7 +123,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['submit'])) {
         exit;
     }
 
-    // Insert the new appointment
+    
     $stmt = $con->prepare("INSERT INTO appointments (scheduleId, patientId, first_name, last_name, phone_number, email, date, appointment_time, endTime, appointment_type, message) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
     $stmt->bind_param("iisssssssss", $scheduleId, $userId, $firstName, $lastName, $phoneNumber, $email, $date, $appointmentTime, $endTime, $appointmentType, $message);
 
@@ -284,8 +284,8 @@ $con->close();
 
             var listContainer = document.getElementById('bookedTimesList');
             bookedAppointments.forEach(function(appointment) {
-                var startTime = appointment.startTime; // Already formatted in PHP
-                var endTime = appointment.endTime; // Already formatted in PHP
+                var startTime = appointment.startTime; 
+                var endTime = appointment.endTime; 
                 var doctorName = appointment.doctorLastName;
 
                 var listItem = document.createElement('a');

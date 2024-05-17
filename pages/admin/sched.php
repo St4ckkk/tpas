@@ -15,7 +15,8 @@ $query->execute();
 $profile = $query->get_result()->fetch_assoc();
 
 // Fetch schedules from the database
-$scheduleQuery = $con->prepare("SELECT startDate, startTime, endTime, status FROM schedule");
+$scheduleQuery = $con->prepare("SELECT startDate, startTime, endTime, status FROM schedule WHERE doctorId = ?");
+$scheduleQuery->bind_param("i", $doctorId); // Assuming doctorId is an integer
 $scheduleQuery->execute();
 $scheduleResult = $scheduleQuery->get_result();
 $schedules = [];
@@ -28,7 +29,7 @@ while ($row = $scheduleResult->fetch_assoc()) {
     $schedules[] = [
         'title' => $timeRange,
         'start' => $row['startDate'],
-        'end' => $row['startDate'],
+        'end' => $row['startDate'], 
         'color' => $color
     ];
 }
@@ -199,7 +200,7 @@ while ($row = $scheduleResult->fetch_assoc()) {
 
     #recent-sched--table .no-data-content {
         text-align: center;
-        color: var(--color-white);
+        color: var(--color-dark);
     }
 </style>
 
@@ -340,9 +341,11 @@ while ($row = $scheduleResult->fetch_assoc()) {
                 <div class="schedule-card-container"> <!-- Added container -->
                     <table id="recent-sched--table">
                         <?php
-                        $query = $con->prepare("SELECT startDate, startTime, endTime, createdAt FROM schedule WHERE startDate < CURDATE() ORDER BY createdAt DESC LIMIT 5");
+                        $query = $con->prepare("SELECT startDate, startTime, endTime, createdAt FROM schedule WHERE doctorId = ? AND startDate < CURDATE() ORDER BY createdAt DESC LIMIT 5");
+                        $query->bind_param("i", $doctorId);
                         $query->execute();
                         $result = $query->get_result();
+
                         if ($result->num_rows > 0) {
                             echo "<thead>
                     <tr>
