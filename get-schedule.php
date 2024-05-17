@@ -40,7 +40,6 @@ if (!$res) {
             text-align: center;
             vertical-align: middle;
             padding: 8px;
-            /* Adjust padding as needed */
         }
 
         /* Style for profile images */
@@ -49,6 +48,7 @@ if (!$res) {
             overflow: hidden;
             width: 50px;
             height: 50px;
+            margin-top: 0 auto;
         }
     </style>
 </head>
@@ -83,7 +83,7 @@ if (!$res) {
                         <td><?= date('h:i A', strtotime($row['startTime'])) ?></td>
                         <td><?= date('h:i A', strtotime($row['endTime'])) ?></td>
                         <td>
-                            <span class='label label-<?= $row['status'] !== 'available' ? 'danger' : 'primary' ?>'>
+                            <span class='label label-<?= $row['status'] !== 'available' ? 'danger' : 'success' ?>'>
                                 <?= htmlspecialchars($row['status']) ?>
                             </span>
                         </td>
