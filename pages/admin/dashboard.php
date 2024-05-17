@@ -123,6 +123,7 @@
         <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Sharp" rel="stylesheet" />
         <link rel="shortcut icon" href="assets/favicon/tpasss.ico" type="image/x-icon">
         <link rel="stylesheet" href="style.css" />
+
         <script>
             var updates = <?= json_encode($updates); ?>;
         </script>
@@ -141,7 +142,10 @@
             height: 40px;
             border-radius: 50%;
             margin: 0 auto;
+            border: none;
+            background: none;
         }
+
 
 
         .status-column i {
@@ -532,7 +536,6 @@
 
         .card {
             background-color: var(--color-white);
-            border-radius: 30px;
             box-shadow: var(--box-shadow);
             padding: 20px;
             display: flex;
@@ -559,11 +562,17 @@
             align-items: center;
         }
 
+        .welcome-image {
+            border-radius: 50%;
+        }
+
         .card .welcome-image {
             width: 150px;
             height: auto;
             margin-left: 10px;
+            background: none;
         }
+
 
         .card h2 {
             font-size: 24px;

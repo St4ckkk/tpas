@@ -22,7 +22,7 @@
         exit;
     }
 
-    
+
     $query = $con->prepare("SELECT COUNT(*) AS total, MAX(updated_at) as lastUpdated FROM reminders WHERE recipient_type = 'doctor'");
     $query->execute();
     $result = $query->get_result()->fetch_assoc();
@@ -129,7 +129,10 @@
 
         }
 
-
+        .profile-image {
+            background: none;
+            border-radius: 50px;
+        }
 
         .status-column i {
             vertical-align: middle;
@@ -480,17 +483,29 @@
         }
 
         .card {
-            background-color: #fff;
-            border-radius: 30px;
-            box-shadow: var(--box-shadow);
+            background: var(--color-white);
             margin-top: 20px;
-            margin-bottom: 10px;
-            padding: 20px;
+            border: none;
+            box-shadow: var(--box-shadow);
+           
+        }
+
+        .card-header {
+            background-color: #007bff;
+            color: #fff;
+            padding: 10px;
+            font-size: 1.2rem;
+          
         }
 
         .card:hover {
             cursor: pointer;
             box-shadow: none;
+        }
+
+        .card-body {
+            background: var(--color-white);
+            border-radius: 30px;
         }
 
         .card .middle {
@@ -512,52 +527,70 @@
             font-weight: bold;
         }
 
-        .profile-pic {
-            margin-left: 25px;
-            display: flex;
-            position: relative;
-            transition: all 0.3s ease;
-            width: 150px;
-            height: 150px;
+        h1 {
+            color: var(---color-white);
+            text-align: center;
+            margin-top: 20px;
+            font-size: 30px;
         }
 
-        .profile {
-            display: flex;
-            align-items: center;
+        .profile-data {
+            width: 80%;
+            margin: 0 auto;
+            background-color: var(--color-white);
+            padding: 20px;
+            border-radius: 30px;
+            box-shadow: var(--box-shadow);
         }
 
-        .profile-image {
-            width: 40px;
-            height: 40px;
-            margin-right: 10px;
+        .btn {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            border: none;
+            border-radius: 4px;
+            color: #fff;
+            background-color: #007bff;
             cursor: pointer;
+            margin-top: 30px;
+        }
+
+        .btn:hover {
+            background-color: #0056b3;
         }
 
 
-        .profile-pic input {
-            display: none;
+        .profile-pic {
+            text-align: center;
+            position: relative;
         }
 
         .profile-pic img {
-            position: absolute;
-            object-fit: cover;
             width: 150px;
             height: 150px;
-            box-shadow: 0 0 10px 0 rgba(255, 255, 255, 0.35);
-            z-index: 0;
+            border-radius: 50%;
+            border: solid 1px #000;
+            display: inline-block;
         }
 
+
+
+
         .profile-pic label {
+            position: absolute;
             cursor: pointer;
             height: 150px;
             width: 150px;
-            display: inline-block;
-            justify-content: center;
+            display: flex;
             align-items: center;
+            justify-content: center;
             background-color: rgba(0, 0, 0, 0);
             z-index: 1;
             color: rgb(250, 250, 250);
             transition: background-color 0.2s ease-in-out;
+            border-radius: 50%;
+            top: 0;
+            left: 333px;
         }
 
         .profile-pic label:hover {
@@ -569,14 +602,13 @@
         }
 
         .profile-pic label:hover span {
-            display: inline-flex;
-            padding: 0.2em;
-            height: 2em;
+            display: block;
         }
+
 
         .header h1 {
             text-align: center;
-            color: #333;
+            color: var(--color-dark);
         }
 
         table {
@@ -728,18 +760,18 @@
                 <div class="profile-data">
                     <form action="upload.php" method="post" enctype="multipart/form-data">
                         <div class="profile-pic">
+                            <img src="<?php echo htmlspecialchars($doctor['profile_image_path'] ?? 'assets/img/default.png'); ?>" alt="Profile Image" class="profile-image">
                             <label class="-label" for="file">
+                                <input type="file" id="file" name="profile_photo" class="account-settings-fileinput" onchange="loadFile(event)">
                                 <span class="bx bx-camera mt-2"></span>
                                 <span style="font-size: 1rem;">Change Image</span>
                             </label>
-                            <input type="file" id="file" name="profile_photo" class="account-settings-fileinput" onchange="loadFile(event)">
-                            <img src="<?php echo htmlspecialchars($doctor['profile_image_path'] ?? 'assets/img/default.png'); ?>" alt="Profile Image" class="profile-image">
                         </div>
 
                         <button type="submit" name="submit" class="btn save-btn btn-primary mt-4 mx-4">Save Changes</button>
                     </form>
                 </div>
-                <div class="card mt-4">
+                <div class="card mt-4 info-data">
                     <div class="card-header">
                         <span class="bx bx-user"></span> Account Info
                     </div>
@@ -901,6 +933,7 @@
                 </div>
             </div>
         </div>
+
         <script>
             function loadFile(event) {
                 var output = document.getElementById('output');
@@ -909,8 +942,7 @@
                     URL.revokeObjectURL(output.src)
                 }
             }
-        </script>
-        <script>
+
             function showUpdateModal(index) {
                 var updateData = updates[index];
                 console.log("Selected update data:", updateData);
