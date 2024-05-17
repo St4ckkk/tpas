@@ -15,7 +15,7 @@ $query->execute();
 $profile = $query->get_result()->fetch_assoc();
 
 // Fetch schedules from the database
-$scheduleQuery = $con->prepare("SELECT startDate, startTime, endTime, status FROM schedule WHERE doctorId = ?");
+$scheduleQuery = $con->prepare("SELECT * FROM schedule WHERE doctorId = ?");
 $scheduleQuery->bind_param("i", $doctorId); // Assuming doctorId is an integer
 $scheduleQuery->execute();
 $scheduleResult = $scheduleQuery->get_result();
@@ -27,14 +27,60 @@ while ($row = $scheduleResult->fetch_assoc()) {
     $timeRange = $startTime . ' - ' . $endTime;
     $color = ($row['status'] == 'available') ? 'limegreen' : 'red';
     $schedules[] = [
+        'scheduleId' => $row['scheduleId'],
         'title' => $timeRange,
         'start' => $row['startDate'],
-        'end' => $row['startDate'], 
+        'end' => $row['startDate'],
         'color' => $color
     ];
 }
 
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    $startDate = $_POST['editStartDate'];
+    $startTime = $_POST['editStartTime'];
+    $endTime = $_POST['editEndTime'];
+
+    if (isset($_POST['update'])) {
+        $scheduleId = $_POST['scheduleId'];
+        $query = $con->prepare("UPDATE schedule SET startDate = ?, startTime = ?, endTime = ? WHERE scheduleId = ? AND doctorId = ?");
+        $query->bind_param("sssii", $startDate, $startTime, $endTime, $scheduleId, $doctorId);
+
+        if ($query->execute()) {
+            echo "<script>alert('Schedule updated successfully.'); window.location.href = 'sched.php';</script>";
+            exit();
+        } else {
+            echo "Error updating schedule";
+        }
+    }
+
+    if (isset($_POST['delete'])) {
+        $scheduleId = $_POST['scheduleId'];
+
+        // Check if there are appointments associated with this schedule
+        $checkAppointmentsQuery = $con->prepare("SELECT COUNT(*) as count FROM appointments WHERE scheduleId = ?");
+        $checkAppointmentsQuery->bind_param("i", $scheduleId);
+        $checkAppointmentsQuery->execute();
+        $result = $checkAppointmentsQuery->get_result();
+        $appointmentCount = $result->fetch_assoc()['count'];
+
+        if ($appointmentCount > 0) {
+            echo "<script>alert('This schedule cannot be deleted as it has appointments associated with it.'); window.location.href = 'sched.php';</script>";
+            exit();
+        }
+
+        $query = $con->prepare("DELETE FROM schedule WHERE scheduleId = ? AND doctorId = ?");
+        $query->bind_param("ii", $scheduleId, $doctorId);
+
+        if ($query->execute()) {
+            echo "<script>alert('Schedule deleted successfully.'); window.location.href = 'sched.php';</script>";
+            exit();
+        } else {
+            echo "Error deleting schedule";
+        }
+    }
+}
 ?>
+
 <html lang="en">
 
 <head>
@@ -140,9 +186,6 @@ while ($row = $scheduleResult->fetch_assoc()) {
         font-weight: bold;
     }
 
-    .fc-day:hover {
-        background-color: #f0f0f0;
-    }
 
     .fc-day-grid-event {
         border: 2px solid black;
@@ -202,6 +245,99 @@ while ($row = $scheduleResult->fetch_assoc()) {
         text-align: center;
         color: var(--color-dark);
     }
+
+    #modal {
+        display: none;
+        position: fixed;
+        z-index: 1;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        box-shadow: var(--box-shadow);
+    }
+
+    .modal-content {
+        background-color: var(--color-white);
+        margin: 10px;
+        padding: 20px;
+        border-radius: 30px;
+        border: 1px solid #888;
+        width: 30%;
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+        box-shadow: var(--box-shadow);
+    }
+
+
+    .close {
+        color: #aaa;
+        float: right;
+        font-size: 28px;
+        font-weight: bold;
+    }
+
+    .close:hover,
+    .close:focus {
+        color: black;
+        text-decoration: none;
+        cursor: pointer;
+    }
+
+    .close:hover {
+        color: #555;
+    }
+
+    h2 {
+        margin-bottom: 10px;
+    }
+
+    button {
+        margin-top: 10px;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 5px;
+        background-color: #007bff;
+        color: #fff;
+        cursor: pointer;
+    }
+
+    #updateBtn {
+        background-color: #218838;
+    }
+
+    #deleteBtn {
+        background-color: #dc3545;
+    }
+
+
+
+    button:hover {
+        background-color: #0056b3;
+    }
+
+    .modal-content input {
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        font-size: 1em;
+        margin-top: 5px;
+    }
+
+    .form form {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-evenly;
+        margin: 10px;
+    }
+
+    .modal-content label {
+        font-weight: bold;
+        color: var(--color-dark);
+        margin-top: 5px;
+    }
 </style>
 
 <body>
@@ -242,7 +378,7 @@ while ($row = $scheduleResult->fetch_assoc()) {
                 <a href="#">
                     <span class="material-icons-sharp">notifications</span>
                     <h3>Reminders</h3>
-                    <span class="message-count"><?= $totalReminders ?></span>
+                    <span class="message-count"></span>
                 </a>
 
                 <a href="logs.php">
@@ -376,9 +512,29 @@ while ($row = $scheduleResult->fetch_assoc()) {
                     </table>
                 </div> <!-- End of schedule-card-container -->
             </div>
-
         </div>
     </div>
+    <div id="myModal" class="modal" style="display:none;">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Schedule Details</h2>
+            <div class="form">
+                <form action="" method="post">
+                    <input type="hidden" name="doctorId" value="<?php echo $_SESSION['doctorSession']; ?>">
+                    <input type="hidden" name="scheduleId" id="scheduleId">
+                    <label for="editStartDate">Date</label>
+                    <input type="date" name="editStartDate" id="editStartDate" required>
+                    <label for="editStartTime">Start Time:</label>
+                    <input type="time" id="editStartTime" name="editStartTime">
+                    <label for="editEndTime">End Time:</label>
+                    <input type="time" id="editEndTime" name="editEndTime">
+                    <button type="submit" id="updateBtn" name="update">Update</button>
+                    <button type="submit" id="deleteBtn" name="delete">Delete</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
     <script src="assets/js/script.js"></script>
     <script src='https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js'></script>
     <script>
@@ -388,15 +544,56 @@ while ($row = $scheduleResult->fetch_assoc()) {
             var calendar = new FullCalendar.Calendar(calendarEl, {
                 initialView: 'dayGridMonth',
                 events: events,
-                eventTimeFormat: { // Will display time as 'H:mm'
+                eventTimeFormat: { // Will display time as 'H:mm
                     hour: '2-digit',
                     minute: '2-digit',
                     meridiem: false
                 },
+                eventClick: function(info) {
+                    var event = info.event;
+                    if (event) {
+                        var scheduleId = event.extendedProps.scheduleId;
+
+                        // Get current date and time in Asia/Manila timezone
+                        var now = new Date();
+                        var timezoneOffset = now.getTimezoneOffset() + (8 * 60); // Offset for Asia/Manila timezone
+                        now.setMinutes(now.getMinutes() + timezoneOffset);
+                        var startDate = now.toISOString().split('T')[0]; // Current date
+
+                        var startTime = new Date(event.start).toLocaleTimeString('en-US', {
+                            hour: '2-digit',
+                            minute: '2-digit',
+                            timeZone: 'Asia/Manila'
+                        });
+                        var endTime = new Date(event.end).toLocaleTimeString('en-US', {
+                            hour: '2-digit',
+                            minute: '2-digit',
+                            timeZone: 'Asia/Manila'
+                        });
+
+                        document.getElementById("scheduleId").value = scheduleId;
+                        document.getElementById("editStartDate").value = startDate;
+                        document.getElementById("editStartTime").value = startTime;
+                        document.getElementById("editEndTime").value = endTime;
+
+                        var modal = document.getElementById("myModal");
+                        modal.style.display = "block";
+                    }
+                }
             });
             calendar.render();
         });
+        window.onload = function() {
+            // Get the modal and the close button
+            var modal = document.getElementById("myModal");
+            var closeButton = document.getElementsByClassName("close")[0];
+            closeButton.onclick = function() {
+                modal.style.display = "none";
+            }
+        }
     </script>
+
+
 </body>
 
 </html>
