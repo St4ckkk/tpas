@@ -83,6 +83,14 @@
         <link rel="shortcut icon" href="assets/favicon/tpasss.ico" type="image/x-icon">
     </head>
     <style>
+        .profile-image-circle {
+            background: none;
+            border-radius: 50%;
+            margin: 0 auto;
+            border: 2px solid #3d81ea;
+
+        }
+
         .status-column i {
             vertical-align: middle;
         }
@@ -391,7 +399,7 @@
                         <small class="text-muted user-role">Admin</small>
                     </div>
                     <div class="profile-photo">
-                        <a href="profile.php"> <img src="<?php echo htmlspecialchars($profile['profile_image_path'] ?? 'assets/img/default.png'); ?>" alt="Profile Image" class="profile-image"></a>
+                        <a href="profile.php"> <img src="<?php echo htmlspecialchars($profile['profile_image_path'] ?? 'assets/img/default.png'); ?>" alt="Profile Image" class="profile-image-circle"></a>
                     </div>
                 </div>
             </div>

@@ -122,14 +122,15 @@
     </head>
     <style>
         .profile-image-circle {
-            width: 40px;
-            height: 40px;
+            background: none;
+            border: 2px solid #3d81ea;
             border-radius: 50%;
             margin: 0 auto;
 
         }
 
-        .profile-image {
+        .profile-image img{
+            border: 2px solid #3d81ea;
             background: none;
             border-radius: 50px;
         }
@@ -569,7 +570,6 @@
             width: 150px;
             height: 150px;
             border-radius: 50%;
-            border: solid 1px #000;
             display: inline-block;
         }
 
@@ -899,7 +899,7 @@
                             <small class="text-muted user-role">Admin</small>
                         </div>
                         <div class="profile-photo">
-                            <a href="profile.php"> <img src="<?php echo htmlspecialchars($doctor['profile_image_path'] ?? 'assets/img/default.png'); ?>" alt="Profile Image" class="profile-image"></a>
+                            <a href="profile.php"> <img src="<?php echo htmlspecialchars($doctor['profile_image_path'] ?? 'assets/img/default.png'); ?>" alt="Profile Image" class="profile-image-circle"></a>
                         </div>
                     </div>
                 </div>

@@ -53,12 +53,25 @@ $logResult = $logQuery->get_result();
         border-radius: 50%;
         margin: 0 auto;
         border: 2px solid #3d81ea;
-       
+
+    }
+
+    .profile-image-circle {
+        border-radius: 50%;
+        border: 2px solid #3d81ea;
+    }
+
+    .logo img {
+        display: block;
+        width: 100%;
+        background-color: var(--color-primary);
+        border-radius: 5px;
+        padding: 2px;
     }
 
     img {
         background: none;
-        
+
     }
 
     .status-column i {
@@ -307,7 +320,7 @@ $logResult = $logQuery->get_result();
                         <small class="text-muted user-role">Admin</small>
                     </div>
                     <div class="profile-photo">
-                        <a href="profile.php"> <img src="<?php echo htmlspecialchars($profile['profile_image_path'] ?? 'assets/img/default.png'); ?>" alt="Profile Image" class="profile-image-top"></a>
+                        <a href="profile.php"> <img src="<?php echo htmlspecialchars($profile['profile_image_path'] ?? 'assets/img/default.png'); ?>" alt="Profile Image" class="profile-image-circle"></a>
                     </div>
                 </div>
             </div>

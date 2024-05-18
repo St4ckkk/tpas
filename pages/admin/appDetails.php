@@ -9,6 +9,14 @@
     }
 
     $doctorId = $_SESSION['doctorSession'];
+
+    $query = $con->prepare("SELECT COUNT(*) AS total, MAX(updated_at) AS lastUpdated FROM reminders WHERE recipient_id = ? AND recipient_type = 'doctor'");
+    $query->bind_param("i", $doctorId);
+    $query->execute();
+    $result = $query->get_result()->fetch_assoc();
+    $totalReminders = $result['total'];
+    $lastUpdatedReminders = $result['lastUpdated'];
+    $displayLastUpdatedReminders = $lastUpdatedReminders ? date("F j, Y g:i A", strtotime($lastUpdatedReminders)) : "No updates";
     $query = $con->prepare("SELECT * FROM doctor WHERE id = ?");
     $query->bind_param("i", $doctorId);
     $query->execute();
@@ -51,14 +59,21 @@
     </head>
     <style>
         .profile-image-circle {
+            background: none;
+            border-radius: 50%;
+            margin: 0 auto;
+            border: 2px solid #3d81ea;
+
+        }
+
+        .profile-image {
             width: 40px;
             height: 40px;
             border-radius: 50%;
             margin: 0 auto;
-            margin-bottom: 5px;
-            margin-top: 5px;
+            border: 2px solid #3d81ea;
+            background: none;
         }
-
 
         .status-column i {
             vertical-align: middle;
@@ -75,8 +90,8 @@
             font-weight: bold;
             min-width: 100px;
             height: 30px;
-            line-height: 30px;
-            margin-top: 10px;
+            line-height: 25px;
+            margin-top: 5px;
         }
 
         .status-pending {
@@ -89,9 +104,9 @@
             font-weight: bold;
             min-width: 100px;
             height: 30px;
-            line-height: 30px;
+            line-height: 25px;
             vertical-align: middle;
-            margin-top: 10px;
+            margin-top: 5px;
         }
 
         .status-cancelled {
@@ -104,8 +119,8 @@
             font-weight: bold;
             min-width: 100px;
             height: 30px;
-            line-height: 30px;
-            margin-top: 10px;
+            line-height: 25px;
+            margin-top: 5px;
         }
 
         .status-reschedule {
@@ -118,8 +133,8 @@
             font-weight: bold;
             min-width: 100px;
             height: 30px;
-            line-height: 30px;
-            vertical-align: middle;
+            line-height: 25px;
+            margin-top: 5px;
         }
 
         th {
@@ -307,9 +322,9 @@
                             <tr>
                                 <td>
                                     <?php if (!empty($appointmentDetails['profile_image_path'])) : ?>
-                                        <img src="<?= $appointmentDetails['profile_image_path'] ?>" alt="Profile Image" class="profile-image-circle">
+                                        <img src="<?= $appointmentDetails['profile_image_path'] ?>" alt="Profile Image" class="profile-image">
                                     <?php else : ?>
-                                        <img src="assets/img/default.png" alt="Default Image" class="profile-image-circle">
+                                        <img src="assets/img/default.png" alt="Default Image" class="profile-image">
                                     <?php endif; ?>
                                 </td>
                                 <td><?= $appointmentDetails['first_name'] . ' ' . $appointmentDetails['last_name'] ?></td>
@@ -375,7 +390,7 @@
                             <small class="text-muted user-role">Admin</small>
                         </div>
                         <div class="profile-photo">
-                            <a href="profile.php"> <img src="<?php echo htmlspecialchars($profile['profile_image_path'] ?? 'assets/img/default.png'); ?>" alt="Profile Image" class="profile-image"></a>
+                            <a href="profile.php"> <img src="<?php echo htmlspecialchars($profile['profile_image_path'] ?? 'assets/img/default.png'); ?>" alt="Profile Image" class="profile-image-circle"></a>
                         </div>
                     </div>
                 </div>

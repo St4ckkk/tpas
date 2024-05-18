@@ -133,6 +133,14 @@ $updatesQuery->close();
         background: none;
     }
 
+    .logo img {
+        display: block;
+        width: 100%;
+        background-color: var(--color-primary);
+        border-radius: 5px;
+        padding: 2px;
+    }
+
     .schedule-container {
         display: flex;
         background: var(--color-white);

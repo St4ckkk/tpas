@@ -124,29 +124,26 @@
         <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Sharp" rel="stylesheet" />
         <link rel="shortcut icon" href="assets/favicon/tpasss.ico" type="image/x-icon">
         <link rel="stylesheet" href="style.css" />
-
         <script>
             var updates = <?= json_encode($updates); ?>;
         </script>
     </head>
     <style>
         .profile-image-circle {
+            background: none;
+            border-radius: 50%;
+            margin: 0 auto;
+            border: 2px solid #3d81ea;
+
+        }
+        .profile-image {
             width: 40px;
             height: 40px;
             border-radius: 50%;
             margin: 0 auto;
-
-        }
-
-        .profile-image {
-            border-radius: 50%;
-            margin: 0 auto;
-            border: none;
+            border: 2px solid #3d81ea;
             background: none;
         }
-
-
-
 
         .status-column i {
             vertical-align: middle;
@@ -577,7 +574,7 @@
 
         .card h2 {
             font-size: 24px;
-            color: #333;
+            color: var(--color-dark);
             margin: 0;
         }
 
@@ -781,7 +778,7 @@
                             const row = tbody.insertRow();
                             row.innerHTML = `
             <td>
-                <img src="${appointment.profile_image_path ? '../uploaded_files/' + appointment.profile_image_path : 'assets/img/default.png'}" alt="Profile Image" class="profile-image-circle">
+                <img src="${appointment.profile_image_path ? '../uploaded_files/' + appointment.profile_image_path : 'assets/img/default.png'}" alt="Profile Image" class="profile-image">
             </td>
             <td>${appointment.first_name} ${appointment.last_name}</td>
             <td>${appointment.date}</td>
@@ -859,7 +856,7 @@
                             <small class="text-muted user-role">Admin</small>
                         </div>
                         <div class="profile-photo">
-                            <a href="profile.php"> <img src="<?php echo htmlspecialchars($profile['profile_image_path'] ?? 'assets/img/default.png'); ?>" alt="Profile Image" class="profile-image"></a>
+                            <a href="profile.php"> <img src="<?php echo htmlspecialchars($profile['profile_image_path'] ?? 'assets/img/default.png'); ?>" alt="Profile Image" class="profile-image-circle"></a>
                         </div>
                     </div>
                 </div>

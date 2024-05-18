@@ -296,8 +296,6 @@ $con->close();
             });
         });
     </script>
-    <!-- Correct order of scripts at the end of your body tag -->
-    
     <script src="assets/js/jquery.js"></script>
     <script src="assets/js/date/bootstrap-datepicker.js"></script>
     <script src="assets/js/bootstrap.min.js"></script>

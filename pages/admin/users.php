@@ -37,14 +37,27 @@ $profile = $query->get_result()->fetch_assoc();
 </head>
 <style>
     .profile-image-circle {
-        width: 40px;    
+        border-radius: 50%;
+        margin: 0 auto;
+    }
+
+    .profile-image {
+        width: 40px;
         height: 40px;
         border-radius: 50%;
         margin: 0 auto;
-        border: 2px solid #3d81ea;
+    }
+
+    .logo img{
+        display: block;
+        width: 100%;
+        background-color: var(--color-primary);
+        border-radius: 5px;
+        padding: 2px;
     }
 
     img {
+        border: 2px solid #3d81ea;
         background: none;
     }
 
@@ -219,7 +232,7 @@ $profile = $query->get_result()->fetch_assoc();
                         ?>
                             <tr>
                                 <td><?= htmlspecialchars($account_num) ?></td>
-                                <td> <img src="<?php echo htmlspecialchars($row['profile_image_path'] ?? 'assets/img/default.png'); ?>" alt="Profile Image" class="profile-image-circle"></a></td>
+                                <td> <img src="<?php echo htmlspecialchars($row['profile_image_path'] ?? 'assets/img/default.png'); ?>" alt="Profile Image" class="profile-image"></a></td>
                                 <td><?= htmlspecialchars($row['firstname'] . ' ' . $row['lastname']) ?></td>
                                 <td><?= htmlspecialchars($row['email']) ?></td>
                                 <td><?= htmlspecialchars($row['phoneno']) ?></td>
@@ -276,7 +289,7 @@ $profile = $query->get_result()->fetch_assoc();
                         <small class="text-muted user-role">Admin</small>
                     </div>
                     <div class="profile-photo">
-                        <a href="profile.php"> <img src="<?php echo htmlspecialchars($profile['profile_image_path'] ?? 'assets/img/default.png'); ?>" alt="Profile Image" class="profile-image"></a>
+                        <a href="profile.php"> <img src="<?php echo htmlspecialchars($profile['profile_image_path'] ?? 'assets/img/default.png'); ?>" alt="Profile Image" class="profile-image-circle"></a>
                     </div>
                 </div>
             </div>

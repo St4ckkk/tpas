@@ -84,11 +84,25 @@ WHERE status = 'Confirmed'");
     </head>
     <style>
         .profile-image-circle {
-            width: 40px;
-            height: 40px;
             border-radius: 50%;
             margin: 0 auto;
             border: 2px solid #3d81ea;
+        }
+
+        .profile-image {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: 2px solid #3d81ea;
+            margin: 0 auto;
+        }
+
+        .logo img {
+            display: block;
+            width: 100%;
+            background-color: var(--color-primary);
+            border-radius: 5px;
+            padding: 2px;
         }
 
         img {
@@ -99,25 +113,64 @@ WHERE status = 'Confirmed'");
             vertical-align: middle;
         }
 
+        .status-column.status-confirmed,
+        .status-column.status-completed {
+            color: var(--color-white);
+            background-color: limegreen;
+            padding: 2px 10px;
+            border-radius: 50px;
+            display: inline-block;
+            text-align: center;
+            font-weight: bold;
+            min-width: 100px;
+            height: 30px;
+            line-height: 25px;
+            margin-top: 10px;
+        }
+
         .status-column.status-pending {
-            color: orange;
-        }
-
-        .status-column.status-confirmed {
-            color: limegreen;
-        }
-
-        .status-column.status-denied {
-            color: #dc3545;
+            color: var(--color-white);
+            background-color: orange;
+            padding: 2px 10px;
+            border-radius: 50px;
+            display: inline-block;
+            text-align: center;
+            font-weight: bold;
+            min-width: 100px;
+            height: 30px;
+            line-height: 25px;
+            vertical-align: middle;
+            margin-top: 10px;
         }
 
         .status-column.status-cancelled {
-            color: red;
+            color: var(--color-white);
+            background-color: red;
+            padding: 2px 10px;
+            border-radius: 50px;
+            display: inline-block;
+            text-align: center;
+            font-weight: bold;
+            min-width: 100px;
+            height: 30px;
+            line-height: 25px;
+            margin-top: 10px;
         }
 
-        .status-column.status-processing {
-            color: #007bff;
+        .status-column.status-reschedule {
+            color: var(--color-white);
+            background-color: #0056b3;
+            padding: 2px 10px;
+            border-radius: 50px;
+            display: inline-block;
+            text-align: center;
+            font-weight: bold;
+            min-width: 100px;
+            height: 30px;
+            line-height: 25px;
+            vertical-align: middle;
         }
+
 
         /* Notifications Styles */
         .recent-updates {
@@ -231,7 +284,6 @@ WHERE status = 'Confirmed'");
         .modal-title {
             font-weight: bold;
             font-size: 24px;
-            /* Larger and bolder */
             color: #333;
             margin-bottom: 8px
         }
@@ -245,7 +297,6 @@ WHERE status = 'Confirmed'");
 
         .modal-priority {
             font-weight: bold;
-            /* Make priority noticeable */
             margin-bottom: 5px;
         }
 
@@ -257,29 +308,7 @@ WHERE status = 'Confirmed'");
         }
 
 
-        .status-pending {
-            color: orange;
-        }
 
-        .status-confirmed {
-            color: limegreen;
-        }
-
-        .status-cancelled {
-            color: red;
-        }
-
-        .status-processing {
-            color: #007bff;
-        }
-
-        .status-reschedule {
-            color: #0056b3;
-        }
-
-        .status-completed {
-            color: #28a745;
-        }
 
         .low,
         .medium,
@@ -401,7 +430,6 @@ WHERE status = 'Confirmed'");
 
         .bx {
             vertical-align: middle;
-            margin-right: 10px;
         }
 
         .reminder-title {
@@ -672,7 +700,7 @@ WHERE status = 'Confirmed'");
                             const row = tbody.insertRow();
                             row.innerHTML = `
             <td>
-                <img src="${appointment.profile_image_path ? '../uploaded_files/' + appointment.profile_image_path : 'assets/img/default.png'}" alt="Profile Image" class="profile-image-circle">
+                <img src="${appointment.profile_image_path ? '../uploaded_files/' + appointment.profile_image_path : 'assets/img/default.png'}" alt="Profile Image" class="profile-image">
             </td>
             <td>${appointment['first_name']} ${appointment['last_name']}</td>
             <td>${appointment['phone_number']}</td>
@@ -755,7 +783,7 @@ WHERE status = 'Confirmed'");
                             <small class="text-muted user-role">Admin</small>
                         </div>
                         <div class="profile-photo">
-                            <a href="profile.php"> <img src="<?php echo htmlspecialchars($profile['profile_image_path'] ?? 'assets/img/default.png'); ?>" alt="Profile Image" class="profile-image"></a>
+                            <a href="profile.php"> <img src="<?php echo htmlspecialchars($profile['profile_image_path'] ?? 'assets/img/default.png'); ?>" alt="Profile Image" class="profile-image-circle"></a>
                         </div>
                     </div>
                 </div>

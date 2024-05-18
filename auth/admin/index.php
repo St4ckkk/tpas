@@ -113,6 +113,7 @@ if (isset($_POST['login']) && $lockRow && strtotime($lockRow['lock_until']) > ti
     <link rel="shortcut icon" href="assets/favicon/tpas.ico" type="image/x-icon">
 </head>
 <style>
+    
     .error {
         color: red;
         font-size: 14px;
@@ -131,14 +132,16 @@ if (isset($_POST['login']) && $lockRow && strtotime($lockRow['lock_until']) > ti
         padding: 20px;
     }
 
-    .profile-image {
+    .profile-image-circle {
         width: 100%;
-        border-radius: 10px 10px 0 0;
+        border-radius: 50%;
         cursor: pointer;
         transition: transform 0.3s ease;
+        background: none;
+        border: none;
     }
 
-    .profile-image:hover {
+    .profile-image-circle:hover {
         transform: scale(1.05);
     }
 
@@ -157,6 +160,7 @@ if (isset($_POST['login']) && $lockRow && strtotime($lockRow['lock_until']) > ti
         color: grey;
         font-size: 0.6rem;
     }
+
 </style>
 
 <body>
@@ -171,14 +175,12 @@ if (isset($_POST['login']) && $lockRow && strtotime($lockRow['lock_until']) > ti
                 $doctorFirstName = htmlspecialchars($_COOKIE['doctorFirstName'], ENT_QUOTES, 'UTF-8');
                 $doctorLastName = htmlspecialchars($_COOKIE['doctorLastName'], ENT_QUOTES, 'UTF-8');
                 echo '<div class="profile-image-card">';
-                echo '<img src="' . htmlspecialchars($fullImagePath, ENT_QUOTES, 'UTF-8') . '" alt="Profile Image" class="profile-image" onclick="quickLogin(\'' . htmlspecialchars($_COOKIE['loginID'], ENT_QUOTES, 'UTF-8') . '\')">';
-
+                echo '<img src="' . htmlspecialchars($fullImagePath, ENT_QUOTES, 'UTF-8') . '" alt="Profile Image" class="profile-image-circle" onclick="quickLogin(\'' . htmlspecialchars($_COOKIE['loginID'], ENT_QUOTES, 'UTF-8') . '\')">';
                 echo '<div class="title">';
                 echo '<div class="profile-name">' . $doctorFirstName . ' ' . $doctorLastName . '</div>';
                 echo '<small class="one-tap-login">Tap the image to login</small>';
                 echo '</div>';
                 echo '</div>';
-                // Add this line for one-tap login
             }
             ?>
             <form class="form-login" method="POST">

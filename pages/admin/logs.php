@@ -10,6 +10,15 @@
     $query->execute();
     $profile = $query->get_result()->fetch_assoc();
 
+
+    $query = $con->prepare("SELECT COUNT(*) AS total, MAX(updated_at) AS lastUpdated FROM reminders WHERE recipient_id = ? AND recipient_type = 'doctor'");
+    $query->bind_param("i", $doctorId);
+    $query->execute();
+    $result = $query->get_result()->fetch_assoc();
+    $totalReminders = $result['total'];
+    $lastUpdatedReminders = $result['lastUpdated'];
+    $displayLastUpdatedReminders = $lastUpdatedReminders ? date("F j, Y g:i A", strtotime($lastUpdatedReminders)) : "No updates";
+
     $query = $con->prepare("SELECT * FROM appointments ORDER BY date DESC");
     $query->execute();
     $result = $query->get_result();
@@ -36,6 +45,31 @@
         <link rel="shortcut icon" href="assets/favicon/tpasss.ico" type="image/x-icon">
     </head>
     <style>
+        .profile-image-circle {
+            border-radius: 50%;
+            margin: 0 auto;
+            border: 2px solid #3d81ea;
+        }
+
+        .profile-image {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            margin: 0 auto;
+        }
+
+        .logo img {
+            display: block;
+            width: 100%;
+            background-color: var(--color-primary);
+            border-radius: 5px;
+            padding: 2px;
+        }
+
+        img {
+            background: none;
+        }
+
         .status-column i {
             vertical-align: middle;
         }
@@ -372,7 +406,7 @@
                         <small class="text-muted user-role">Admin</small>
                     </div>
                     <div class="profile-photo">
-                        <a href="profile.php"> <img src="<?php echo htmlspecialchars($profile['profile_image_path'] ?? 'assets/img/default.png'); ?>" alt="Profile Image" class="profile-image"></a>
+                        <a href="profile.php"> <img src="<?php echo htmlspecialchars($profile['profile_image_path'] ?? 'assets/img/default.png'); ?>" alt="Profile Image" class="profile-image-circle"></a>
                     </div>
                 </div>
             </div>
