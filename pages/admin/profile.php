@@ -487,7 +487,7 @@
             margin-top: 20px;
             border: none;
             box-shadow: var(--box-shadow);
-           
+
         }
 
         .card-header {
@@ -495,7 +495,7 @@
             color: #fff;
             padding: 10px;
             font-size: 1.2rem;
-          
+
         }
 
         .card:hover {
@@ -760,17 +760,17 @@
                 <div class="profile-data">
                     <form action="upload.php" method="post" enctype="multipart/form-data">
                         <div class="profile-pic">
-                            <img src="<?php echo htmlspecialchars($doctor['profile_image_path'] ?? 'assets/img/default.png'); ?>" alt="Profile Image" class="profile-image">
+                            <img id="output" src="<?php echo htmlspecialchars($doctor['profile_image_path'] ?? 'assets/img/default.png'); ?>" alt="Profile Image" class="profile-image">
                             <label class="-label" for="file">
                                 <input type="file" id="file" name="profile_photo" class="account-settings-fileinput" onchange="loadFile(event)">
                                 <span class="bx bx-camera mt-2"></span>
                                 <span style="font-size: 1rem;">Change Image</span>
                             </label>
                         </div>
-
                         <button type="submit" name="submit" class="btn save-btn btn-primary mt-4 mx-4">Save Changes</button>
                     </form>
                 </div>
+
                 <div class="card mt-4 info-data">
                     <div class="card-header">
                         <span class="bx bx-user"></span> Account Info
@@ -939,9 +939,10 @@
                 var output = document.getElementById('output');
                 output.src = URL.createObjectURL(event.target.files[0]);
                 output.onload = function() {
-                    URL.revokeObjectURL(output.src)
+                    URL.revokeObjectURL(output.src) // free memory
                 }
             }
+
 
             function showUpdateModal(index) {
                 var updateData = updates[index];

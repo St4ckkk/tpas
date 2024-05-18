@@ -138,13 +138,12 @@
         }
 
         .profile-image {
-            width: 40px;
-            height: 40px;
             border-radius: 50%;
             margin: 0 auto;
             border: none;
             background: none;
         }
+        
 
 
 
@@ -541,6 +540,7 @@
             display: flex;
             align-items: center;
             margin: 20px 0;
+            border-radius: 30px;
         }
 
         .card .middle {
@@ -654,9 +654,6 @@
                     <div class="middle">
                         <div class="left">
                             <h2>Welcome Back, Dr. <span id="doctorNameCard"><?= $profile['doctorFirstName'] . " " . $profile['doctorLastName'] ?></span></h2>
-                        </div>
-                        <div class="right">
-                            <img src="<?= $profile['profile_image_path'] ?>" alt="Welcome Image" class="welcome-image">
                         </div>
                     </div>
                 </div>

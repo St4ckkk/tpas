@@ -20,7 +20,7 @@ $recordsPerPage = 5;
 $page = isset($_GET['page']) ? intval($_GET['page']) : 1;
 $offset = ($page - 1) * $recordsPerPage;
 
-$query = $con->prepare("SELECT accountNumber, firstName, lastName, email, phoneNumber, createdAt FROM assistants ORDER BY createdAt DESC LIMIT ? OFFSET ?");
+$query = $con->prepare("SELECT * FROM assistants ORDER BY createdAt DESC LIMIT ? OFFSET ?");
 $query->bind_param("ii", $recordsPerPage, $offset);
 $query->execute();
 $result = $query->get_result();
@@ -47,6 +47,20 @@ $logResult = $logQuery->get_result();
     <link rel="shortcut icon" href="assets/favicon/tpasss.ico" type="image/x-icon">
 </head>
 <style>
+    .profile-image {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        margin: 0 auto;
+        border: 2px solid #3d81ea;
+       
+    }
+
+    img {
+        background: none;
+        
+    }
+
     .status-column i {
         vertical-align: middle;
     }
@@ -246,22 +260,22 @@ $logResult = $logQuery->get_result();
                     <thead>
                         <tr>
                             <th>Account Number</th>
+                            <th>Profile</th>
                             <th>First Name</th>
                             <th>Last Name</th>
                             <th>Email</th>
                             <th>Phone number</th>
-                            <th>Created At</th>
                         </tr>
                     </thead>
                     <tbody>
                         <?php while ($row = $result->fetch_assoc()) : ?>
                             <tr>
                                 <td><?= htmlspecialchars(decryptData($row['accountNumber'], $encryptionKey)) ?></td>
+                                <td><img src="<?= htmlspecialchars($row['profile_image_path'] ?? 'assets/img/default.png') ?>" alt="Profile Image" class="profile-image"></td>
                                 <td><?= htmlspecialchars($row['firstName']) ?></td>
                                 <td><?= htmlspecialchars($row['lastName']) ?></td>
                                 <td><?= htmlspecialchars($row['email']) ?></td>
                                 <td><?= htmlspecialchars($row['phoneNumber']) ?></td>
-                                <td><?= htmlspecialchars(date("F j, Y g:i A", strtotime($row['createdAt']))) ?></td>
                             </tr>
                         <?php endwhile; ?>
 
@@ -293,7 +307,7 @@ $logResult = $logQuery->get_result();
                         <small class="text-muted user-role">Admin</small>
                     </div>
                     <div class="profile-photo">
-                        <a href="profile.php"> <img src="<?php echo htmlspecialchars($profile['profile_image_path'] ?? 'assets/img/default.png'); ?>" alt="Profile Image" class="profile-image"></a>
+                        <a href="profile.php"> <img src="<?php echo htmlspecialchars($profile['profile_image_path'] ?? 'assets/img/default.png'); ?>" alt="Profile Image" class="profile-image-top"></a>
                     </div>
                 </div>
             </div>

@@ -88,10 +88,12 @@ WHERE status = 'Confirmed'");
             height: 40px;
             border-radius: 50%;
             margin: 0 auto;
-
+            border: 2px solid #3d81ea;
         }
 
-
+        img {
+            background: none;
+        }
 
         .status-column i {
             vertical-align: middle;

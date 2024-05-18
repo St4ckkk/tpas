@@ -30,6 +30,18 @@ $profile = $query->get_result()->fetch_assoc();
     <link rel="shortcut icon" href="assets/favicon/tpasss.ico" type="image/x-icon">
 </head>
 <style>
+    .profile-image-circle {
+        width: 40px;    
+        height: 40px;
+        border-radius: 50%;
+        margin: 0 auto;
+        border: 2px solid #3d81ea;
+    }
+
+    img {
+        background: none;
+    }
+
     .status-column i {
         vertical-align: middle;
     }
@@ -175,11 +187,12 @@ $profile = $query->get_result()->fetch_assoc();
         </aside>
         <main>
             <div class="recent-orders">
-                <h2>Users</h2>
+                <h1>Users Account</h1>
                 <table id="sched--table">
                     <thead>
                         <tr>
                             <th>Account Number</th>
+                            <th>Profile</th>
                             <th>Name</th>
                             <th>Email</th>
                             <th>Phone No</th>
@@ -191,7 +204,7 @@ $profile = $query->get_result()->fetch_assoc();
                         <?php
                         define('BASE_URL1', '/tpas/');
                         include_once $_SERVER['DOCUMENT_ROOT'] . BASE_URL1 . 'data-encryption.php';
-                        $query = $con->prepare("SELECT account_num, firstname, lastname, email, phoneno, accountStatus, createdAt FROM tb_patients ORDER BY createdAt DESC");
+                        $query = $con->prepare("SELECT * FROM tb_patients ORDER BY createdAt DESC");
 
                         $query->execute();
                         $result = $query->get_result();
@@ -200,6 +213,7 @@ $profile = $query->get_result()->fetch_assoc();
                         ?>
                             <tr>
                                 <td><?= htmlspecialchars($account_num) ?></td>
+                                <td> <img src="<?php echo htmlspecialchars($row['profile_image_path'] ?? 'assets/img/default.png'); ?>" alt="Profile Image" class="profile-image-circle"></a></td>
                                 <td><?= htmlspecialchars($row['firstname'] . ' ' . $row['lastname']) ?></td>
                                 <td><?= htmlspecialchars($row['email']) ?></td>
                                 <td><?= htmlspecialchars($row['phoneno']) ?></td>
