@@ -1,15 +1,22 @@
 <?php
 session_start();
-include_once 'assets/conn/dbconnect.php'; // Adjust the path as needed
+include_once 'assets/conn/dbconnect.php';
 
 define('BASE_URL', '/TPAS/auth/admin/');
 if (!isset($_SESSION['doctorSession'])) {
     header("Location: " . BASE_URL . "index.php");
     exit();
 }
+$query = $con->prepare("SELECT COUNT(*) AS total, MAX(updated_at) AS lastUpdated FROM reminders WHERE recipient_id = ? AND recipient_type = 'doctor'");
+$query->bind_param("i", $doctorId);
+$query->execute();
+$result = $query->get_result()->fetch_assoc();
+$totalReminders = $result['total'];
+$lastUpdatedReminders = $result['lastUpdated'];
+$displayLastUpdatedReminders = $lastUpdatedReminders ? date("F j, Y g:i A", strtotime($lastUpdatedReminders)) : "No updates";
 
 $doctorId = $_SESSION['doctorSession'];
-$query = $con->prepare("SELECT doctorLastName FROM doctor WHERE id = ?");
+$query = $con->prepare("SELECT * FROM doctor WHERE id = ?");
 $query->bind_param("i", $doctorId);
 $query->execute();
 $profile = $query->get_result()->fetch_assoc();
@@ -23,23 +30,23 @@ $query = $con->prepare("
         CASE
             WHEN r.recipient_type = 'assistant' THEN a.firstName
             WHEN r.recipient_type = 'patient' THEN p.firstname
+            WHEN r.recipient_type = 'doctor' THEN d.doctorFirstName
         END AS firstName,
         CASE
             WHEN r.recipient_type = 'assistant' THEN a.lastName
             WHEN r.recipient_type = 'patient' THEN p.lastname
+            WHEN r.recipient_type = 'doctor' THEN d.doctorLastName
         END AS lastName
     FROM reminders AS r
     LEFT JOIN assistants AS a ON r.recipient_id = a.assistantId AND r.recipient_type = 'assistant'
     LEFT JOIN tb_patients AS p ON r.recipient_id = p.patientId AND r.recipient_type = 'patient'
+    LEFT JOIN doctor AS d ON r.recipient_id = d.id AND r.recipient_type = 'doctor'
     WHERE r.creatorId = ?
     ORDER BY r.date DESC    
 ");
 $query->bind_param("i", $doctorId);
 $query->execute();
 $result = $query->get_result();
-
-
-
 
 if (isset($_SESSION['success'])) {
     echo "<script>alert('" . $_SESSION['success'] . "');</script>";
@@ -50,24 +57,10 @@ if (isset($_SESSION['error'])) {
     echo "<script>alert('" . $_SESSION['error'] . "');</script>";
     unset($_SESSION['error']);
 }
+$query->execute();
+$result = $query->get_result();
+
 $updatesQuery = $con->prepare("
-    SELECT 
-        a.appointment_id, 
-        a.first_name, 
-        a.last_name, 
-        a.date AS datetime,
-        a.status,
-        a.updatedAt AS updatedAt,
-        '' AS title, 
-        '' AS description,
-        'appointment' AS type
-    FROM 
-        appointments a
-    JOIN 
-        schedule s ON a.scheduleId = s.scheduleId
-    WHERE 
-        a.status IN ('Cancelled') AND s.doctorId = ?
-    UNION ALL
     SELECT 
         r.id AS appointment_id,
         '' AS first_name,
@@ -87,11 +80,11 @@ $updatesQuery = $con->prepare("
     LIMIT 10
 ");
 
-
 if ($updatesQuery === false) {
     die('MySQL prepare error: ' . $con->error);
 }
-$updatesQuery->bind_param("ii", $doctorId, $doctorId);
+
+$updatesQuery->bind_param("i", $doctorId);
 $updatesQuery->execute();
 $updatesResult = $updatesQuery->get_result();
 $updates = [];
@@ -99,8 +92,6 @@ while ($update = $updatesResult->fetch_assoc()) {
     $updates[] = $update;
 }
 $updatesQuery->close();
-
-
 ?>
 
 
@@ -138,7 +129,12 @@ $updatesQuery->close();
         color: #dc3545;
     }
 
+    img {
+        background: none;
+    }
+
     .schedule-container {
+        display: flex;
         background: var(--color-white);
         padding: var(--card-padding);
         border-radius: var(--border-radius-2);
@@ -146,15 +142,9 @@ $updatesQuery->close();
 
     }
 
-    .schedule-container form {
-        display: flex;
-        flex-direction: column;
-        padding: 1rem;
-        gap: 0.8rem;
-        margin-bottom: 1rem;
-        position: relative;
-        right: 50px;
-
+    .schedule-container:hover {
+        box-shadow: none;
+        cursor: pointer;
     }
 
     .schedule-container form label {
@@ -280,7 +270,6 @@ $updatesQuery->close();
 
     .schedule-container select {
         width: 100%;
-        /* Makes the select elements take full width of the form group */
         padding: 0.8rem;
         border-radius: var(--border-radius-1);
         border: 1px solid var(--color-info-light);
@@ -414,40 +403,29 @@ $updatesQuery->close();
         margin-top: 5px;
     }
 
-    /* The Modal (background) */
     .modal {
         display: none;
-        /* Hidden by default */
         position: fixed;
-        /* Stay in place */
         z-index: 1000;
-        /* Sit on top */
         left: 0;
         top: 0;
         width: 100%;
-        /* Full width */
         height: 100%;
-        /* Full height */
         overflow: auto;
-        /* Enable scroll if needed */
         background-color: rgba(0, 0, 0, 0.4);
-        /* Black w/ opacity */
         display: flex;
         align-items: center;
-        /* Center vertically */
         justify-content: center;
-        /* Center horizontally */
+
     }
 
 
     .modal-content {
         background-color: #fefefe;
         margin: auto;
-        /* Necessary for aligning the modal content in the center */
         padding: 20px;
         border: 1px solid #888;
         width: 20%;
-        /* Responsive width */
         box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.3), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
         border-radius: 5px;
     }
@@ -554,18 +532,25 @@ $updatesQuery->close();
 
     .reminder-title {
         color: orange;
-        /* Set the color for reminder titles */
         display: flex;
         align-items: center;
-        /* Align the icon with the text */
+
     }
 
     .reminder-icon {
         display: inline-block;
         margin-right: 5px;
-        /* Space between icon and text */
         font-size: 20px;
-        /* Icon size */
+    }
+
+    .bx-trash {
+        color: red;
+        cursor: pointer;
+        font-size: 16px;
+    }
+
+    .bx-trash:hover {
+        color: #dc3545;
     }
 </style>
 
@@ -583,15 +568,20 @@ $updatesQuery->close();
             </div>
 
             <div class="sidebar">
-                <a href="dashboard.php" class="">
+                <a href="dashboard.php">
                     <span class="material-icons-sharp"> dashboard </span>
                     <h3>Dashboard</h3>
                 </a>
+                <a href="profile.php">
+                    <span class="material-icons-sharp">account_circle</span>
+                    <h3>Profile</h3>
+                </a>
+
                 <a href="users.php">
                     <span class="material-icons-sharp"> person_outline </span>
                     <h3>Users</h3>
                 </a>
-                <a href="assistant.php">
+                <a href="assistant.php ">
                     <span class="material-icons-sharp"> person </span>
                     <h3>Staffs</h3>
                 </a>
@@ -600,9 +590,9 @@ $updatesQuery->close();
                     <h3>Appointments</h3>
                 </a>
                 <a href="reminders.php" class="active">
-                    <span class="material-icons-sharp">notifications </span>
+                    <span class="material-icons-sharp">notifications</span>
                     <h3>Reminders</h3>
-                    <span class="message-count"></span>
+                    <span class="message-count"><?= $totalReminders ?></span>
                 </a>
                 <a href="logs.php">
                     <span class="material-icons-sharp">description</span>
@@ -611,6 +601,10 @@ $updatesQuery->close();
                 <a href="sched.php">
                     <span class="material-icons-sharp"> add </span>
                     <h3>Add Schedule</h3>
+                </a>
+                <a href="systems.php">
+                    <span class="material-icons-sharp"> settings </span>
+                    <h3>System Settings</h3>
                 </a>
                 <a href="logout.php?logout">
                     <span class="material-icons-sharp"> logout </span>
@@ -628,6 +622,7 @@ $updatesQuery->close();
                             <label for="reminderTarget">Target:</label>
                             <select name="reminderTarget" id="reminderTarget" required onchange="loadTargetUsers(this.value);">
                                 <option value="">Select Target</option>
+                                <option value="doctor">Doctor</option>
                                 <option value="assistant">Assistant</option>
                                 <option value="patient">Patient</option>
                             </select>
@@ -704,28 +699,36 @@ $updatesQuery->close();
                 </div>
                 <div class="profile">
                     <div class="info">
-                        <p>Hey, <b name="admin-name"><?= $profile['doctorLastName'] ?></b></p>
+                        <p>Hey, <b name="admin-name"><?= $profile['doctorFirstName'] . " " . $profile['doctorLastName'] ?></b></p>
                         <small class="text-muted user-role">Admin</small>
                     </div>
                     <div class="profile-photo">
+                        <a href="profile.php"> <img src="<?php echo htmlspecialchars($profile['profile_image_path'] ?? 'assets/img/default.png'); ?>" alt="Profile Image" class="profile-image"></a>
                     </div>
                 </div>
             </div>
             <div class="recent-updates">
                 <h2 class="updates-title">Reminders</h2>
-                <div class="updates-list">
-                    <?php foreach ($updates as $index => $update) : ?>
-                        <div class="update-item" data-index="<?= $index ?>" onclick="showUpdateModal(this.getAttribute('data-index'));">
-                            <h3 class="update-title <?= $update['type'] === 'reminder' ? 'reminder-title' : ''; ?>">
-                                <?php if ($update['type'] === 'reminder') : ?>
-                                    <i class="bx bxs-bell reminder-icon"></i> <!-- Bell icon for reminders -->
-                                <?php endif; ?>
-                                <?= $update['type'] === 'appointment' ? "Appointment Update" : "Reminder"; ?>
-                            </h3>
-                            <span class="update-date"><?= date("F j, Y", strtotime($update['datetime'])); ?></span>
-                        </div>
-                    <?php endforeach; ?>
-                </div>
+                <?php if (empty($updates)) : ?>
+                    <p>No reminders available</p>
+                <?php else : ?>
+                    <div class="updates-list">
+                        <?php foreach ($updates as $index => $update) : ?>
+                            <div class="update-item" data-index="<?= $index ?>" onclick="showUpdateModal(this.getAttribute('data-index'));">
+                                <h3 class="update-title <?= $update['type'] === 'reminder' ? 'reminder-title' : ''; ?>">
+                                    <?php if ($update['type'] === 'reminder') : ?>
+                                        <i class="bx bxs-bell reminder-icon"></i>
+                                    <?php elseif ($update['type'] === 'appointment') : ?>
+                                        <i class="bx bxs-message-square-dots appointment-icon"></i>
+                                    <?php endif; ?>
+                                    <?= $update['type'] === 'appointment' ? "Appointment Update" : "Reminder"; ?>
+                                </h3>
+                                <span class="update-date"><?= date("F j, Y", strtotime($update['datetime'])); ?></span>
+                                <i class="bx bx-trash delete-icon" onclick="deleteUpdate(<?= $update['appointment_id'] ?>, '<?= $update['type'] ?>')"></i>
+                            </div>
+                        <?php endforeach; ?>
+                    </div>
+                <?php endif; ?>
             </div>
             <div id="updateModal" class="modal" style="display: none;">
                 <div class="modal-content">
@@ -733,86 +736,104 @@ $updatesQuery->close();
                     <div id="modalContent"></div>
                 </div>
             </div>
-
         </div>
-    </div>
-    <script>
-        function showUpdateModal(index) {
-            var updateData = updates[index];
-            console.log("Selected update data:", updateData);
+        <script>
+            function showUpdateModal(index) {
+                var updateData = updates[index];
+                console.log("Selected update data:", updateData);
 
-            var modal = document.getElementById('updateModal');
-            var modalContent = document.getElementById('modalContent');
+                var modal = document.getElementById('updateModal');
+                var modalContent = document.getElementById('modalContent');
 
-            modalContent.innerHTML = '';
-            // Here you need to format the date and time when setting it in the modal
-            var formattedDate = new Date(updateData.datetime).toLocaleDateString('en-GB', {
-                day: 'numeric',
-                month: 'long',
-                year: 'numeric'
-            });
-            var formattedTime = new Date(updateData.datetime).toLocaleTimeString([], {
-                hour: '2-digit',
-                minute: '2-digit',
-                hour12: true
-            });
+                modalContent.innerHTML = '';
+                // Here you need to format the date and time when setting it in the modal
+                var formattedDate = new Date(updateData.datetime).toLocaleDateString('en-GB', {
+                    day: 'numeric',
+                    month: 'long',
+                    year: 'numeric'
+                });
+                var formattedTime = new Date(updateData.datetime).toLocaleTimeString([], {
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    hour12: true
+                });
 
-            if (updateData.type === 'appointment') {
-                const statusClass = updateData.status ? `modal-status ${updateData.status.toLowerCase()}` : 'modal-status unknown';
-                modalContent.innerHTML = `
+                if (updateData.type === 'appointment') {
+                    const statusClass = updateData.status ? `modal-status ${updateData.status.toLowerCase()}` : 'modal-status unknown';
+                    modalContent.innerHTML = `
             <h3>Appointment Details</h3>
             <div class="${statusClass} modal-title">${updateData.status || 'No status'}</div>
             <div class="recipients">${updateData.first_name} ${updateData.last_name}</div>
             <div class="modal-date">${formattedDate} : ${formattedTime}</div>
         `;
-            } else if (updateData.type === 'reminder') {
-                const priorityClass = updateData.status ? `priority-${updateData.status.toLowerCase()}` : '';
-                modalContent.innerHTML = `
+                } else if (updateData.type === 'reminder') {
+                    const priorityClass = updateData.status ? `priority-${updateData.status.toLowerCase()}` : '';
+                    modalContent.innerHTML = `
             <h3>Reminder Details</h3>
             <div class="modal-priority-icon ${priorityClass}"><i class="bx bxs-flag-alt"></i></div>
             <div class="modal-title">${updateData.title || 'No Title'}</div>
             <div class="modal-description">${updateData.description || 'No Description'}</div>
             <div class="modal-date">${formattedDate} : ${formattedTime}</div>
         `;
+                }
+
+                modal.style.display = "flex";
             }
 
-            modal.style.display = "flex";
-        }
 
-
-        function closeModal() {
-            var modal = document.getElementById('updateModal');
-            modal.style.display = "none";
-        }
-        window.onclick = function(event) {
-            var modal = document.getElementById('updateModal');
-            if (event.target == modal) {
+            function closeModal() {
+                var modal = document.getElementById('updateModal');
                 modal.style.display = "none";
             }
-        }
-        console.log("Updates Data:", updates);
-    </script>
-    <script src="assets/js/script.js"></script>
-    <script>
-        function loadTargetUsers(targetType) {
-            const userSelect = document.getElementById('reminderUser');
-            userSelect.innerHTML = '<option value="">Select User</option>'; // Reset user selection
+            window.onclick = function(event) {
+                var modal = document.getElementById('updateModal');
+                if (event.target == modal) {
+                    modal.style.display = "none";
+                }
+            }
+            console.log("Updates Data:", updates);
+        </script>
+        <script src="assets/js/script.js"></script>
+        <script>
+            function deleteUpdate(updateId, updateType) {
+                if (updateType === 'reminder' && confirm("Are you sure you want to delete this reminder?")) {
+                    var xhr = new XMLHttpRequest();
+                    xhr.open("POST", "delete-update.php", true);
+                    xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+                    xhr.onreadystatechange = function() {
+                        if (xhr.readyState == 4 && xhr.status == 200) {
+                            var response = JSON.parse(xhr.responseText);
+                            if (response.success) {
+                                alert("Reminder deleted successfully.");
+                                window.location.reload();
+                            } else {
+                                alert("Failed to delete reminder. Please try again.");
+                            }
+                        }
+                    };
+                    xhr.send("update_id=" + updateId + "&update_type=" + updateType);
+                }
+            }
 
-            if (!targetType) return;
 
-            fetch(`load-users.php?target=${targetType}`)
-                .then(response => response.json())
-                .then(data => {
-                    data.forEach(user => {
-                        const option = document.createElement('option');
-                        option.value = user.id;
-                        option.textContent = user.name;
-                        userSelect.appendChild(option);
-                    });
-                })
-                .catch(error => console.error('Error loading users:', error));
-        }
-    </script>
+            function loadTargetUsers(targetType) {
+                const userSelect = document.getElementById('reminderUser');
+                userSelect.innerHTML = '<option value="">Select User</option>';
+                if (!targetType) return;
+
+                fetch(`load-users.php?target=${targetType}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        data.forEach(user => {
+                            const option = document.createElement('option');
+                            option.value = user.id;
+                            option.textContent = user.name;
+                            userSelect.appendChild(option);
+                        });
+                    })
+                    .catch(error => console.error('Error loading users:', error));
+            }
+        </script>
 </body>
 
 </html>

@@ -26,7 +26,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
 
     // Check if the recipient type is valid
-    if (!in_array($recipientType, ['assistant', 'patient'])) {
+    if (!in_array($recipientType, ['assistant', 'patient', 'doctor'])) {
         $_SESSION['error'] = 'Invalid recipient type.';
         header("Location: reminders.php");
         exit;

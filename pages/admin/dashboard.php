@@ -21,15 +21,16 @@
     } else {
         $displayLastUpdatedAppointments = "None";
     }
-    // Fetch total users
+
     $query = $con->prepare("SELECT COUNT(*) AS total, MAX(updatedAt) as lastUpdated FROM tb_patients WHERE accountStatus ='Verified'");
     $query->execute();
     $result = $query->get_result()->fetch_assoc();
     $totalUsers = $result['total'];
     $lastUpdatedUsers = $result['lastUpdated'];
     $displayLastUpdatedUsers = $lastUpdatedUsers ? date("F j, Y g:i A", strtotime($lastUpdatedUsers)) : "No updates";
-    // Fetch recent appointments
-    $query = $con->prepare("SELECT COUNT(*) AS total, MAX(updated_at) as lastUpdated FROM reminders WHERE recipient_type = 'doctor'");
+
+    $query = $con->prepare("SELECT COUNT(*) AS total, MAX(updated_at) AS lastUpdated FROM reminders WHERE recipient_id = ? AND recipient_type = 'doctor'");
+    $query->bind_param("i", $doctorId);
     $query->execute();
     $result = $query->get_result()->fetch_assoc();
     $totalReminders = $result['total'];
@@ -143,7 +144,7 @@
             border: none;
             background: none;
         }
-        
+
 
 
 
@@ -587,6 +588,16 @@
         .bx-show {
             text-align: center;
         }
+
+        .bx-trash {
+            color: red;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        .bx-trash:hover {
+            color: #dc3545;
+        }
     </style>
 
     <body>
@@ -624,7 +635,7 @@
                         <span class="material-icons-sharp"> event_available </span>
                         <h3>Appointments</h3>
                     </a>
-                    <a href="#">
+                    <a href="reminders.php">
                         <span class="material-icons-sharp">notifications</span>
                         <h3>Reminders</h3>
                         <span class="message-count"><?= $totalReminders ?></span>
@@ -657,8 +668,6 @@
                         </div>
                     </div>
                 </div>
-
-
 
                 <div class="insights">
                     <div class="appointments">
@@ -871,6 +880,8 @@
                                         <?= $update['type'] === 'appointment' ? "Appointment Update" : "Reminder"; ?>
                                     </h3>
                                     <span class="update-date"><?= date("F j, Y", strtotime($update['datetime'])); ?></span>
+                                    <!-- Add onclick event to delete icon -->
+                                    <i class="bx bx-trash delete-icon" onclick="deleteUpdate(<?= $update['appointment_id'] ?>, '<?= $update['type'] ?>')"></i>
                                 </div>
                             <?php endforeach; ?>
                         </div>
@@ -886,6 +897,26 @@
             </div>
         </div>
         <script>
+            function deleteUpdate(updateId, updateType) {
+                if (confirm("Are you sure you want to delete this " + updateType + "?")) {
+                    var xhr = new XMLHttpRequest();
+                    xhr.open("POST", "delete-appRem.php", true);
+                    xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+                    xhr.onreadystatechange = function() {
+                        if (xhr.readyState == 4 && xhr.status == 200) {
+                            var response = JSON.parse(xhr.responseText);
+                            if (response.success) {
+                                alert(updateType + " deleted successfully.");
+                                window.location.reload();
+                            } else {
+                                alert("Failed to delete " + updateType + ". Please try again.");
+                            }
+                        }
+                    };
+                    xhr.send("update_id=" + updateId + "&update_type=" + updateType);
+                }
+            }
+
             function showUpdateModal(index) {
                 var updateData = updates[index];
                 console.log("Selected update data:", updateData);

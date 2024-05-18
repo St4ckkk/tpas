@@ -7,6 +7,12 @@ if (!isset($_SESSION['doctorSession'])) {
     header("Location: " . BASE_URL . "index.php");
     exit();
 }
+$query = $con->prepare("SELECT COUNT(*) AS total FROM reminders WHERE recipient_type = 'doctor'");
+$query->execute();
+$result = $query->get_result()->fetch_assoc();
+$totalReminders = $result['total'];
+
+
 
 $doctorId = $_SESSION['doctorSession'];
 $query = $con->prepare("SELECT * FROM doctor WHERE id = ?");
@@ -161,10 +167,10 @@ $profile = $query->get_result()->fetch_assoc();
                     <span class="material-icons-sharp"> event_available </span>
                     <h3>Appointments</h3>
                 </a>
-                <a href="#">
+                <a href="reminders.php">
                     <span class="material-icons-sharp">notifications</span>
                     <h3>Reminders</h3>
-                    <span class="message-count"></span>
+                    <span class="message-count"><?= $totalReminders ?></span>
                 </a>
 
                 <a href="logs.php">
