@@ -16,21 +16,35 @@ $query->bind_param("i", $doctorId);
 $query->execute();
 $profile = $query->get_result()->fetch_assoc();
 
+// Pagination for assistants
 $recordsPerPage = 5;
 $page = isset($_GET['page']) ? intval($_GET['page']) : 1;
 $offset = ($page - 1) * $recordsPerPage;
+
+$query = $con->prepare("SELECT COUNT(*) FROM assistants");
+$query->execute();
+$totalAssistants = $query->get_result()->fetch_row()[0];
+$totalPages = ceil($totalAssistants / $recordsPerPage);
 
 $query = $con->prepare("SELECT * FROM assistants ORDER BY createdAt DESC LIMIT ? OFFSET ?");
 $query->bind_param("ii", $recordsPerPage, $offset);
 $query->execute();
 $result = $query->get_result();
-$logQuery = $con->prepare("SELECT id, accountNumber, actionDescription, userType, dateTime FROM logs WHERE userType = ? ORDER BY dateTime DESC LIMIT ? OFFSET ?");
+
+// Pagination for logs
+$logQuery = $con->prepare("SELECT COUNT(*) FROM logs WHERE userType = ?");
 $userType = 'assistant';
+$logQuery->bind_param("s", $userType);
+$logQuery->execute();
+$totalLogs = $logQuery->get_result()->fetch_row()[0];
+$totalLogPages = ceil($totalLogs / $recordsPerPage);
+
+$logQuery = $con->prepare("SELECT id, accountNumber, actionDescription, userType, dateTime FROM logs WHERE userType = ? ORDER BY dateTime DESC LIMIT ? OFFSET ?");
 $logQuery->bind_param("sii", $userType, $recordsPerPage, $offset);
 $logQuery->execute();
 $logResult = $logQuery->get_result();
-
 ?>
+
 
 
 <!DOCTYPE html>
@@ -192,6 +206,23 @@ $logResult = $logQuery->get_result();
     .logs-container thead {
         box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     }
+
+    .pagination-container {
+        text-align: center;
+        margin-top: 20px;
+    }
+
+    .pagination-container button {
+        margin: 0 5px;
+        padding: 5px 10px;
+        background-color: #f0f0f0;
+        border: 1px solid #ddd;
+        cursor: pointer;
+    }
+
+    .pagination-container button:hover {
+        background-color: #ddd;
+    }
 </style>
 
 <body>
@@ -232,7 +263,7 @@ $logResult = $logQuery->get_result();
                 <a href="#">
                     <span class="material-icons-sharp">notifications</span>
                     <h3>Reminders</h3>
-                    <span class="message-count"><?= $totalReminders ?></span>
+                    <span class="message-count"><!-- <?= $totalReminders ?> --></span>
                 </a>
 
                 <a href="logs.php">
@@ -294,13 +325,10 @@ $logResult = $logQuery->get_result();
 
                     </tbody>
                 </table>
-                <div class="pagination">
-                    <?php
-                    $totalPages = ceil($logQuery->num_rows / $recordsPerPage);
-                    for ($i = 1; $i <= $totalPages; $i++) {
-                        echo '<a href="?page=' . $i . '">' . $i . '</a>';
-                    }
-                    ?>
+                <div class="pagination-container">
+                    <?php for ($i = 1; $i <= $totalLogPages; $i++) : ?>
+                        <button onclick="window.location.href='?logPage=<?= $i ?>'"><?= $i ?></button>
+                    <?php endfor; ?>
                 </div>
             </div>
         </main>

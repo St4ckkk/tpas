@@ -66,15 +66,48 @@ $profile = $query->get_result()->fetch_assoc();
     }
 
     .status-column.status-pending {
-        color: orange;
+        color: var(--color-white);
+        background-color: orange;
+        padding: 2px 10px;
+        border-radius: 50px;
+        display: inline-block;
+        text-align: center;
+        font-weight: bold;
+        min-width: 100px;
+        height: 30px;
+        line-height: 30px;
+        vertical-align: middle;
+        margin-top: 5px;
     }
 
     .status-column.status-approved {
-        color: limegreen;
+        color: var(--color-white);
+        background-color: limegreen;
+        padding: 2px 10px;
+        border-radius: 50px;
+        display: inline-block;
+        text-align: center;
+        font-weight: bold;
+        min-width: 100px;
+        height: 30px;
+        line-height: 30px;
+        vertical-align: middle;
+        margin-top: 5px;
     }
 
     .status-column.status-denied {
-        color: #dc3545;
+        color: var(--color-white);
+        background-color: red;
+        padding: 2px 10px;
+        border-radius: 50px;
+        display: inline-block;
+        text-align: center;
+        font-weight: bold;
+        min-width: 100px;
+        height: 30px;
+        line-height: 30px;
+        vertical-align: middle;
+        margin-top: 5px;
     }
 
     th {

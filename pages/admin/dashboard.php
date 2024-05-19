@@ -74,7 +74,7 @@
     JOIN 
         schedule s ON a.scheduleId = s.scheduleId
     WHERE 
-        a.status IN ('Request-for-cancel', 'Request-for-reshedule') AND s.doctorId = ?
+        a.status IN ('Request-for-cancel', 'Request-for-reschedule', 'Cancelled') AND s.doctorId = ?
     UNION ALL
     SELECT 
         r.id AS appointment_id,
@@ -549,6 +549,14 @@
             color: red;
         }
 
+        .modal-status-request-for-reschedule {
+            color: #0056b3;
+        }
+
+        .modal-status-request-for-cancel {
+            color: coral;
+        }
+
         .modal-status-reschedule {
             color: #0056b3;
         }
@@ -860,7 +868,7 @@
                                 class: 'status-request-for-cancel',
                                 icon: 'bx bx-calendar-x'
                             },
-                             'On-Going': {
+                            'On-Going': {
                                 class: 'status-on-going',
                                 icon: 'bx bx-run'
                             },
