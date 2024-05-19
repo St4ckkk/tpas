@@ -83,6 +83,7 @@ WHERE status = 'Confirmed'");
         </script>
     </head>
     <style>
+
         .profile-image-circle {
             border-radius: 50%;
             margin: 0 auto;
@@ -488,6 +489,7 @@ WHERE status = 'Confirmed'");
             background-color: rgba(0, 0, 0, 0.5);
             z-index: 1000;
         }
+     
     </style>
 
     <body>
@@ -528,7 +530,7 @@ WHERE status = 'Confirmed'");
                     <a href="#">
                         <span class="material-icons-sharp">notifications</span>
                         <h3>Reminders</h3>
-                        <span class="message-count"><?= $totalReminders ?></span>
+                        <span class="message-count"></span>
                     </a>
 
                     <a href="logs.php">
@@ -573,6 +575,7 @@ WHERE status = 'Confirmed'");
                                 <th>Time</th>
                                 <th>Reason</th>
                                 <th>Message</th>
+                                <th>Documents</th>
                                 <th>Status</th>
                                 <th></th>
                             </tr>
@@ -697,6 +700,14 @@ WHERE status = 'Confirmed'");
                             const statusInfo = getStatusDetails(appointment.status);
                             const formattedTime = formatAMPMTime(appointment.appointment_time);
 
+                            // Create document links
+                            let documentLinks = 'No documents';
+                            if (appointment.document_paths.length > 0) {
+                                documentLinks = appointment.document_paths.map(path => {
+                                    return `<a href="../uploaded_files/${path}" download>${path.split('/').pop()}</a>`;
+                                }).join(', ');
+                            }
+
                             const row = tbody.insertRow();
                             row.innerHTML = `
             <td>
@@ -709,6 +720,7 @@ WHERE status = 'Confirmed'");
             <td>${formattedTime}</td>
             <td>${appointment['appointment_type']}</td>
             <td>${appointment['message']}</td>
+            <td>${documentLinks}</td>
             <td class="${statusInfo.class} status-column" data-appointment-id="${appointment.appointment_id}">
                 ${appointment['status']}<i class="${statusInfo.icon}"></i>
             </td>
@@ -716,6 +728,7 @@ WHERE status = 'Confirmed'");
         `;
                         });
                     }
+
 
                     function getStatusDetails(status) {
                         const statuses = {

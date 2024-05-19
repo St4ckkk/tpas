@@ -93,6 +93,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['submit'])) {
     $message = trim(htmlspecialchars($_POST['message']));
     $scheduleId = $scheduleData['scheduleId'];
 
+
+
     // Check if this user already has an appointment on this date
     $userCheckQuery = "SELECT COUNT(*) AS count FROM appointments WHERE patientId = ? AND date = ?";
     $userCheckStmt = $con->prepare($userCheckQuery);
@@ -123,15 +125,56 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['submit'])) {
         exit;
     }
 
-    
+
     $stmt = $con->prepare("INSERT INTO appointments (scheduleId, patientId, first_name, last_name, phone_number, email, date, appointment_time, endTime, appointment_type, message) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
     $stmt->bind_param("iisssssssss", $scheduleId, $userId, $firstName, $lastName, $phoneNumber, $email, $date, $appointmentTime, $endTime, $appointmentType, $message);
-
     if ($stmt->execute()) {
+        $appointmentId = $con->insert_id; // Retrieve the auto-generated appointmentId
+        $stmt->close();
+
+        // Insert medical documents associated with the appointment
+        $uploadDirectory = '../uploaded_files/';
+        $allowedTypes = ['image/jpeg', 'image/png', 'application/pdf'];
+
+        $files = $_FILES['medicalDocuments'];
+        $numFiles = count($files['name']);
+
+        for ($i = 0; $i < $numFiles; $i++) {
+            $fileName = basename($files['name'][$i]);
+            $fileType = $files['type'][$i];
+            $fileTmpName = $files['tmp_name'][$i];
+            $fileError = $files['error'][$i];
+            $fileSize = $files['size'][$i];
+
+            if ($fileError !== UPLOAD_ERR_OK) {
+                echo "<script>alert('Error uploading file $fileName'); window.history.back();</script>";
+                exit;
+            }
+
+            // Validate file type
+            if (!in_array($fileType, $allowedTypes)) {
+                echo "<script>alert('Invalid file type: $fileName'); window.history.back();</script>";
+                exit;
+            }
+
+            $filePath = $uploadDirectory . $fileName;
+            if (move_uploaded_file($fileTmpName, $filePath)) {
+                $stmt = $con->prepare("INSERT INTO medical_documents (patient_id, appointment_id, file_name, file_path) VALUES (?, ?, ?, ?)");
+                $stmt->bind_param("iiss", $userId, $appointmentId, $fileName, $filePath); 
+                $stmt->execute();
+                $stmt->close();
+            } else {
+                echo "<script>alert('Failed to save file $fileName'); window.history.back();</script>";
+                exit;
+            }
+        }
+
+
         $currentDateTime = date('Y-m-d g:i A');
         echo "<script>alert('Appointment booked successfully. Please check your email for confirmation and further details.'); window.location.href='userpage.php';</script>";
         log_action($con, $accountNum, "booked an appointment on $currentDateTime", "user");
     } else {
+        // Error message if the appointment insertion fails
         echo "<script>alert('Error: Could not execute the query: {$stmt->error}');</script>";
     }
     $stmt->close();
@@ -219,7 +262,7 @@ $con->close();
             <div class="col-md-6">
                 <div class="col-12">
                     <h1 class="fw-normal text-secondary text-uppercase mb-4">Appointment Form</h1>
-                    <form method="post">
+                    <form method="post" enctype="multipart/form-data">
                         <div class="row g-3">
                             <input type="hidden" name="patientId" value="<?php echo htmlspecialchars($userId); ?>">
                             <div class="col-md-6">
@@ -262,7 +305,10 @@ $con->close();
                                 <label for="msg">Message</label>
                                 <textarea class="form-control" placeholder="Message (Optional symptoms, questions, etc.)" name="message"></textarea>
                             </div>
-
+                            <div class="col-12">
+                                <label for="medicalDocuments">Upload Medical Documents</label>
+                                <input type="file" class="form-control" name="medicalDocuments[]" multiple>
+                            </div>
                             <div class="col-12 mt-5">
                                 <button type="submit" name="submit" class="btn btn-primary float-end">Book Appointment</button>
                                 <button type="button" class="btn btn-outline-secondary float-end me-2">Cancel</button>
@@ -284,8 +330,8 @@ $con->close();
 
             var listContainer = document.getElementById('bookedTimesList');
             bookedAppointments.forEach(function(appointment) {
-                var startTime = appointment.startTime; 
-                var endTime = appointment.endTime; 
+                var startTime = appointment.startTime;
+                var endTime = appointment.endTime;
                 var doctorName = appointment.doctorLastName;
 
                 var listItem = document.createElement('a');
