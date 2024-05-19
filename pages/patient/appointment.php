@@ -86,26 +86,32 @@ $stmt->close();
     }
 
     .status-pending {
+        color: #fff;
         background-color: orange;
     }
 
     .status-processing {
+        color: #fff;
         background-color: lightblue;
     }
 
     .status-confirmed {
+        color: #fff;
         background-color: lightgreen;
     }
 
-    .status-cancelled {
+    .status-request-for-cancel {
+        color: #fff;
         background-color: red;
     }
 
     .status-denied {
+        color: #fff;
         background-color: red;
     }
 
-    .status-reschedule{
+    .status-request-for-reschedule {
+        color: #fff;
         background-color: #3e81ec;
     }
 
@@ -165,10 +171,12 @@ $stmt->close();
                             <td><?= htmlspecialchars($appointment['doctorName']); ?></td>
                             <td><?= ucfirst($appointment['status']); ?></td>
                             <td>
-                                <?php if ($appointment['status'] == 'Pending') : ?>
+                                <?php if ($appointment['status'] == 'Pending'  || $appointment['status'] == 'Cancelled') : ?>
                                     <button onclick="cancelAppointment(<?= $appointment['appointment_id']; ?>)" class="btn btn-danger">Cancel</button>
                                     <a href="reschedule.php?appointment_id=<?= $appointment['appointment_id']; ?>" class="btn btn-primary">Reschedule</a>
-
+                                <?php endif; ?>
+                                <?php if ($appointment['status'] == 'Request-for-reschedule') : ?>
+                                    <button onclick="cancelAppointment(<?= $appointment['appointment_id']; ?>)" class="btn btn-danger">Cancel</button>
                                 <?php endif; ?>
                             </td>
                         </tr>
@@ -181,7 +189,29 @@ $stmt->close();
             </tbody>
         </table>
     </div>
-    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script> <!-- Optional: jQuery, if you're using Bootstrap's bundle that depends on jQuery -->
+    <script>
+        function cancelAppointment(appointmentId) {
+            if (confirm('Are you sure you want to cancel this appointment?')) {
+                $.ajax({
+                    url: 'cancel-appointment.php',
+                    type: 'POST',
+                    data: {
+                        appointment_id: appointmentId
+                    },
+                    success: function(response) {
+                        if (response == 'success') {
+                            alert('Cancellation request sent successfully, Please wait for confirmation.');
+                            location.reload();
+                        } else {
+                            alert('Failed to send cancellation request.');
+                        }
+                    }
+                });
+            }
+        }
+    </script>
+
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.min.js"></script>
     <script src="assets/js/jquery.js"></script>

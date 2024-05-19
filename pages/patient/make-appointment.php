@@ -132,7 +132,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['submit'])) {
         $appointmentId = $con->insert_id; // Retrieve the auto-generated appointmentId
         $stmt->close();
 
-        // Insert medical documents associated with the appointment
+      
         $uploadDirectory = '../uploaded_files/';
         $allowedTypes = ['image/jpeg', 'image/png', 'application/pdf'];
 
@@ -174,7 +174,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['submit'])) {
         echo "<script>alert('Appointment booked successfully. Please check your email for confirmation and further details.'); window.location.href='userpage.php';</script>";
         log_action($con, $accountNum, "booked an appointment on $currentDateTime", "user");
     } else {
-        // Error message if the appointment insertion fails
+       
         echo "<script>alert('Error: Could not execute the query: {$stmt->error}');</script>";
     }
     $stmt->close();

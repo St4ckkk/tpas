@@ -6,16 +6,7 @@ if (!isset($_SESSION['patientSession'])) {
     header("Location: index.php");
     exit;
 }
-$query = "SELECT DISTINCT startDate FROM schedule WHERE startDate >= CURDATE() AND status = 'available'";
-$result = $con->query($query);
-$availableDates = [];
 
-while ($row = $result->fetch_assoc()) {
-    $availableDates[] = $row['startDate'];
-}
-
-// Pass data to JavaScript
-echo "<script>var availableDates = " . json_encode($availableDates) . ";</script>";
 $userId = $_SESSION['patientSession'];
 $isReschedule = isset($_GET['appointment_id']);
 $appointmentDetails = null;
@@ -32,6 +23,16 @@ if ($isReschedule) {
     $selectedDate = date('Y-m-d');
 }
 
+// Fetch available dates
+$query = "SELECT DISTINCT startDate FROM schedule WHERE startDate >= CURDATE() AND status = 'available'";
+$result = $con->query($query);
+$availableDates = [];
+
+while ($row = $result->fetch_assoc()) {
+    $availableDates[] = $row['startDate'];
+}
+
+// Fetch booked appointments for the selected date
 $query = "SELECT a.appointment_time, a.endTime, d.doctorLastName
           FROM appointments a
           JOIN schedule s ON a.scheduleId = s.scheduleId
@@ -53,6 +54,8 @@ while ($appointment = $bookedAppointmentsResult->fetch_assoc()) {
     ];
 }
 $stmt->close();
+
+// Fetch schedule for the selected date
 $stmt = $con->prepare("SELECT scheduleId, startDate, startTime, endTime FROM schedule WHERE startDate = ?");
 $stmt->bind_param("s", $selectedDate);
 $stmt->execute();
@@ -68,6 +71,7 @@ if ($result->num_rows > 0) {
     exit;
 }
 $stmt->close();
+
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['submit'])) {
     $firstName = trim($_POST['firstName']);
     $lastName = trim($_POST['lastName']);
@@ -77,20 +81,22 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['submit'])) {
     $appointmentTime = trim($_POST['appointmentTime']);
     $appointmentType = trim($_POST['appointmentType']);
     $message = trim($_POST['message']);
-    $newStatus = 'Reschedule';
+    $newStatus = 'Request-for-reschedule';
 
     if ($isReschedule) {
-        // Update existing appointment
         $stmt = $con->prepare("UPDATE appointments SET first_name=?, last_name=?, phone_number=?, email=?, date=?, appointment_time=?, appointment_type=?, message=?, status=? WHERE appointment_id=?");
         $stmt->bind_param("sssssssssi", $firstName, $lastName, $phoneNumber, $email, $date, $appointmentTime, $appointmentType, $message, $newStatus, $appointmentId);
     } else {
-        // Insert new appointment
         $stmt = $con->prepare("INSERT INTO appointments (patientId, first_name, last_name, phone_number, email, date, appointment_time, appointment_type, message, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
         $stmt->bind_param("isssssssss", $userId, $firstName, $lastName, $phoneNumber, $email, $date, $appointmentTime, $appointmentType, $message, $newStatus);
     }
 
     if ($stmt->execute()) {
-        echo "<script>alert('Appointment successfully scheduled with status pending.'); window.location.href='userpage.php';</script>";
+        if (!$isReschedule) {
+            $appointmentId = $stmt->insert_id;
+        }
+        handleFileUploads($con, $userId, $appointmentId);
+        echo "<script>alert('Rescheduled request sent successfully, Please wait for confirmation.'); window.location.href='userpage.php';</script>";
     } else {
         echo "<script>alert('Error scheduling appointment: {$stmt->error}');</script>";
     }
@@ -98,6 +104,49 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['submit'])) {
 }
 $con->close();
 
+echo "<script>var availableDates = " . json_encode($availableDates) . ";</script>";
+
+function handleFileUploads($con, $userId, $appointmentId)
+{
+    if (!isset($_FILES['medicalDocuments']) || !is_array($_FILES['medicalDocuments']['name']) || empty($_FILES['medicalDocuments']['name'][0])) {
+        return; // No files uploaded, nothing to do
+    }
+
+    $uploadDirectory = '../uploaded_files/';
+    $allowedTypes = ['image/jpeg', 'image/png', 'application/pdf'];
+
+    $files = $_FILES['medicalDocuments'];
+    $numFiles = count($files['name']);
+
+    for ($i = 0; $i < $numFiles; $i++) {
+        $fileName = basename($files['name'][$i]);
+        $fileType = $files['type'][$i];
+        $fileTmpName = $files['tmp_name'][$i];
+        $fileError = $files['error'][$i];
+        $fileSize = $files['size'][$i];
+
+        if ($fileError !== UPLOAD_ERR_OK) {
+            echo "<script>alert('Error uploading file $fileName'); window.history.back();</script>";
+            exit;
+        }
+
+        if (!in_array($fileType, $allowedTypes)) {
+            echo "<script>alert('Invalid file type: $fileName'); window.history.back();</script>";
+            exit;
+        }
+
+        $filePath = $uploadDirectory . $fileName;
+        if (move_uploaded_file($fileTmpName, $filePath)) {
+            $stmt = $con->prepare("INSERT INTO medical_documents (patient_id, appointment_id, file_name, file_path) VALUES (?, ?, ?, ?)");
+            $stmt->bind_param("iiss", $userId, $appointmentId, $fileName, $filePath);
+            $stmt->execute();
+            $stmt->close();
+        } else {
+            echo "<script>alert('Failed to save file $fileName'); window.history.back();</script>";
+            exit;
+        }
+    }
+}
 ?>
 
 <!DOCTYPE html>
@@ -151,7 +200,7 @@ $con->close();
             <div class="col-md-6">
                 <div class="col-12">
                     <h1 class="fw-normal text-secondary text-uppercase mb-4"><?= $isReschedule ? "Reschedule Appointment" : "Appointment Form" ?></h1>
-                    <form method="post" action="<?= htmlspecialchars($_SERVER['PHP_SELF']) . ($isReschedule ? '?appointment_id=' . $appointmentId : '') ?>">
+                    <form method="post" action="<?= htmlspecialchars($_SERVER['PHP_SELF']) . ($isReschedule ? '?appointment_id=' . $appointmentId : '') ?>" enctype="multipart/form-data">
                         <div class="row g-3">
                             <input type="hidden" name="patientId" value="<?php echo htmlspecialchars($userId); ?>">
                             <div class="col-md-6">
@@ -187,12 +236,16 @@ $con->close();
                                     <option value="follow-up" <?= isset($appointmentDetails) && $appointmentDetails['appointment_type'] == 'follow-up' ? 'selected' : '' ?>>Follow-Up</option>
                                     <option value="routine-check" <?= isset($appointmentDetails) && $appointmentDetails['appointment_type'] == 'routine-check' ? 'selected' : '' ?>>Routine-check</option>
                                     <option value="emergency" <?= isset($appointmentDetails) && $appointmentDetails['appointment_type'] == 'emergency' ? 'selected' : '' ?>>Emergency</option>
-                                    <!-- Additional options can be added here -->
+
                                 </select>
                             </div>
                             <div class="col-12">
                                 <label for="message">Message:</label>
                                 <textarea class="form-control" name="message" placeholder="Additional notes"><?= $appointmentDetails['message'] ?? '' ?></textarea>
+                            </div>
+                            <div class="col-12">
+                                <label for="medicalDocuments">Upload Medical Documents</label>
+                                <input type="file" class="form-control" name="medicalDocuments[]" multiple>
                             </div>
                             <div class="col-12 mt-5">
                                 <button type="submit" name="submit" class="btn btn-primary float-end"><?= $isReschedule ? "Reschedule" : "Book" ?> Appointment</button>
