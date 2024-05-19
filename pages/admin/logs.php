@@ -28,6 +28,7 @@
     }
 
 
+
     ?>
 
 
@@ -217,6 +218,24 @@
             border-radius: 10px;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
+
+        .pagination-container {
+            color: var(--color-white);
+            margin-top: 10px;
+        }
+
+        .pagination-container button {
+            margin: 0 5px;
+            padding: 5px 10px;
+            background-color: var(--color-white);
+            box-shadow: var(--box-shadow);
+            border: 1px solid var(--box-shadow);
+            cursor: pointer;
+        }
+
+        .pagination-container button:hover {
+            background-color: #ddd;
+        }
     </style>
 
 
@@ -301,7 +320,7 @@
                     </tbody>
                 </table>
             </div>
-
+            <div class="pagination-container"></div>
 
             <script>
                 document.addEventListener('DOMContentLoaded', function() {
@@ -336,11 +355,52 @@
                                 logTypeHeading = 'System Logs';
                         }
                         logsHeading.textContent = logTypeHeading;
+
+                        fetchTotalLogs(logType)
+                            .then(totalLogs => {
+                                const totalPages = Math.ceil(totalLogs / 10);
+                                renderPagination(totalPages);
+                            });
+
+                        // Fetch logs for the current page
                         fetchLogs(logType)
                             .then(logs => renderLogs(logs))
                             .catch(error => console.error('Error fetching logs:', error));
                     }
 
+                    function fetchTotalLogs(logType) {
+                        return new Promise((resolve, reject) => {
+                            const xhr = new XMLHttpRequest();
+                            xhr.onreadystatechange = function() {
+                                if (xhr.readyState === XMLHttpRequest.DONE) {
+                                    if (xhr.status === 200) {
+                                        resolve(JSON.parse(xhr.responseText));
+                                    } else {
+                                        reject(xhr.statusText);
+                                    }
+                                }
+                            };
+                            xhr.open('GET', `fetch-total-logs.php?logType=${logType}`);
+                            xhr.send();
+                        });
+                    }
+
+                    function renderPagination(totalPages) {
+                        const paginationContainer = document.querySelector('.pagination-container');
+                        paginationContainer.innerHTML = '';
+
+                        for (let i = 1; i <= totalPages; i++) {
+                            const pageButton = document.createElement('button');
+                            pageButton.textContent = i;
+                            pageButton.addEventListener('click', function() {
+                                sessionStorage.setItem('currentPage', i);
+                                updateLogs(logTypeDropdown.value);
+                            });
+                            paginationContainer.appendChild(pageButton);
+                        }
+                    }
+
+                    // Modify the fetchLogs function to include pagination parameters
                     function fetchLogs(logType) {
                         return new Promise((resolve, reject) => {
                             const xhr = new XMLHttpRequest();
@@ -353,7 +413,8 @@
                                     }
                                 }
                             };
-                            xhr.open('GET', `fetch-logs.php?logType=${logType}`);
+                            const currentPage = sessionStorage.getItem('currentPage') || 1;
+                            xhr.open('GET', `fetch-logs.php?logType=${logType}&page=${currentPage}`);
                             xhr.send();
                         });
                     }

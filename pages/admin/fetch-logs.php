@@ -9,6 +9,11 @@ if (!isset($_SESSION['doctorSession'])) {
     exit;
 }
 
+// Pagination variables
+$page = isset($_GET['page']) ? $_GET['page'] : 1;
+$logsPerPage = 10;
+$start = ($page - 1) * $logsPerPage;
+
 $logType = $_GET['logType'] ?? 'all';
 
 $queryString = "SELECT * FROM logs";
@@ -19,9 +24,16 @@ if ($logType !== 'all') {
     $params[] = $logType;
 }
 
+
+$queryString .= " LIMIT ?, ?";
+$params[] = $start;
+$params[] = $logsPerPage;
+
 $stmt = $con->prepare($queryString);
 if ($logType !== 'all') {
-    $stmt->bind_param("s", ...$params);
+    $stmt->bind_param("sii", ...$params);
+} else {
+    $stmt->bind_param("ii", ...$params);
 }
 
 $stmt->execute();
