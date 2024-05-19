@@ -61,6 +61,7 @@ $appointmentDetails['document_paths'] = !empty($appointmentDetails['document_pat
     <title>Users</title>
     <link rel="stylesheet" href="node_modules/boxicons/css/boxicons.min.css" />
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Sharp" rel="stylesheet" />
+    <link rel="shortcut icon" href="assets/favicon/tpasss.ico" type="image/x-icon">
     <link rel="stylesheet" href="style.css" />
 </head>
 <style>
