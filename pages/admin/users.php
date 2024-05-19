@@ -48,7 +48,7 @@ $profile = $query->get_result()->fetch_assoc();
         margin: 0 auto;
     }
 
-    .logo img{
+    .logo img {
         display: block;
         width: 100%;
         background-color: var(--color-primary);
@@ -228,16 +228,16 @@ $profile = $query->get_result()->fetch_assoc();
                         $query->execute();
                         $result = $query->get_result();
                         while ($row = $result->fetch_assoc()) :
-                            $account_num = decryptData($row['account_num'], $encryptionKey);
+                            $patientId = $row['patientId'];
                         ?>
                             <tr>
-                                <td><?= htmlspecialchars($account_num) ?></td>
-                                <td> <img src="<?php echo htmlspecialchars($row['profile_image_path'] ?? 'assets/img/default.png'); ?>" alt="Profile Image" class="profile-image"></a></td>
+                                <td><?= htmlspecialchars(decryptData($row['account_num'], $encryptionKey)) ?></td>
+                                <td><img src="<?= htmlspecialchars($row['profile_image_path'] ?? 'assets/img/default.png'); ?>" alt="Profile Image" class="profile-image"></td>
                                 <td><?= htmlspecialchars($row['firstname'] . ' ' . $row['lastname']) ?></td>
                                 <td><?= htmlspecialchars($row['email']) ?></td>
                                 <td><?= htmlspecialchars($row['phoneno']) ?></td>
                                 <td><?= htmlspecialchars(date("F j, Y g:i A", strtotime($row['createdAt']))) ?></td>
-                                <td class="status-column  <?= $row['accountStatus'] === 'Pending' ? 'status-pending' : ($row['accountStatus'] === 'Verified' ? 'status-approved' : 'status-denied') ?> " data-patient-id="<?= $row['account_num'] ?>">
+                                <td class="status-column <?= $row['accountStatus'] === 'Pending' ? 'status-pending' : ($row['accountStatus'] === 'Verified' ? 'status-approved' : 'status-denied') ?>" data-patient-id="<?= htmlspecialchars($patientId) ?>">
                                     <?= htmlspecialchars($row['accountStatus']) ?>
                                     <?php if ($row['accountStatus'] === 'Verified') : ?>
                                         <i class="bx bx-check-circle"></i>
@@ -247,32 +247,52 @@ $profile = $query->get_result()->fetch_assoc();
                                         <i class="bx bx-time-five"></i>
                                     <?php endif; ?>
                                 </td>
-                                <td>
-                                    <input type="hidden" name="account_num" id="account_num" value="<?= htmlspecialchars($account_num) ?>">
-                                </td>
                             </tr>
-                            <div id="statusModal" class="modal">
-                                <div class="modal-content">
-                                    <span class="close">&times;</span>
-                                    <h2>Change Status</h2>
-                                    <form action="update-account-status.php" method="POST">
-                                        <input type="hidden" name="account_num" id="account_num" value="<?= htmlspecialchars($account_num) ?>">
-                                        <select name="newStatus" id="newStatus" required>
-                                            <option value="" disabled selected>Please select a status</option>
-                                            <option value="Verified">Verified</option>
-                                            <option value="Denied">Denied</option>
-                                        </select>
-                                        <button type="submit">Update Status</button>
-                                    </form>
-                                </div>
-                            </div>
                         <?php endwhile; ?>
                     </tbody>
-
                 </table>
             </div>
-        </main>
 
+            <!-- Modal HTML placed outside the loop -->
+            <div id="statusModal" class="modal">
+                <div class="modal-content">
+                    <span class="close">&times;</span>
+                    <h2>Change Status</h2>
+                    <form action="update-account-status.php" method="POST">
+                        <input type="hidden" name="patientId" id="patientId">
+                        <select name="newStatus" id="newStatus" required>
+                            <option value="" disabled selected>Please select a status</option>
+                            <option value="Verified">Verified</option>
+                            <option value="Denied">Denied</option>
+                        </select>
+                        <button type="submit">Update Status</button>
+                    </form>
+                </div>
+            </div>
+
+            <script>
+                document.querySelectorAll('.status-column').forEach(function(element) {
+                    element.onclick = function() {
+                        var modal = document.getElementById('statusModal');
+                        var patientIdInput = document.getElementById('patientId');
+                        patientIdInput.value = this.getAttribute('data-patient-id');
+                        modal.style.display = "block";
+                    };
+                });
+
+                document.getElementsByClassName('close')[0].onclick = function() {
+                    var modal = document.getElementById('statusModal');
+                    modal.style.display = "none";
+                }
+
+                window.onclick = function(event) {
+                    var modal = document.getElementById('statusModal');
+                    if (event.target == modal) {
+                        modal.style.display = "none";
+                    }
+                }
+            </script>
+        </main>
 
         <div class="right">
             <div class="top">
@@ -296,36 +316,7 @@ $profile = $query->get_result()->fetch_assoc();
         </div>
     </div>
     <script src="assets/js/script.js"></script>
-    <script>
-        document.querySelectorAll('.status-column').forEach(function(element) {
-            element.onclick = function() {
-                var modal = document.getElementById('statusModal');
-                var patientIdInput = document.getElementById('patientId');
-                patientIdInput.value = this.getAttribute('data-patient-id');
-            };
-        });
-        document.querySelectorAll('.status-column').forEach(function(element) {
-            element.onclick = function() {
-                var modal = document.getElementById('statusModal');
-                var patientIdInput = document.getElementById('account_num');
-                patientIdInput.value = this.getAttribute('data-patient-id');
-                modal.style.display = "block";
-            };
-        });
 
-
-        document.getElementsByClassName('close')[0].onclick = function() {
-            var modal = document.getElementById('statusModal');
-            modal.style.display = "none";
-        }
-
-        window.onclick = function(event) {
-            var modal = document.getElementById('statusModal');
-            if (event.target == modal) {
-                modal.style.display = "none";
-            }
-        }
-    </script>
 </body>
 
 </html>

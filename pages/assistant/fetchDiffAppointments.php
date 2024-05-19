@@ -9,7 +9,7 @@ if (!isset($_SESSION['assistantSession'])) {
 
 $status = $_GET['status'] ?? 'All';
 
-$queryString = "SELECT a.first_name, a.last_name, a.date, a.appointment_time, a.status, p.profile_image_path 
+$queryString = "SELECT a.first_name, a.last_name, a.date, a.appointment_time, endTime, a.status, p.profile_image_path 
                 FROM appointments AS a
                 LEFT JOIN tb_patients AS p ON a.patientId = p.patientId";
 

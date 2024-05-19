@@ -43,7 +43,7 @@ $query = $con->prepare("UPDATE appointments SET status = ? WHERE appointment_id 
 $query->bind_param("si", $newStatus, $appointmentId);
 
 if ($query->execute()) {
-    if (in_array($newStatus, ['Confirmed', 'Cancelled', 'Completed', 'Request-denied', 'Request-confirmed'])) {
+    if (in_array($newStatus, ['Confirmed', 'Cancelled', 'Completed', 'Request-denied', 'Request-confirmed', 'Denied', 'On-Going'])) {
         $query = $con->prepare("SELECT email, first_name, last_name, date, appointment_time FROM appointments WHERE appointment_id = ?");
         $query->bind_param("i", $appointmentId);
         $query->execute();
@@ -66,10 +66,16 @@ if ($query->execute()) {
                 $mail->isHTML(true);
 
                 if ($currentStatus === 'Request-for-reschedule' || $currentStatus === 'Request-for-cancel') {
-                    if ($newStatus === 'Request-confirmed') {
+                    if ($newStatus === 'Confirmed') {
                         $subject = 'Request Confirmation';
                         $body = "Your request for rescheduling/cancellation of the appointment scheduled for " . date("F j, Y, g:i A", strtotime($currentAppointment['date'] . ' ' . $currentAppointment['appointment_time'])) . " has been confirmed.";
-                    } else if ($newStatus === 'Request-denied') {
+                        if ($currentStatus === 'Request-for-cancel' && $newStatus === 'Confirmed') {
+                            $query = $con->prepare("UPDATE appointments SET status = 'Cancelled' WHERE appointment_id = ?");
+                            $query->bind_param("i", $appointmentId);
+                            $query->execute();
+                            $currentAppointment['status'] = 'Cancelled';
+                        }
+                    } else if ($newStatus === 'Denied') {
                         $subject = 'Request Denial';
                         $body = "We regret to inform you that your request for rescheduling/cancellation of the appointment scheduled for " . date("F j, Y, g:i A", strtotime($currentAppointment['date'] . ' ' . $currentAppointment['appointment_time'])) . " has been denied. Please contact our office for more information or to reschedule.";
                     }

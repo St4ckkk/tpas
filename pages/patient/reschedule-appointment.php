@@ -42,7 +42,7 @@ if ($row['patientId'] != $userId) {
 
 $stmt->close();
 
-// Calculate new end time (assuming appointments are 1 hour long)
+
 $newEndTime = date('H:i:s', strtotime($newTime) + 60 * 60);
 
 // Update appointment details

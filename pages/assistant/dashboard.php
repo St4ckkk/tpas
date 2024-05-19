@@ -390,11 +390,8 @@ if (!$assistant) {
             </li>
         </ul>
     </div>
-    <!-- End of Sidebar -->
 
-    <!-- Main Content -->
     <div class="content">
-        <!-- Navbar -->
         <nav>
             <i class='bx bx-menu'></i>
             <form action="#">
@@ -543,17 +540,14 @@ if (!$assistant) {
                                 $('#appointmentDate').datepicker('update');
 
                                 const tbody = document.querySelector('.orders table tbody');
-                                tbody.innerHTML = ''; 
+                                tbody.innerHTML = '';
                                 if (data.appointments && data.appointments.length > 0) {
                                     data.appointments.forEach(appointment => {
                                         const row = tbody.insertRow();
 
-                                        const formattedTime = new Date('1970-01-01T' + appointment.appointment_time + 'Z').toLocaleTimeString('en-US', {
-                                            hour: 'numeric',
-                                            minute: 'numeric',
-                                            hour12: true
-                                        });
-
+                                        // Format appointment times as current date time
+                                        const formattedStartTime = formatAMPMTime(appointment.appointment_time);
+                                        const formattedEndTime = formatAMPMTime(appointment.endTime);
 
                                         const statusInfo = getStatusDetails(appointment.status);
 
@@ -570,9 +564,9 @@ if (!$assistant) {
                                         imgCell.appendChild(img);
 
                                         row.innerHTML += `<td>${appointment.first_name} ${appointment.last_name}</td>
-                        <td>${appointment.date}</td>
-                        <td>${formattedTime}</td>
-                        <td class="${statusInfo.class} status-column">${appointment.status}<i class='${statusInfo.icon}'></i></td>`;
+                    <td>${appointment.date}</td>
+                    <td>${formattedStartTime} - ${formattedEndTime}</td>
+                    <td class="${statusInfo.class} status-column">${appointment.status}<i class='${statusInfo.icon}'></i></td>`;
                                     });
                                 } else {
                                     tbody.innerHTML = '<tr><td colspan="4" class="text-center">No appointments found for this date.</td></tr>';
@@ -582,6 +576,22 @@ if (!$assistant) {
                                 console.error('Error loading appointments:', error);
                                 document.querySelector('.orders table tbody').innerHTML = '<tr><td colspan="4" class="text-center">Error loading data.</td></tr>';
                             });
+                    }
+
+                    // Function to format appointment time as current date time (AM/PM format)
+                    function formatAMPMTime(timeString) {
+                        const timeComponents = timeString.split(':');
+                        const hours = parseInt(timeComponents[0]);
+                        const minutes = parseInt(timeComponents[1]);
+
+                        let formattedTime = '';
+                        if (hours >= 12) {
+                            formattedTime = (hours == 12 ? hours : hours - 12) + ':' + (minutes < 10 ? '0' : '') + minutes + ' PM';
+                        } else {
+                            formattedTime = hours + ':' + (minutes < 10 ? '0' : '') + minutes + ' AM';
+                        }
+
+                        return formattedTime;
                     }
 
 

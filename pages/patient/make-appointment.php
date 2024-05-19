@@ -25,7 +25,6 @@ $bookedAppointmentsResult = $stmt->get_result();
 
 $bookedAppointments = [];
 while ($appointment = $bookedAppointmentsResult->fetch_assoc()) {
-    // Format time from MySQL (usually in HH:MM:SS format) to AM/PM format
     $startTimeFormatted = date("g:i A", strtotime($appointment['appointment_time']));
     $endTimeFormatted = date("g:i A", strtotime($appointment['endTime']));
 
@@ -80,11 +79,23 @@ function log_action($con, $accountNumber, $actionDescription, $userType)
         error_log("Error preparing log statement: " . $con->error);
     }
 }
+function generateCaptchaChallenge()
+{
+    $num1 = rand(1, 10);
+    $num2 = rand(1, 10);
+    $_SESSION['captcha_answer'] = $num1 + $num2;
+    return "$num1 + $num2 = ?";
+}
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['submit'])) {
-    $accountNum = $_SESSION['patientAccountNumber']; // Get account number from session
+    $userAnswer = $_POST['captcha'];
+    if ($userAnswer != $_SESSION['captcha_answer']) {
+        echo "<script>alert('CAPTCHA verification failed. Please try again.'); window.history.back();</script>";
+        exit;
+    }
+    $accountNum = $_SESSION['patientAccountNumber'];
     $date = trim(htmlspecialchars($_POST['date']));
     $appointmentTime = trim(htmlspecialchars($_POST['appointmentTime']));
-    $endTime = date('H:i:s', strtotime($appointmentTime) + 60 * 60); // assuming 30-minute appointments
+    $endTime = date('H:i:s', strtotime($appointmentTime) + 60 * 60);
     $firstName = trim(htmlspecialchars($_POST['firstName']));
     $lastName = trim(htmlspecialchars($_POST['lastName']));
     $phoneNumber = trim(htmlspecialchars($_POST['phoneNumber']));
@@ -94,8 +105,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['submit'])) {
     $scheduleId = $scheduleData['scheduleId'];
 
 
-
-    // Check if this user already has an appointment on this date
     $userCheckQuery = "SELECT COUNT(*) AS count FROM appointments WHERE patientId = ? AND date = ?";
     $userCheckStmt = $con->prepare($userCheckQuery);
     $userCheckStmt->bind_param("is", $userId, $date);
@@ -110,7 +119,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['submit'])) {
         exit;
     }
 
-    // Check if this time slot or overlapping slot is already booked
+
     $timeCheckQuery = "SELECT COUNT(*) AS count FROM appointments WHERE date = ? AND NOT (endTime <= ? OR appointment_time >= ?)";
     $timeCheckStmt = $con->prepare($timeCheckQuery);
     $timeCheckStmt->bind_param("sss", $date, $appointmentTime, $endTime);
@@ -132,7 +141,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['submit'])) {
         $appointmentId = $con->insert_id; // Retrieve the auto-generated appointmentId
         $stmt->close();
 
-      
+
         $uploadDirectory = '../uploaded_files/';
         $allowedTypes = ['image/jpeg', 'image/png', 'application/pdf'];
 
@@ -151,7 +160,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['submit'])) {
                 exit;
             }
 
-            // Validate file type
+
             if (!in_array($fileType, $allowedTypes)) {
                 echo "<script>alert('Invalid file type: $fileName'); window.history.back();</script>";
                 exit;
@@ -160,7 +169,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['submit'])) {
             $filePath = $uploadDirectory . $fileName;
             if (move_uploaded_file($fileTmpName, $filePath)) {
                 $stmt = $con->prepare("INSERT INTO medical_documents (patient_id, appointment_id, file_name, file_path) VALUES (?, ?, ?, ?)");
-                $stmt->bind_param("iiss", $userId, $appointmentId, $fileName, $filePath); 
+                $stmt->bind_param("iiss", $userId, $appointmentId, $fileName, $filePath);
                 $stmt->execute();
                 $stmt->close();
             } else {
@@ -174,12 +183,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['submit'])) {
         echo "<script>alert('Appointment booked successfully. Please check your email for confirmation and further details.'); window.location.href='userpage.php';</script>";
         log_action($con, $accountNum, "booked an appointment on $currentDateTime", "user");
     } else {
-       
+
         echo "<script>alert('Error: Could not execute the query: {$stmt->error}');</script>";
     }
     $stmt->close();
 }
-
+$captchaChallenge = generateCaptchaChallenge();
 $con->close();
 ?>
 
@@ -310,6 +319,9 @@ $con->close();
                                 <input type="file" class="form-control" name="medicalDocuments[]" multiple>
                             </div>
                             <div class="col-12 mt-5">
+                                <label for="captcha">CAPTCHA:</label>
+                                <input type="text" class="form-control" id="captcha" name="captcha" required>
+                                <span style="font-size: 20px;"><?php echo $captchaChallenge; ?></span>
                                 <button type="submit" name="submit" class="btn btn-primary float-end">Book Appointment</button>
                                 <button type="button" class="btn btn-outline-secondary float-end me-2">Cancel</button>
                             </div>
@@ -342,6 +354,7 @@ $con->close();
             });
         });
     </script>
+    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
     <script src="assets/js/jquery.js"></script>
     <script src="assets/js/date/bootstrap-datepicker.js"></script>
     <script src="assets/js/bootstrap.min.js"></script>

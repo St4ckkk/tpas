@@ -113,6 +113,7 @@ WHERE status = 'Confirmed'");
             vertical-align: middle;
         }
 
+        .status-on-going,
         .status-column.status-request-confirmed,
         .status-column.status-confirmed,
         .status-column.status-completed {
@@ -585,12 +586,16 @@ WHERE status = 'Confirmed'");
                     <div class="header-wrapper">
                         <h1 id="statusHeading">All Appointments</h1>
                         <select id="statusFilter" onchange="filterAppointments()">
+                            <option value="" disabled>Select an appointment</option>
                             <option value="All">All</option>
                             <option value="Confirmed">Confirmed</option>
-                            <option value="Reschedule">Reschedule</option>
                             <option value="Pending">Pending</option>
-                            <option value="Cancelled">Cancelled</option>
                             <option value="Denied">Denied</option>
+                            <option value="On-Going">On-Going</option>
+                            <option value="Completed">Completed</option>
+                            <option value="Cancelled">Cancelled</option>
+                            <option value="Request-for-reschedule">Request for reschedule</option>
+                            <option value="Request-for-cancel">Request for cancel</option>
                         </select>
                     </div>
                     <table id="recent-orders--table">
@@ -659,9 +664,7 @@ WHERE status = 'Confirmed'");
                             fetch('getAppointmentDetails.php?id=' + appointmentId)
                                 .then(response => response.json())
                                 .then(data => {
-                                    // Store the fetched appointment details in the global variable
                                     currentAppointmentDetails = data;
-                                    // Populate the modal with the fetched appointment details
                                     populateModal(data);
                                 })
                                 .catch(error => console.error('Error fetching appointment details:', error));
@@ -673,14 +676,10 @@ WHERE status = 'Confirmed'");
                             const statusForm = document.getElementById('statusForm');
                             const newStatusInput = statusForm.querySelector('select[name="new_status"]');
 
-                            // Populate the form fields with appointment details
                             appointmentIdInput.value = appointmentDetails.appointment_id;
                             statusForm.querySelector('input[name="status"]').value = appointmentDetails.status;
-                            newStatusInput.value = 'Confirmed'; // Set default new status
+                            newStatusInput.value = 'Confirmed';
 
-                            // Additional fields can be populated here
-
-                            // Example of updating modal content with appointment details
                             const modalTitle = modal.querySelector('.modal-title');
                             const modalDescription = modal.querySelector('.modal-description');
                             modalTitle.textContent = 'Update Status for ' + appointmentDetails.first_name + ' ' + appointmentDetails.last_name;
@@ -704,7 +703,6 @@ WHERE status = 'Confirmed'");
                             event.preventDefault();
                             var formData = new FormData(this);
 
-                            // Append additional data from currentAppointmentDetails to formData
                             formData.append('appointment_id', currentAppointmentDetails.appointment_id);
                             formData.append('status', currentAppointmentDetails.status);
 
@@ -770,7 +768,7 @@ WHERE status = 'Confirmed'");
                         appointments.forEach(appointment => {
                             const statusInfo = getStatusDetails(appointment.status);
                             const formattedTime = formatAMPMTime(appointment.appointment_time);
-
+                            const formattedEndTime = formatAMPMTime(appointment.endTime);
                             // Create document links
                             let documentLinks = 'No documents';
                             if (appointment.document_paths.length > 0) {
@@ -788,7 +786,7 @@ WHERE status = 'Confirmed'");
             <td>${appointment['phone_number']}</td>
             <td>${appointment['email']}</td>
             <td>${appointment['date']}</td>
-            <td>${formattedTime}</td>
+            <td>${formattedTime} - ${formattedEndTime}</td>
             <td>${appointment['appointment_type']}</td>
             <td>${appointment['message']}</td>
             <td>${documentLinks}</td>
@@ -846,6 +844,10 @@ WHERE status = 'Confirmed'");
                             'Request-confirmed': {
                                 class: 'status-request-confirmed',
                                 icon: 'bx bx-check-circle'
+                            },
+                            'On-Going': {
+                                class: 'status-on-going',
+                                icon: 'bx bx-run'
                             },
                             'Request-denied': {
                                 class: 'status-request-denied',

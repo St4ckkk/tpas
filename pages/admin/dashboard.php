@@ -74,7 +74,7 @@
     JOIN 
         schedule s ON a.scheduleId = s.scheduleId
     WHERE 
-        a.status IN ('Cancelled', 'Reschedule') AND s.doctorId = ?
+        a.status IN ('Request-for-cancel', 'Request-for-reshedule') AND s.doctorId = ?
     UNION ALL
     SELECT 
         r.id AS appointment_id,
@@ -302,6 +302,8 @@
             margin-top: auto;
         }
 
+        .status-on-going,
+        .status-request-confirmed,
         .status-confirmed,
         .status-completed {
             color: var(--color-white);
@@ -333,6 +335,7 @@
             margin-top: 5px;
         }
 
+        .status-request-denied,
         .status-cancelled {
             color: var(--color-white);
             background-color: red;
@@ -731,8 +734,6 @@
                         </div>
                     </div>
                 </div>
-
-
                 <div class="recent-orders">
                     <div class="header-wrapper">
                         <h1 id="statusHeading">All Appointments</h1>
@@ -740,11 +741,13 @@
                             <option value="all">Select an appointment</option>
                             <option value="All">All</option>
                             <option value="Confirmed">Confirmed</option>
-                            <option value="Request-for-reschedule">Request for reschedule</option>
                             <option value="Pending">Pending</option>
-                            <option value="Request-for-cancel">Request for cancel</option>
-                            <option value="Cancelled">Cancelled</option>
                             <option value="Denied">Denied</option>
+                            <option value="On-Going">On-Going</option>
+                            <option value="Completed">Completed</option>
+                            <option value="Cancelled">Cancelled</option>
+                            <option value="Request-for-reschedule">Request for reschedule</option>
+                            <option value="Request-for-cancel">Request for cancel</option>
                         </select>
                     </div>
                     <table id="recent-orders--table">
@@ -803,11 +806,10 @@
 
                         table.style.display = '';
                         message.style.display = 'none';
-
                         appointments.forEach(appointment => {
                             const statusInfo = getStatusDetails(appointment.status);
                             const formattedTime = formatAMPMTime(appointment.appointment_time);
-
+                            const formattedEndTime = formatAMPMTime(appointment.endTime);
                             const row = tbody.insertRow();
                             row.innerHTML = `
             <td>
@@ -815,7 +817,7 @@
             </td>
             <td>${appointment.first_name} ${appointment.last_name}</td>
             <td>${appointment.date}</td>
-            <td>${formattedTime}</td>
+            <td>${formattedTime} - ${formattedEndTime}</td>
          <td class="${statusInfo.class}">
     ${appointment.status} <i class="${statusInfo.icon}"></i>
 </td>
@@ -858,9 +860,17 @@
                                 class: 'status-request-for-cancel',
                                 icon: 'bx bx-calendar-x'
                             },
-                            'Reschedule': {
-                                class: 'status-reschedule',
-                                icon: 'bx bx-calendar'
+                             'On-Going': {
+                                class: 'status-on-going',
+                                icon: 'bx bx-run'
+                            },
+                            'Request-confirmed': {
+                                class: 'status-request-confirmed',
+                                icon: 'bx bx-check-circle'
+                            },
+                            'Request-denied': {
+                                class: 'status-request-denied',
+                                icon: 'bx bx-block'
                             },
                             'Unknown': {
                                 class: 'status-unknown',

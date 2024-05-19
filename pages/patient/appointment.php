@@ -95,9 +95,10 @@ $stmt->close();
         background-color: lightblue;
     }
 
+    .status-on-going,
     .status-request-confirmed,
     .status-confirmed {
-        color: #fff;
+        color: #000;
         background-color: lightgreen;
     }
 
@@ -191,7 +192,7 @@ $stmt->close();
                                     <button onclick="cancelAppointment(<?= $appointment['appointment_id']; ?>)" class="btn btn-danger">Cancel</button>
                                 <?php endif; ?>
                                 <?php if ($appointment['status'] == 'Request-denied') : ?>
-                                     <a href="userpage.php" class="btn btn-primary">Make another appointment</a>
+                                    <a href="userpage.php" class="btn btn-primary">Make another appointment</a>
                                 <?php endif; ?>
                             </td>
                         </tr>

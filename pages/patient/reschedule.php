@@ -71,24 +71,51 @@ if ($result->num_rows > 0) {
     exit;
 }
 $stmt->close();
-
+function generateCaptchaChallenge()
+{
+    $num1 = rand(1, 10);
+    $num2 = rand(1, 10);
+    $_SESSION['captcha_answer'] = $num1 + $num2;
+    return "$num1 + $num2 = ?";
+}
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['submit'])) {
+    $userAnswer = $_POST['captcha'];
+    if ($userAnswer != $_SESSION['captcha_answer']) {
+        echo "<script>alert('CAPTCHA verification failed. Please try again.'); window.history.back();</script>";
+        exit;
+    }
     $firstName = trim($_POST['firstName']);
     $lastName = trim($_POST['lastName']);
     $phoneNumber = trim($_POST['phoneNumber']);
     $email = trim($_POST['email']);
     $date = trim($_POST['date']);
     $appointmentTime = trim($_POST['appointmentTime']);
+    $endTime = date('H:i:s', strtotime($appointmentTime) + 60 * 60);
     $appointmentType = trim($_POST['appointmentType']);
     $message = trim($_POST['message']);
     $newStatus = 'Request-for-reschedule';
 
+    // Check if this time slot or overlapping slot is already booked
+    $timeCheckQuery = "SELECT COUNT(*) AS count FROM appointments WHERE date = ? AND NOT (endTime <= ? OR appointment_time >= ?)";
+    $timeCheckStmt = $con->prepare($timeCheckQuery);
+    $timeCheckStmt->bind_param("sss", $date, $appointmentTime, $endTime);
+    $timeCheckStmt->execute();
+    $timeCheckResult = $timeCheckStmt->get_result();
+    $timeCheckRow = $timeCheckResult->fetch_assoc();
+
+    if ($timeCheckRow['count'] > 0) {
+        $currentDateTime = date('Y-m-d g:i A');
+        echo "<script>alert('This time slot is already taken or overlaps with another booking. Please choose another hour.'); window.history.back();</script>";
+        log_action($con, $accountNum, "tried to book an appointment on a time slot that is already taken $currentDateTime", "user");
+        exit;
+    }
+
     if ($isReschedule) {
-        $stmt = $con->prepare("UPDATE appointments SET first_name=?, last_name=?, phone_number=?, email=?, date=?, appointment_time=?, appointment_type=?, message=?, status=? WHERE appointment_id=?");
-        $stmt->bind_param("sssssssssi", $firstName, $lastName, $phoneNumber, $email, $date, $appointmentTime, $appointmentType, $message, $newStatus, $appointmentId);
+        $stmt = $con->prepare("UPDATE appointments SET first_name=?, last_name=?, phone_number=?, email=?, date=?, appointment_time=?, endTime=?, appointment_type=?, message=?, status=? WHERE appointment_id=?");
+        $stmt->bind_param("ssssssssssi", $firstName, $lastName, $phoneNumber, $email, $date, $appointmentTime, $endTime, $appointmentType, $message, $newStatus, $appointmentId);
     } else {
-        $stmt = $con->prepare("INSERT INTO appointments (patientId, first_name, last_name, phone_number, email, date, appointment_time, appointment_type, message, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
-        $stmt->bind_param("isssssssss", $userId, $firstName, $lastName, $phoneNumber, $email, $date, $appointmentTime, $appointmentType, $message, $newStatus);
+        $stmt = $con->prepare("INSERT INTO appointments (patientId, first_name, last_name, phone_number, email, date, appointment_time, endTime, appointment_type, message, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        $stmt->bind_param("isssssssss", $userId, $firstName, $lastName, $phoneNumber, $email, $date, $appointmentTime, $endTime, $appointmentType, $message, $newStatus);
     }
 
     if ($stmt->execute()) {
@@ -147,6 +174,7 @@ function handleFileUploads($con, $userId, $appointmentId)
         }
     }
 }
+$captchaChallenge = generateCaptchaChallenge();
 ?>
 
 <!DOCTYPE html>
@@ -227,7 +255,7 @@ function handleFileUploads($con, $userId, $appointmentId)
                                 <label for="availTime">Available Time: </label>
                                 <small id="startTime" data-time="<?php echo htmlspecialchars($scheduleData['startTime']); ?>"><?php echo htmlspecialchars($displayStartTime); ?></small> :
                                 <small id="endTime" data-time="<?php echo htmlspecialchars($scheduleData['endTime']); ?>"><?php echo htmlspecialchars($displayEndTime); ?></small>
-                                <input type="time" class="form-control" name="appointmentTime" value="<?= substr($appointmentDetails['appointment_time'], 0, 5) ?? '' ?>" required>
+                                <input type="time" class="form-control" id="appointmentTime" name="appointmentTime" min="<?php echo htmlspecialchars($scheduleData['startTime']); ?>" max="<?php echo htmlspecialchars($scheduleData['endTime']); ?>">
                             </div>
                             <div class="col-md-6">
                                 <label for="appointmentType">Reason for Visit:</label>
@@ -236,7 +264,6 @@ function handleFileUploads($con, $userId, $appointmentId)
                                     <option value="follow-up" <?= isset($appointmentDetails) && $appointmentDetails['appointment_type'] == 'follow-up' ? 'selected' : '' ?>>Follow-Up</option>
                                     <option value="routine-check" <?= isset($appointmentDetails) && $appointmentDetails['appointment_type'] == 'routine-check' ? 'selected' : '' ?>>Routine-check</option>
                                     <option value="emergency" <?= isset($appointmentDetails) && $appointmentDetails['appointment_type'] == 'emergency' ? 'selected' : '' ?>>Emergency</option>
-
                                 </select>
                             </div>
                             <div class="col-12">
@@ -248,7 +275,10 @@ function handleFileUploads($con, $userId, $appointmentId)
                                 <input type="file" class="form-control" name="medicalDocuments[]" multiple>
                             </div>
                             <div class="col-12 mt-5">
-                                <button type="submit" name="submit" class="btn btn-primary float-end"><?= $isReschedule ? "Reschedule" : "Book" ?> Appointment</button>
+                                <label for="captcha">CAPTCHA:</label>
+                                <input type="text" class="form-control mb-3" id="captcha" name="captcha" required>
+                                <span style="font-size: 20px;"><?php echo $captchaChallenge; ?></span>
+                                <button type="submit" name="submit" class="btn btn-primary float-end">Book Appointment</button>
                                 <button type="button" class="btn btn-outline-secondary float-end me-2">Cancel</button>
                             </div>
                         </div>

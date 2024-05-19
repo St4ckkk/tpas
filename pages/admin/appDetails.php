@@ -86,6 +86,7 @@ $appointmentDetails['document_paths'] = !empty($appointmentDetails['document_pat
         vertical-align: middle;
     }
 
+    .status-on-going,
     .status-request-confirmed,
     .status-confirmed,
     .status-completed {
@@ -117,7 +118,7 @@ $appointmentDetails['document_paths'] = !empty($appointmentDetails['document_pat
         margin-top: 7px;
     }
 
-    .status-request-denied,
+    .status-denied,
     .status-cancelled {
         color: var(--color-white);
         background-color: red;
@@ -353,8 +354,8 @@ $appointmentDetails['document_paths'] = !empty($appointmentDetails['document_pat
                             <th>Time</th>
                             <th>Reason</th>
                             <th>Message</th>
-                            <th>Status</th>
                             <th>Documents</th>
+                            <th>Status</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -370,9 +371,18 @@ $appointmentDetails['document_paths'] = !empty($appointmentDetails['document_pat
                             <td><?= $appointmentDetails['phone_number'] ?></td>
                             <td><?= $appointmentDetails['email'] ?></td>
                             <td><?= date("F j, Y", strtotime($appointmentDetails['date'])) ?></td>
-                            <td><?= date("g:i A", strtotime($appointmentDetails['appointment_time'])) ?></td>
+                            <td><?= date("g:i A", strtotime($appointmentDetails['appointment_time'])) ?> - <?= date("g:i A", strtotime($appointmentDetails['endTime'])) ?></td>
                             <td><?= $appointmentDetails['appointment_type'] ?></td>
                             <td><?= $appointmentDetails['message'] ?></td>
+                            <td>
+                                <?php if (!empty($appointmentDetails['document_paths'])) : ?>
+                                    <?php foreach ($appointmentDetails['document_paths'] as $documentPath) : ?>
+                                        <a href="<?= '../uploaded_files/' . $documentPath ?>" download><?= basename($documentPath) ?></a>
+                                    <?php endforeach; ?>
+                                <?php else : ?>
+                                    No documents
+                                <?php endif; ?>
+                            </td>
                             <td class="status-column <?=
                                                         $appointmentDetails['status'] === 'Pending' ? 'status-pending' : (
                                                             $appointmentDetails['status'] === 'Processing' ? 'status-processing' : (
@@ -384,17 +394,9 @@ $appointmentDetails['document_paths'] = !empty($appointmentDetails['document_pat
                                                                                     $appointmentDetails['status'] === 'Request-for-reschedule' ? 'status-request-for-reschedule' : (
                                                                                         $appointmentDetails['status'] === 'Request-for-cancel' ? 'status-request-for-cancel' : (
                                                                                             $appointmentDetails['status'] === 'Request-confirmed' ? 'status-request-confirmed' : (
-                                                                                                $appointmentDetails['status'] === 'Request-denied' ? 'status-request-denied' : ''
-                                                                                            )
-                                                                                        )
-                                                                                    )
-                                                                                )
-                                                                            )
-                                                                        )
-                                                                    )
-                                                                )
-                                                            )
-                                                        )
+                                                                                                $appointmentDetails['status'] === 'Request-denied' ? 'status-request-denied' : (
+                                                                                                    $appointmentDetails['status'] === 'On-Going' ? 'status-on-going' : '' // Add this line for On-Going status
+                                                                                                )))))))))))
                                                         ?>">
                                 <?= htmlspecialchars($appointmentDetails['status']) ?>
                                 <?php if ($appointmentDetails['status'] === 'Confirmed' || $appointmentDetails['status'] === 'Request-confirmed') : ?>
@@ -407,23 +409,14 @@ $appointmentDetails['document_paths'] = !empty($appointmentDetails['document_pat
                                     <i class="bx bx-cog"></i>
                                 <?php elseif ($appointmentDetails['status'] === 'Cancelled') : ?>
                                     <i class="bx bx-x-circle"></i>
+                                <?php elseif ($appointmentDetails['status'] === 'On-Going') : ?> <!-- Add this condition for On-Going status -->
+                                    <i class="bx bx-run"></i>
                                 <?php elseif ($appointmentDetails['status'] === 'Completed') : ?>
                                     <i class="bx bx-badge-check"></i>
                                 <?php elseif ($appointmentDetails['status'] === 'Reschedule' || $appointmentDetails['status'] === 'Request-for-reschedule') : ?>
                                     <i class="bx bx-calendar-check"></i>
                                 <?php elseif ($appointmentDetails['status'] === 'Request-for-cancel') : ?>
                                     <i class="bx bx-calendar-x"></i>
-                                <?php endif; ?>
-                            </td>
-
-
-                            <td>
-                                <?php if (!empty($appointmentDetails['document_paths'])) : ?>
-                                    <?php foreach ($appointmentDetails['document_paths'] as $documentPath) : ?>
-                                        <a href="<?= '../uploaded_files/' . $documentPath ?>" download><?= basename($documentPath) ?></a>
-                                    <?php endforeach; ?>
-                                <?php else : ?>
-                                    No documents
                                 <?php endif; ?>
                             </td>
                         </tr>
@@ -437,15 +430,14 @@ $appointmentDetails['document_paths'] = !empty($appointmentDetails['document_pat
                 <span class="close">&times;</span>
                 <h2>Update Status</h2>
                 <form id="statusForm">
-                    <input type="text" name="appointment_id" value="<?= $appointmentDetails['appointment_id']; ?>">
-                    <input type="text" name="status" value="<?= $appointmentDetails['status']; ?>">
+                    <input type="hidden" name="appointment_id" value="<?= $appointmentDetails['appointment_id']; ?>">
+                    <input type="hidden" name="status" value="<?= $appointmentDetails['status']; ?>">
                     <select name="new_status">
                         <option value="Confirmed">Confirmed</option>
                         <option value="Cancelled">Cancelled</option>
+                        <option value="Denied">Denied</option>
+                        <option value="On-Going">On-Going</option>
                         <option value="Completed">Completed</option>
-                        <option value="Request-denied">Request Denied</option>
-                        <option value="Request-confirmed">Request Confirmed</option>
-
                     </select>
                     <button type="submit">Update</button>
                 </form>

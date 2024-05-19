@@ -288,6 +288,8 @@
             margin-top: 20px;
         }
 
+        .status-request-confirmed,
+        .status-on-going,
         .status-confirmed {
             color: green;
         }
@@ -300,6 +302,8 @@
             color: orange;
         }
 
+        .status-request-for-cancel,
+        .status-cancelled,
         .status-denied {
             color: darkred;
         }
@@ -308,6 +312,7 @@
             color: blue;
         }
 
+        .status-request-for-reschedule,
         .status-reschedule {
             color: blue;
         }
@@ -321,16 +326,12 @@
             border-collapse: collapse;
         }
 
-        .status-column {
-            display: flex;
-            align-items: center;
-            font-size: 0.7rem;
+        .status-column i {
+            font-size: 10px;
+            vertical-align: middle;
         }
 
-        .status-column i {
-            font-size: 0.7rem;
-            margin-left: 5px;
-        }
+
 
         body {
             background: var(--grey);
@@ -424,11 +425,15 @@
                             <h3 id="statusHeading">All Appointments</h3>
                             <select id="statusFilter" onchange="filterAppointments()">
                                 <option value="All">All</option>
+                                <option value="All">All</option>
                                 <option value="Confirmed">Confirmed</option>
                                 <option value="Pending">Pending</option>
-                                <option value="Cancelled">Cancelled</option>
                                 <option value="Denied">Denied</option>
-                                <option value="Reschedule">Reschedule</option>
+                                <option value="On-Going">On-Going</option>
+                                <option value="Completed">Completed</option>
+                                <option value="Cancelled">Cancelled</option>
+                                <option value="Request-for-reschedule">Request for reschedule</option>
+                                <option value="Request-for-cancel">Request for cancel</option>
                             </select>
                             <table>
                                 <thead>
@@ -452,10 +457,15 @@
                         <span class="close-btn" onclick="closeModal()">&times;</span>
                         <h2>Update Status</h2>
                         <select id="newStatus">
+                            <option value="All">All</option>
                             <option value="Confirmed">Confirmed</option>
                             <option value="Pending">Pending</option>
-                            <option value="Cancelled">Cancelled</option>
                             <option value="Denied">Denied</option>
+                            <option value="On-Going">On-Going</option>
+                            <option value="Completed">Completed</option>
+                            <option value="Cancelled">Cancelled</option>
+                            <option value="Request-for-reschedule">Request for reschedule</option>
+                            <option value="Request-for-cancel">Request for cancel</option>
                         </select>
                         <button onclick="confirmStatusUpdate()">Update</button>
                     </div>
@@ -572,6 +582,7 @@
                 appointments.forEach(appointment => {
                     const statusInfo = getStatusDetails(appointment.status);
                     const formattedTime = formatAMPMTime(appointment.appointment_time);
+                    const formattedEndTime = formatAMPMTime(appointment.endTime);
                     const row = tbody.insertRow();
 
 
@@ -580,7 +591,6 @@
                     if (appointment.profile_image_path) {
                         img.src = '../uploaded_files/' + appointment.profile_image_path;
                     } else {
-                        // Use default image path
                         img.src = 'assets/img/default.png';
                     }
                     img.alt = 'Profile Image';
@@ -590,7 +600,7 @@
                     row.innerHTML += `
             <td>${appointment.first_name} ${appointment.last_name}</td>
             <td>${appointment.date}</td>
-            <td>${formattedTime}</td>
+            <td>${formattedTime} - ${formattedEndTime}</td>
             <td class="${statusInfo.class} status-column">
                 ${appointment.status}<i class="${statusInfo.icon}"></i>
             </td>
@@ -603,35 +613,51 @@
                 const statuses = {
                     'All': {
                         class: 'status-all',
-                        iconClass: 'bx bx-list-ul'
+                        icon: 'bx bx-list-ul'
                     },
                     'Confirmed': {
                         class: 'status-confirmed',
-                        iconClass: 'bx bx-check-circle'
+                        icon: 'bx bx-check-circle'
                     },
                     'Cancelled': {
                         class: 'status-cancelled',
-                        iconClass: 'bx bx-x-circle'
+                        icon: 'bx bx-x-circle'
                     },
                     'Pending': {
                         class: 'status-pending',
-                        iconClass: 'bx bx-loader-circle'
+                        icon: 'bx bx-time-five'
                     },
                     'Denied': {
                         class: 'status-denied',
-                        iconClass: 'bx bx-block'
+                        icon: 'bx bx-block'
                     },
                     'Processing': {
                         class: 'status-processing',
-                        iconClass: 'bx bx-loader'
+                        icon: 'bx bx-loader'
                     },
-                    'Reschedule': {
-                        class: 'status-reschedule',
-                        iconClass: 'bx bx-time'
+                    'Request-for-reschedule': {
+                        class: 'status-request-for-reschedule',
+                        icon: 'bx bx-calendar-check'
+                    },
+                    'Request-for-cancel': {
+                        class: 'status-request-for-cancel',
+                        icon: 'bx bx-calendar-x'
+                    },
+                    'On-Going': {
+                        class: 'status-on-going',
+                        icon: 'bx bx-run'
+                    },
+                    'Request-confirmed': {
+                        class: 'status-request-confirmed',
+                        icon: 'bx bx-check-circle'
+                    },
+                    'Request-denied': {
+                        class: 'status-request-denied',
+                        icon: 'bx bx-block'
                     },
                     'Unknown': {
                         class: 'status-unknown',
-                        iconClass: 'bx bx-help-circle'
+                        icon: 'bx bx-help-circle'
                     }
                 };
                 return statuses[status] || statuses['Unknown'];

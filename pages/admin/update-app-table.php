@@ -10,34 +10,36 @@ if (!isset($_SESSION['doctorSession'])) {
 $status = $_GET['status'] ?? 'All';
 
 // Define the base query string
-$queryString = "SELECT a.appointment_id, a.first_name, a.last_name, a.date, a.appointment_time, a.status, p.profile_image_path
+$queryString = "SELECT a.appointment_id, a.first_name, a.last_name, a.date, a.appointment_time, endTime,
+                    CASE 
+                        WHEN a.status = 'Request-confirmed' THEN 'Confirmed' 
+                        ELSE a.status 
+                    END AS status, p.profile_image_path
                 FROM appointments a
                 LEFT JOIN tb_patients p ON a.patientId = p.patientId";
 
-
 $params = [];
 
-
 if ($status !== 'All') {
-    $queryString .= " WHERE a.status = ?";
-    $params[] = $status;
+    if ($status === 'Confirmed') {
+        $queryString .= " WHERE (a.status = 'Confirmed' OR a.status = 'Request-confirmed')";
+    } else {
+        // For other statuses, filter by the selected status
+        $queryString .= " WHERE a.status = ?";
+        $params[] = $status;
+    }
 }
 
-
 if ($stmt = $con->prepare($queryString)) {
-
-    if ($status !== 'All' && !empty($params)) {
-        $stmt->bind_param("s", ...$params);
+    if (!empty($params)) {
+        $stmt->bind_param(str_repeat("s", count($params)), ...$params);
     }
-
 
     $stmt->execute();
 
     $result = $stmt->get_result();
 
-  
     $appointments = [];
-
 
     while ($row = $result->fetch_assoc()) {
         $appointments[] = $row;

@@ -16,27 +16,27 @@ require './PHPMailer/src/SMTP.php';
 $mail = new PHPMailer(true);
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    $accountNum = $_POST['account_num'];
+    $patientId = $_POST['patientId'];
     $newStatus = $_POST['newStatus'] ?? '';
     if (empty($newStatus)) {
         echo "<script>alert('Please choose a status.'); window.location.href='users.php';</script>";
         exit;
     }
-    $statusQuery = $con->prepare("SELECT accountStatus, email, firstname FROM tb_patients WHERE account_num = ?");
-    $statusQuery->bind_param("i", $accountNum);
+    $statusQuery = $con->prepare("SELECT accountStatus, email, firstname FROM tb_patients WHERE patientId = ?");
+    $statusQuery->bind_param("i", $patientId);
     $statusQuery->execute();
     $statusResult = $statusQuery->get_result();
     $user = $statusResult->fetch_assoc();
 
     if ($user['accountStatus'] !== $newStatus && $user['accountStatus'] !== 'Verified' && $user['accountStatus'] !== 'Denied') {
-        echo "<script>alert('Status is already set to {$newStatus}.'); window.location.href='users.php';</script>";
+        echo "Status is already set to {$newStatus}.'); window.location.href='users.php";
     } else {
-        $query = $con->prepare("UPDATE tb_patients SET accountStatus = ? WHERE account_num = ?");
-        $query->bind_param("si", $newStatus, $accountNum);
+        $query = $con->prepare("UPDATE tb_patients SET accountStatus = ? WHERE patientId = ?");
+        $query->bind_param("si", $newStatus, $patientId);
         $query->execute();
         if ($query->affected_rows === 1) {
-            $query = $con->prepare("SELECT email, firstname FROM tb_patients WHERE account_num = ?");
-            $query->bind_param("i", $accountNum);
+            $query = $con->prepare("SELECT email, firstname FROM tb_patients WHERE patientId = ?");
+            $query->bind_param("i", $patientId);
             $query->execute();
             $result = $query->get_result();
             $user = $result->fetch_assoc();

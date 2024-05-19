@@ -11,7 +11,7 @@ if (!isset($_SESSION['assistantSession'])) {
 $date = $_GET['date'] ?? date('Y-m-d');
 
 try {
-    $appointmentQuery = $con->prepare("SELECT a.appointment_id, a.first_name, a.last_name, a.date, a.appointment_time, a.status, p.profile_image_path 
+    $appointmentQuery = $con->prepare("SELECT a.appointment_id, a.first_name, a.last_name, a.date, a.appointment_time, endTime, a.status, p.profile_image_path 
                                         FROM appointments a 
                                         JOIN tb_patients p ON a.patientId = p.patientId
                                         WHERE a.date = ? 
