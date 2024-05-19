@@ -136,6 +136,7 @@
             border: 2px solid #3d81ea;
 
         }
+
         .profile-image {
             width: 40px;
             height: 40px;
@@ -348,6 +349,36 @@
         }
 
         .status-reschedule {
+            color: var(--color-white);
+            background-color: #0056b3;
+            padding: 2px 10px;
+            border-radius: 50px;
+            display: inline-block;
+            text-align: center;
+            font-weight: bold;
+            min-width: 100px;
+            height: 30px;
+            line-height: 30px;
+            vertical-align: middle;
+            margin-top: 5px;
+        }
+
+        .status-request-for-cancel {
+            color: var(--color-white);
+            background-color: coral;
+            padding: 2px 10px;
+            border-radius: 50px;
+            display: inline-block;
+            text-align: center;
+            font-weight: bold;
+            min-width: 100px;
+            height: 30px;
+            line-height: 30px;
+            vertical-align: middle;
+            margin-top: 5px;
+        }
+
+        .status-request-for-reschedule {
             color: var(--color-white);
             background-color: #0056b3;
             padding: 2px 10px;
@@ -706,10 +737,12 @@
                     <div class="header-wrapper">
                         <h1 id="statusHeading">All Appointments</h1>
                         <select id="statusFilter" onchange="filterAppointments()">
+                            <option value="all">Select an appointment</option>
                             <option value="All">All</option>
                             <option value="Confirmed">Confirmed</option>
-                            <option value="Reschedule">Reschedule</option>
+                            <option value="Request-for-reschedule">Request for reschedule</option>
                             <option value="Pending">Pending</option>
+                            <option value="Request-for-cancel">Request for cancel</option>
                             <option value="Cancelled">Cancelled</option>
                             <option value="Denied">Denied</option>
                         </select>
@@ -816,6 +849,14 @@
                             'Processing': {
                                 class: 'status-processing',
                                 icon: 'bx bx-loader'
+                            },
+                            'Request-for-reschedule': {
+                                class: 'status-request-for-reschedule',
+                                icon: 'bx bx-calendar-check'
+                            },
+                            'Request-for-cancel': {
+                                class: 'status-request-for-cancel',
+                                icon: 'bx bx-calendar-x'
                             },
                             'Reschedule': {
                                 class: 'status-reschedule',

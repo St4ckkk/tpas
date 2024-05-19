@@ -14,32 +14,31 @@ $queryString = "SELECT a.appointment_id, a.first_name, a.last_name, a.date, a.ap
                 FROM appointments a
                 LEFT JOIN tb_patients p ON a.patientId = p.patientId";
 
-// Array to store parameters for prepared statement
+
 $params = [];
 
-// Check if filtering by status is required
+
 if ($status !== 'All') {
     $queryString .= " WHERE a.status = ?";
     $params[] = $status;
 }
 
-// Prepare the SQL statement
+
 if ($stmt = $con->prepare($queryString)) {
-    // Bind parameters if needed
+
     if ($status !== 'All' && !empty($params)) {
         $stmt->bind_param("s", ...$params);
     }
 
-    // Execute the query
+
     $stmt->execute();
 
-    // Get the result set
     $result = $stmt->get_result();
 
-    // Array to store appointments
+  
     $appointments = [];
 
-    // Fetch each row and store in the appointments array
+
     while ($row = $result->fetch_assoc()) {
         $appointments[] = $row;
     }

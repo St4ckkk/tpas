@@ -86,6 +86,7 @@ $appointmentDetails['document_paths'] = !empty($appointmentDetails['document_pat
         vertical-align: middle;
     }
 
+    .status-request-confirmed,
     .status-confirmed,
     .status-completed {
         color: var(--color-white);
@@ -98,7 +99,7 @@ $appointmentDetails['document_paths'] = !empty($appointmentDetails['document_pat
         min-width: 100px;
         height: 30px;
         line-height: 25px;
-        margin-top: 5px;
+        margin-top: 7px;
     }
 
     .status-pending {
@@ -113,9 +114,10 @@ $appointmentDetails['document_paths'] = !empty($appointmentDetails['document_pat
         height: 30px;
         line-height: 25px;
         vertical-align: middle;
-        margin-top: 5px;
+        margin-top: 7px;
     }
 
+    .status-request-denied,
     .status-cancelled {
         color: var(--color-white);
         background-color: red;
@@ -127,7 +129,7 @@ $appointmentDetails['document_paths'] = !empty($appointmentDetails['document_pat
         min-width: 100px;
         height: 30px;
         line-height: 25px;
-        margin-top: 5px;
+        margin-top: 7px;
     }
 
     .status-reschedule {
@@ -141,7 +143,37 @@ $appointmentDetails['document_paths'] = !empty($appointmentDetails['document_pat
         min-width: 100px;
         height: 30px;
         line-height: 25px;
-        margin-top: 5px;
+        margin-top: 7px;
+    }
+
+    .status-request-for-cancel {
+        color: var(--color-white);
+        background-color: coral;
+        padding: 2px 10px;
+        border-radius: 50px;
+        display: inline-block;
+        text-align: center;
+        font-weight: bold;
+        min-width: 100px;
+        height: 30px;
+        line-height: 30px;
+        vertical-align: middle;
+        margin-top: 7px;
+    }
+
+    .status-request-for-reschedule {
+        color: var(--color-white);
+        background-color: #0056b3;
+        padding: 2px 10px;
+        border-radius: 50px;
+        display: inline-block;
+        text-align: center;
+        font-weight: bold;
+        min-width: 100px;
+        height: 30px;
+        line-height: 30px;
+        vertical-align: middle;
+        margin-top: 7px;
     }
 
     th {
@@ -341,11 +373,33 @@ $appointmentDetails['document_paths'] = !empty($appointmentDetails['document_pat
                             <td><?= date("g:i A", strtotime($appointmentDetails['appointment_time'])) ?></td>
                             <td><?= $appointmentDetails['appointment_type'] ?></td>
                             <td><?= $appointmentDetails['message'] ?></td>
-                            <td class="status-column <?= $appointmentDetails['status'] === 'Pending' ? 'status-pending' : ($appointmentDetails['status'] === 'Processing' ? 'status-processing' : ($appointmentDetails['status'] === 'Confirmed' ? 'status-confirmed' : ($appointmentDetails['status'] === 'Denied' ? 'status-denied' : ($appointmentDetails['status'] === 'Cancelled' ? 'status-cancelled' : ($appointmentDetails['status'] === 'Completed' ? 'status-completed' : ($appointmentDetails['status'] === 'Reschedule' ? 'status-reschedule' : '')))))) ?>">
+                            <td class="status-column <?=
+                                                        $appointmentDetails['status'] === 'Pending' ? 'status-pending' : (
+                                                            $appointmentDetails['status'] === 'Processing' ? 'status-processing' : (
+                                                                $appointmentDetails['status'] === 'Confirmed' ? 'status-confirmed' : (
+                                                                    $appointmentDetails['status'] === 'Denied' ? 'status-denied' : (
+                                                                        $appointmentDetails['status'] === 'Cancelled' ? 'status-cancelled' : (
+                                                                            $appointmentDetails['status'] === 'Completed' ? 'status-completed' : (
+                                                                                $appointmentDetails['status'] === 'Reschedule' ? 'status-reschedule' : (
+                                                                                    $appointmentDetails['status'] === 'Request-for-reschedule' ? 'status-request-for-reschedule' : (
+                                                                                        $appointmentDetails['status'] === 'Request-for-cancel' ? 'status-request-for-cancel' : (
+                                                                                            $appointmentDetails['status'] === 'Request-confirmed' ? 'status-request-confirmed' : (
+                                                                                                $appointmentDetails['status'] === 'Request-denied' ? 'status-request-denied' : ''
+                                                                                            )
+                                                                                        )
+                                                                                    )
+                                                                                )
+                                                                            )
+                                                                        )
+                                                                    )
+                                                                )
+                                                            )
+                                                        )
+                                                        ?>">
                                 <?= htmlspecialchars($appointmentDetails['status']) ?>
-                                <?php if ($appointmentDetails['status'] === 'Confirmed') : ?>
+                                <?php if ($appointmentDetails['status'] === 'Confirmed' || $appointmentDetails['status'] === 'Request-confirmed') : ?>
                                     <i class="bx bx-check-circle"></i>
-                                <?php elseif ($appointmentDetails['status'] === 'Denied') : ?>
+                                <?php elseif ($appointmentDetails['status'] === 'Denied' || $appointmentDetails['status'] === 'Request-denied') : ?>
                                     <i class="bx bx-block"></i>
                                 <?php elseif ($appointmentDetails['status'] === 'Pending') : ?>
                                     <i class="bx bx-time-five"></i>
@@ -355,10 +409,14 @@ $appointmentDetails['document_paths'] = !empty($appointmentDetails['document_pat
                                     <i class="bx bx-x-circle"></i>
                                 <?php elseif ($appointmentDetails['status'] === 'Completed') : ?>
                                     <i class="bx bx-badge-check"></i>
-                                <?php elseif ($appointmentDetails['status'] === 'Reschedule') : ?>
-                                    <i class="bx bx-calendar"></i>
+                                <?php elseif ($appointmentDetails['status'] === 'Reschedule' || $appointmentDetails['status'] === 'Request-for-reschedule') : ?>
+                                    <i class="bx bx-calendar-check"></i>
+                                <?php elseif ($appointmentDetails['status'] === 'Request-for-cancel') : ?>
+                                    <i class="bx bx-calendar-x"></i>
                                 <?php endif; ?>
                             </td>
+
+
                             <td>
                                 <?php if (!empty($appointmentDetails['document_paths'])) : ?>
                                     <?php foreach ($appointmentDetails['document_paths'] as $documentPath) : ?>
@@ -379,11 +437,15 @@ $appointmentDetails['document_paths'] = !empty($appointmentDetails['document_pat
                 <span class="close">&times;</span>
                 <h2>Update Status</h2>
                 <form id="statusForm">
-                    <input type="hidden" name="appointment_id" value="<?= $appointmentDetails['appointment_id']; ?>">
+                    <input type="text" name="appointment_id" value="<?= $appointmentDetails['appointment_id']; ?>">
+                    <input type="text" name="status" value="<?= $appointmentDetails['status']; ?>">
                     <select name="new_status">
                         <option value="Confirmed">Confirmed</option>
-                        <option value="Processing">Cancelled</option>
+                        <option value="Cancelled">Cancelled</option>
                         <option value="Completed">Completed</option>
+                        <option value="Request-denied">Request Denied</option>
+                        <option value="Request-confirmed">Request Confirmed</option>
+
                     </select>
                     <button type="submit">Update</button>
                 </form>
@@ -453,7 +515,7 @@ $appointmentDetails['document_paths'] = !empty($appointmentDetails['document_pat
                         } else {
                             alert('Error: ' + data.error);
                         }
-                        location.reload(); // Reload the page to update the data displayed
+                        location.reload();
                     })
                     .catch(error => {
                         console.error('Error:', error);

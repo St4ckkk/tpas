@@ -95,11 +95,13 @@ $stmt->close();
         background-color: lightblue;
     }
 
+    .status-request-confirmed,
     .status-confirmed {
         color: #fff;
         background-color: lightgreen;
     }
 
+    .status-request-denied,
     .status-request-for-cancel {
         color: #fff;
         background-color: red;
@@ -128,6 +130,16 @@ $stmt->close();
     .tags span {
         color: #3e81ec;
 
+    }
+
+    .make a {
+        color: #fff;
+        text-decoration: none;
+    }
+
+    .make:hover {
+        text-decoration: underline;
+        color: #fff;
     }
 </style>
 
@@ -177,6 +189,9 @@ $stmt->close();
                                 <?php endif; ?>
                                 <?php if ($appointment['status'] == 'Request-for-reschedule') : ?>
                                     <button onclick="cancelAppointment(<?= $appointment['appointment_id']; ?>)" class="btn btn-danger">Cancel</button>
+                                <?php endif; ?>
+                                <?php if ($appointment['status'] == 'Request-denied') : ?>
+                                     <a href="userpage.php" class="btn btn-primary">Make another appointment</a>
                                 <?php endif; ?>
                             </td>
                         </tr>

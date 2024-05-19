@@ -83,7 +83,6 @@ WHERE status = 'Confirmed'");
         </script>
     </head>
     <style>
-
         .profile-image-circle {
             border-radius: 50%;
             margin: 0 auto;
@@ -114,6 +113,7 @@ WHERE status = 'Confirmed'");
             vertical-align: middle;
         }
 
+        .status-column.status-request-confirmed,
         .status-column.status-confirmed,
         .status-column.status-completed {
             color: var(--color-white);
@@ -144,6 +144,7 @@ WHERE status = 'Confirmed'");
             margin-top: 10px;
         }
 
+        .status-column.status-request-denied,
         .status-column.status-cancelled {
             color: var(--color-white);
             background-color: red;
@@ -172,6 +173,35 @@ WHERE status = 'Confirmed'");
             vertical-align: middle;
         }
 
+        .status-request-for-cancel {
+            color: var(--color-white);
+            background-color: coral;
+            padding: 2px 10px;
+            border-radius: 50px;
+            display: inline-block;
+            text-align: center;
+            font-weight: bold;
+            min-width: 100px;
+            height: 30px;
+            line-height: 30px;
+            vertical-align: middle;
+            margin-top: 5px;
+        }
+
+        .status-request-for-reschedule {
+            color: var(--color-white);
+            background-color: #0056b3;
+            padding: 2px 10px;
+            border-radius: 50px;
+            display: inline-block;
+            text-align: center;
+            font-weight: bold;
+            min-width: 100px;
+            height: 30px;
+            line-height: 30px;
+            vertical-align: middle;
+            margin-top: 5px;
+        }
 
         /* Notifications Styles */
         .recent-updates {
@@ -489,7 +519,6 @@ WHERE status = 'Confirmed'");
             background-color: rgba(0, 0, 0, 0.5);
             z-index: 1000;
         }
-     
     </style>
 
     <body>
@@ -592,11 +621,14 @@ WHERE status = 'Confirmed'");
                         <span class="close">&times;</span>
                         <h2>Update Status</h2>
                         <form id="statusForm">
-                            <input type="hidden" id="appointmentId" name="appointment_id" value="">
+                            <input type="hidden" name="appointment_id" value="<?= $appointmentDetails['appointment_id']; ?>">
+                            <input type="hidden" name="status" value="<?= $appointmentDetails['status']; ?>">
                             <select name="new_status">
                                 <option value="Confirmed">Confirmed</option>
                                 <option value="Cancelled">Cancelled</option>
                                 <option value="Completed">Completed</option>
+                                <option value="Request-denied">Request Denied</option>
+                                <option value="Request-confirmed">Request Confirmed</option>
                             </select>
                             <button type="submit">Update</button>
                         </form>
@@ -610,15 +642,50 @@ WHERE status = 'Confirmed'");
                         const appointmentIdInput = document.getElementById('appointmentId');
 
                         table.addEventListener('click', function(event) {
-                            const target = event.target.closest('tr');
+                            const target = event.target.closest('td.status-column');
                             if (!target) return;
 
-                            const appointmentId = target.querySelector('.status-column').getAttribute('data-appointment-id');
+                            const appointmentId = target.getAttribute('data-appointment-id');
                             console.log('Clicked status with appointment ID:', appointmentId);
-                            appointmentIdInput.value = appointmentId;
+
+                            // Make AJAX request to fetch appointment details
+                            fetchAppointmentDetails(appointmentId);
                             modal.style.display = "block";
-                            centerModal()
+                            centerModal();
                         });
+                        let currentAppointmentDetails = null;
+
+                        function fetchAppointmentDetails(appointmentId) {
+                            fetch('getAppointmentDetails.php?id=' + appointmentId)
+                                .then(response => response.json())
+                                .then(data => {
+                                    // Store the fetched appointment details in the global variable
+                                    currentAppointmentDetails = data;
+                                    // Populate the modal with the fetched appointment details
+                                    populateModal(data);
+                                })
+                                .catch(error => console.error('Error fetching appointment details:', error));
+                        }
+
+                        function populateModal(appointmentDetails) {
+                            const modal = document.getElementById('statusModal');
+                            const appointmentIdInput = document.getElementById('appointmentId');
+                            const statusForm = document.getElementById('statusForm');
+                            const newStatusInput = statusForm.querySelector('select[name="new_status"]');
+
+                            // Populate the form fields with appointment details
+                            appointmentIdInput.value = appointmentDetails.appointment_id;
+                            statusForm.querySelector('input[name="status"]').value = appointmentDetails.status;
+                            newStatusInput.value = 'Confirmed'; // Set default new status
+
+                            // Additional fields can be populated here
+
+                            // Example of updating modal content with appointment details
+                            const modalTitle = modal.querySelector('.modal-title');
+                            const modalDescription = modal.querySelector('.modal-description');
+                            modalTitle.textContent = 'Update Status for ' + appointmentDetails.first_name + ' ' + appointmentDetails.last_name;
+                            modalDescription.textContent = 'Appointment Date: ' + appointmentDetails.date + ' ' + appointmentDetails.appointment_time;
+                        }
 
                         modal.addEventListener('click', function(event) {
                             if (event.target === modal || event.target.classList.contains('close')) {
@@ -636,6 +703,10 @@ WHERE status = 'Confirmed'");
                         statusForm.addEventListener('submit', function(event) {
                             event.preventDefault();
                             var formData = new FormData(this);
+
+                            // Append additional data from currentAppointmentDetails to formData
+                            formData.append('appointment_id', currentAppointmentDetails.appointment_id);
+                            formData.append('status', currentAppointmentDetails.status);
 
                             if (confirm("Are you sure you want to update the status?")) {
                                 fetch('update-app-status.php', {
@@ -763,6 +834,22 @@ WHERE status = 'Confirmed'");
                             'Completed': {
                                 class: 'status-completed',
                                 icon: 'bx bx-check'
+                            },
+                            'Request-for-reschedule': {
+                                class: 'status-request-for-reschedule',
+                                icon: 'bx bx-calendar-check'
+                            },
+                            'Request-for-cancel': {
+                                class: 'status-request-for-cancel',
+                                icon: 'bx bx-calendar-x'
+                            },
+                            'Request-confirmed': {
+                                class: 'status-request-confirmed',
+                                icon: 'bx bx-check-circle'
+                            },
+                            'Request-denied': {
+                                class: 'status-request-denied',
+                                icon: 'bx bx-block'
                             },
                             'Unknown': {
                                 class: 'status-comlete',
