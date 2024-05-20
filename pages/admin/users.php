@@ -7,12 +7,14 @@ if (!isset($_SESSION['doctorSession'])) {
     header("Location: " . BASE_URL . "index.php");
     exit();
 }
-$query = $con->prepare("SELECT COUNT(*) AS total FROM reminders WHERE recipient_type = 'doctor'");
+
+$query = $con->prepare("SELECT COUNT(*) AS total, MAX(updated_at) AS lastUpdated FROM reminders WHERE recipient_id = ? AND recipient_type = 'doctor'");
+$query->bind_param("i", $doctorId);
 $query->execute();
 $result = $query->get_result()->fetch_assoc();
 $totalReminders = $result['total'];
-
-
+$lastUpdatedReminders = $result['lastUpdated'];
+$displayLastUpdatedReminders = $lastUpdatedReminders ? date("F j, Y g:i A", strtotime($lastUpdatedReminders)) : "No updates";
 
 $doctorId = $_SESSION['doctorSession'];
 $query = $con->prepare("SELECT * FROM doctor WHERE id = ?");

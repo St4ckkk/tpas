@@ -9,6 +9,16 @@
     }
 
     $doctorId = $_SESSION['doctorSession'];
+
+    $query = $con->prepare("SELECT COUNT(*) AS total, MAX(updated_at) AS lastUpdated FROM reminders WHERE recipient_id = ? AND recipient_type = 'doctor'");
+    $query->bind_param("i", $doctorId);
+    $query->execute();
+    $result = $query->get_result()->fetch_assoc();
+    $totalReminders = $result['total'];
+    $lastUpdatedReminders = $result['lastUpdated'];
+    $displayLastUpdatedReminders = $lastUpdatedReminders ? date("F j, Y g:i A", strtotime($lastUpdatedReminders)) : "No updates";
+
+
     $query = $con->prepare("SELECT * FROM doctor WHERE id = ?");
     $query->bind_param("i", $doctorId);
     $query->execute();
@@ -328,7 +338,7 @@
                 <a href="reminders.php">
                     <span class="material-icons-sharp">notifications </span>
                     <h3>Reminders</h3>
-                    <span class="message-count"></span>
+                    <span class="message-count"><?= $totalReminders ?></span>
                 </a>
                 <a href="logs.php">
                     <span class="material-icons-sharp">description</span>

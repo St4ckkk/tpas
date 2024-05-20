@@ -11,12 +11,21 @@ if (!isset($_SESSION['doctorSession'])) {
 }
 
 $doctorId = $_SESSION['doctorSession'];
+
+$query = $con->prepare("SELECT COUNT(*) AS total, MAX(updated_at) AS lastUpdated FROM reminders WHERE recipient_id = ? AND recipient_type = 'doctor'");
+$query->bind_param("i", $doctorId);
+$query->execute();
+$result = $query->get_result()->fetch_assoc();
+$totalReminders = $result['total'];
+$lastUpdatedReminders = $result['lastUpdated'];
+$displayLastUpdatedReminders = $lastUpdatedReminders ? date("F j, Y g:i A", strtotime($lastUpdatedReminders)) : "No updates";
+
 $query = $con->prepare("SELECT * FROM doctor WHERE id = ?");
 $query->bind_param("i", $doctorId);
 $query->execute();
 $profile = $query->get_result()->fetch_assoc();
 
-// Pagination for assistants
+
 $recordsPerPage = 5;
 $page = isset($_GET['page']) ? intval($_GET['page']) : 1;
 $offset = ($page - 1) * $recordsPerPage;
@@ -31,7 +40,7 @@ $query->bind_param("ii", $recordsPerPage, $offset);
 $query->execute();
 $result = $query->get_result();
 
-// Pagination for logs
+
 $logQuery = $con->prepare("SELECT COUNT(*) FROM logs WHERE userType = ?");
 $userType = 'assistant';
 $logQuery->bind_param("s", $userType);
@@ -263,7 +272,7 @@ $logResult = $logQuery->get_result();
                 <a href="#">
                     <span class="material-icons-sharp">notifications</span>
                     <h3>Reminders</h3>
-                    <span class="message-count"><!-- <?= $totalReminders ?> --></span>
+                    <span class="message-count"><?= $totalReminders ?> </span>
                 </a>
 
                 <a href="logs.php">

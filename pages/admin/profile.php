@@ -22,7 +22,14 @@
         exit;
     }
 
-
+    $query = $con->prepare("SELECT COUNT(*) AS total, MAX(updated_at) AS lastUpdated FROM reminders WHERE recipient_id = ? AND recipient_type = 'doctor'");
+    $query->bind_param("i", $doctorId);
+    $query->execute();
+    $result = $query->get_result()->fetch_assoc();
+    $totalReminders = $result['total'];
+    $lastUpdatedReminders = $result['lastUpdated'];
+    $displayLastUpdatedReminders = $lastUpdatedReminders ? date("F j, Y g:i A", strtotime($lastUpdatedReminders)) : "No updates";
+    
     $query = $con->prepare("SELECT COUNT(*) AS total, MAX(updated_at) as lastUpdated FROM reminders WHERE recipient_type = 'doctor'");
     $query->execute();
     $result = $query->get_result()->fetch_assoc();
@@ -129,7 +136,7 @@
 
         }
 
-        .profile-image img{
+        .profile-image img {
             border: 2px solid #3d81ea;
             background: none;
             border-radius: 50px;
@@ -590,7 +597,7 @@
             transition: background-color 0.2s ease-in-out;
             border-radius: 50%;
             top: 0;
-            left: 333px;
+            left: 415px;
         }
 
         .profile-pic label:hover {
